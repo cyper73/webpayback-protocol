@@ -1,3 +1,6 @@
+// ✅ Versione deployata su Sepolia in data 06/07/2025
+// Indirizzo contratto: 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
