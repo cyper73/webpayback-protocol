@@ -1,7 +1,12 @@
-# Contracts
+# WebPayback Token (WPT)
 
-This folder contains the smart contracts for the WebPayback protocol.
-Here you'll find all Solidity code, deployment scripts, and related blockchain logic.
+Smart contract ERC20 customizzato (fee + wallet) deployato su Ethereum.
 
-> The first version will include an ERC-20 token contract with a built-in creator's fee and transparent distribution logic.
+- Contratto verificato su Etherscan: [0x84C97E9073D3D5bEee7201D102041aC97d88aa9B](https://etherscan.io/address/0x84C97E9073D3D5bEee7201D102041aC97d88aa9B#code)
+- Compilato con Solidity 0.8.30, optimization: 200
+
+## Codice sorgente
+
+Vedi `/contracts/WebPaybackToken.sol`
+
 
