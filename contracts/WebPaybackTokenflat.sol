@@ -2,6 +2,28 @@
 pragma solidity ^0.8.0;
 
 /**
+ * ------------------------------------------------------------------------
+ *  WebPaybackToken — Versione Deployata [2025-07-06]
+ * ------------------------------------------------------------------------
+ *  Indirizzo contratto: 0x84C97E9073D3D5bEee7201D102041aC97d88aa9B
+ *  Compilatore Solidity: 0.8.30+commit.73712a01
+ *  Optimization: Enabled (Runs: 200)
+ *  Nome Token: WebPayback Token
+ *  Simbolo: WPT
+ *  Decimali: 18
+ *  Supply iniziale: 1,000,000 (con 18 decimali)
+ *  creatorWallet: 0x8250e17682de64eC41c20caE907F2c03875445eD
+ *  creatorFeeBasisPoints: 300 (3%)
+ *  MAX_FEE_BPS: 1000 (10%)
+ *  Sorgente: Flat, tutte le dipendenze OZ incluse
+ *
+ *  Deploy Log: https://etherscan.io/address/0x84C97E9073D3D5bEee7201D102041aC97d88aa9B
+ * ------------------------------------------------------------------------
+ *  Sviluppatore: Claudio + ChatGPT Agents | 2025
+ * ------------------------------------------------------------------------
+ */
+
+/**
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
  * via msg.sender and msg.data, they should not be accessed in such a direct
