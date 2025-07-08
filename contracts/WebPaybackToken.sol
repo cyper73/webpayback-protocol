@@ -1,49 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/**
- * ------------------------------------------------------------------------
- *  WebPaybackToken — Versione Deployata [2025-07-06]
- * ------------------------------------------------------------------------
- *  Indirizzo contratto: 0x84C97E9073D3D5bEee7201D102041aC97d88aa9B
- *  Compilatore Solidity: 0.8.30+commit.73712a01
- *  Optimization: Enabled (Runs: 200)
- *  Nome Token: WebPayback Token
- *  Simbolo: WPT
- *  Decimali: 18
- *  Supply iniziale: 1,000,000 (con 18 decimali)
- *  creatorWallet: 0x8250e17682de64eC41c20caE907F2c03875445eD
- *  creatorFeeBasisPoints: 300 (3%)
- *  MAX_FEE_BPS: 1000 (10%)
- *  Sorgente: Flat, tutte le dipendenze OZ incluse
- *
- *  Deploy Log: https://etherscan.io/address/0x84C97E9073D3D5bEee7201D102041aC97d88aa9B
- * ------------------------------------------------------------------------
- *  Sviluppatore: Claudio + ChatGPT Agents | 2025
- * ------------------------------------------------------------------------
- */
+// --- OpenZeppelin-style ERC20 implementation ---
 
-/**
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
-
     function _msgData() internal view virtual returns (bytes calldata) {
         return msg.data;
     }
 }
 
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
 interface IERC20 {
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
@@ -56,39 +24,12 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-/**
- * @dev Interface for the optional metadata functions from the ERC20 standard.
- */
 interface IERC20Metadata is IERC20 {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function decimals() external view returns (uint8);
 }
 
-/**
- * @dev Implementation of the {IERC20} interface.
- *
- * This implementation is agnostic to the way tokens are created. This means
- * that a supply mechanism has to be added in a derived contract using {_mint}.
- * For a generic mechanism see {ERC20PresetMinterPauser}.
- *
- * TIP: For a detailed writeup see our guide
- * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226
- *
- * We have followed general OpenZeppelin Contracts guidelines: functions revert
- * instead of returning `false` on failure. This behavior is nonetheless
- * conventional and does not conflict with the expectations of ERC20
- * applications.
- *
- * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
- * This allows applications to reconstruct the allowance for all accounts just
- * by listening to said events. Other implementations of the EIP may not emit
- * these events, as it isn't required by the specification.
- *
- * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
- * functions have been added to mitigate the well-known issues around setting
- * allowances. See {IERC20-approve}.
- */
 contract ERC20 is Context, IERC20, IERC20Metadata {
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -208,18 +149,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     }
 }
 
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
 abstract contract Ownable is Context {
     address private _owner;
 
@@ -256,7 +185,7 @@ abstract contract Ownable is Context {
 
 // *** IL TUO CONTRATTO PERSONALIZZATO ***
 contract WebPaybackToken is ERC20, Ownable {
-    address public creatorWallet = 0x8250e17682de64eC41c20caE907F2c03875445eD;
+    address public creatorWallet = 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba; // <-- Mainnet address here!
     uint256 public creatorFeeBasisPoints = 300; // 3% (300 basis points)
     uint256 public constant MAX_FEE_BPS = 1000; // 10% max
 
