@@ -131,41 +131,41 @@ The founder’s wallet address will be publicly visible and the allocation param
 
 *Transparency, sustainability, and rewarding those who build the future: that’s our philosophy.*
 
-## Deployment
+# 🚀 WebPaybackToken (WPT) - Live on Polygon
 
-- **Contract Address (Polygon):** [`0x9077051D318b614F915E8A07861090856FDEC91e`](https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e)
+- **Token Contract (Polygon):** [`0x9077051D318b614F915E8A07861090856FDEC91e`](https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e)
 - **Token Symbol:** WPT
 - **Decimals:** 18
-- **Liquidity Pool:** [Uniswap POL/WPT Pool]( https://app.uniswap.org/positions/v2/polygon/0x823C0b22b2eaD1A3A857F2300C8259d1695C5AAB)
-- **Owner/Deployer:** 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
-- **Date of deployment:** [2025-07-13
-  ]
-  ## 🚀 WebPaybackToken (WPT) - Live on Polygon
-
-- **Token Contract (Polygon):** [0x9077051D318b614F915E8A07861090856FDEC91e](https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e)
+- **Owner/Deployer:** `0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba`
+- **Date of deployment:** 2025-07-13
 - **Uniswap WMATIC/WPT Pool:** [Posizione su Uniswap](https://app.uniswap.org/positions/v2/polygon/0x823C0b22b2eaD1A3A857F2300C8259d1695C5AAB)
-- **Deployer:** 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
-- **Pool Address:** 0x823C0b22b2eaD1A3A857F2300C8259d1695C5AAB
-- **Decimali:** 18
+- **Pool Address:** [`0x823C0b22b2eaD1A3A857F2300C8259d1695C5AAB`](https://app.uniswap.org/positions/v2/polygon/0x823C0b22b2eaD1A3A857F2300C8259d1695C5AAB)
 
 ---
 
-### **Come aggiungere il token a MetaMask**
-1. Apri MetaMask, seleziona Polygon Mainnet.
+## Come aggiungere il token a MetaMask
+
+1. Apri MetaMask e seleziona Polygon Mainnet.
 2. “Importa token” → incolla l’indirizzo:  
    `0x9077051D318b614F915E8A07861090856FDEC91e`
 
-### **Come scambiare su Uniswap**
-1. Vai su Uniswap, seleziona Polygon come rete.
+---
+
+## Come scambiare su Uniswap
+
+1. Vai su [Uniswap](https://app.uniswap.org/), seleziona Polygon come rete.
 2. Cerca il token con il contract address sopra.
 3. Swap tra WMATIC e WPT, oppure aggiungi liquidità alla pool.
 
 ---
 
-### **Doc & Community**
+## Doc & Community
+
 - [Whitepaper](link)
 - [Changelog](link)
 - [Telegram/Discord](link, se li hai)
+
+
 
 
 *Building a sustainable web, together. No mediocrity allowed.* 🚀
