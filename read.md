@@ -164,7 +164,7 @@ The founder’s wallet address will be publicly visible and the allocation param
 - [Whitepaper](link)
 - [Changelog](link)
 - [Telegram/Discord](link, if available)
-- [dextools](https://www.dextools.io/app/en/polygon/pair-explorer/0xadbf1854e5883eb8aa7baf50705338739e558e5b?t=1752446919318)
+- [dextools](https://www.dextools.io/app/en/polygon/pair-explorer/0x823c0b22b2ead1a3a857f2300c8259d1695c5aab?t=1752448279187)
 
 ---
 
