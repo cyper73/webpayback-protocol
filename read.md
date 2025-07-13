@@ -170,8 +170,3 @@ The founder’s wallet address will be publicly visible and the allocation param
 
 **Building a sustainable web, together. No mediocrity allowed. 🚀**
 
-
-
-
-
-*Building a sustainable web, together. No mediocrity allowed.* 🚀
