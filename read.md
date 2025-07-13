@@ -131,5 +131,13 @@ The founder’s wallet address will be publicly visible and the allocation param
 
 *Transparency, sustainability, and rewarding those who build the future: that’s our philosophy.*
 
+## Deployment
 
+- **Contract Address (Polygon):** [`0x9077051D318b614F915E8A07861090856FDEC91e`](https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e)
+- **Token Symbol:** WPT
+- **Decimals:** 18
+- **Liquidity Pool:** [Uniswap POL/WPT Pool](inserisci_link_pool_uniswap_quando_lo_hai)
+- **Owner/Deployer:** 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
+- **Date of deployment:** [2025-07-13
+  ]
 *Building a sustainable web, together. No mediocrity allowed.* 🚀
