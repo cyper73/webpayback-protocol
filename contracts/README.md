@@ -27,8 +27,8 @@ This folder contains the Solidity smart contracts for the **WebPaybackToken (WPT
 - [Polygonscan - WPT Token](https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e)
 - [Whitepaper](../docs/whitepaper.md) *(add the link if available)*
 - [Main README](../README.md)
-   [dextools](https://www.dextools.io/app/en/polygon/pair-explorer/0x823c0b22b2ead1a3a857f2300c8259d1695c5aab?t=1752448279187)
----
+- [DEXTOOLS](https://www.dextools.io/app/en/polygon/pair-explorer/0x823c0b22b2ead1a3a857f2300c8259d1695c5aab?t=1752448279187)
+  
 
 **Note:**  
 This code is open source under the MIT license.  
