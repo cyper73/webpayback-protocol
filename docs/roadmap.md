@@ -1,1 +1,1 @@
-next step  diffusione pool, community, DEXTools, ecc.
+next step  mainet launch,diffuse protocol
