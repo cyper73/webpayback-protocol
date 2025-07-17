@@ -4,7 +4,7 @@
 
 **WebPayback** is an open source protocol designed to ensure that web content creators are compensated whenever their work is used by AI systems. Our goal is to build a sustainable, transparent, and decentralized ecosystem where both AI and humans benefit, preserving the future of the open web.
 
----
+---  (https://web-payback-tokenizer.replit.app/)
 
 ## 🌐 What is WebPayback?
 
