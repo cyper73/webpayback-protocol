@@ -326,14 +326,14 @@ See the [LICENSE](./LICENSE) file for full details.
 
 ### Community
 
-- **Discord**: Join our community server
-- **Twitter**: [@WebPaybackHQ](https://twitter.com/WebPaybackHQ)
+- **Discord**: Join our community server   (https://discord.com/channels/1394808861508112474/1394808861508112476)
+- **Twitter**: [https://x.com/WEBPAYBACK](https://x.com/WEBPAYBACK)
 - **Blog**: Latest updates and insights
 - **Newsletter**: Monthly protocol updates
 
 ### Business Inquiries
 
-- **Partnerships**: claudiob73@hotmail.com
+- **Partnerships**: 
 - **Enterprise**: claudiob73@hotmail.com
 - **Press**: claudiob73@hotmail.com
 - **General**: claudiob73@hotmail.com
