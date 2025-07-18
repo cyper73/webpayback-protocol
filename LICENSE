@@ -1,4 +1,4 @@
-MIT License
+MIT License with Commercial Restrictions
 
 Copyright (c) 2025 WebPayback Protocol
 
@@ -8,6 +8,9 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
+
+**COMMERCIAL USE RESTRICTION:**
+Commercial use, listing and brand usage is prohibited without written permission from the creator.
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -19,3 +22,29 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## Commercial Use Guidelines
+
+### Prohibited Without Permission:
+- Commercial deployment of the WebPayback Protocol
+- Use of "WebPayback" brand name or derivatives
+- Listing on commercial platforms or marketplaces
+- Monetization of the protocol or its derivatives
+- Corporate or enterprise deployment
+
+### Permitted Uses:
+- Educational and research purposes
+- Personal development and learning
+- Non-commercial open source contributions
+- Academic studies and analysis
+
+### How to Request Commercial Permission:
+For commercial use inquiries, please contact:
+- Email: licensing@webpayback.com
+- GitHub: Create an issue with "Commercial License Request" label
+- Discord: Contact administrators in #business-inquiries
+
+### Enforcement:
+The WebPayback Protocol team reserves the right to enforce these restrictions and may take legal action against unauthorized commercial use.
