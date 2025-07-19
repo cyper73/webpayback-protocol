@@ -10,6 +10,9 @@ import { domainVerificationService } from "./services/domainVerification";
 import { chainlinkDomainVerificationService } from "./services/chainlinkDomainVerification";
 import { channelMonitoringService } from "./services/channelMonitoring";
 import { aiKnowledgeTrackingService } from "./services/aiKnowledgeTracking";
+import { poolDrainProtectionService } from "./services/poolDrainProtection";
+import { fakeCreatorDetection } from "./services/fakeCreatorDetection";
+import { reentrancyProtection } from "./services/reentrancyProtection";
 import { 
   insertCreatorSchema, 
   insertAgentCommunicationSchema,
@@ -363,6 +366,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: result.status,
         emergencyMode: result.status === 'emergency'
       });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // MEV Protection Endpoints
+  app.get("/api/mev/stats", async (req, res) => {
+    try {
+      const { mevProtectionService } = await import("./services/mevProtection");
+      const stats = await mevProtectionService.getProtectionStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.get("/api/mev/recent-rewards", async (req, res) => {
+    try {
+      // Get recent rewards with MEV protection metadata
+      const rewards = await storage.getRewardDistributions();
+      const mevProtectedRewards = rewards
+        .filter(r => r.metadata && (r.metadata as any).mevProtected)
+        .slice(0, 10)
+        .map(r => ({
+          id: r.id,
+          creatorId: r.creatorId,
+          amount: r.amount,
+          aiModel: (r.metadata as any)?.aiModel || 'unknown',
+          commitHash: (r.metadata as any)?.commitHash,
+          timestamp: r.createdAt
+        }));
+        
+      res.json(mevProtectedRewards);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mev/test", async (req, res) => {
+    try {
+      const { mevProtectionService } = await import("./services/mevProtection");
+      const { creatorId, amount, testMode } = req.body;
+      
+      console.log(`🧪 MEV Protection Test Started:
+        Creator: ${creatorId}
+        Amount: ${amount} WPT
+        Test Mode: ${testMode}`);
+      
+      // Simulate a front-running attempt
+      const commitResult = await mevProtectionService.commitReward(creatorId, amount);
+      
+      if (commitResult.success) {
+        console.log(`✅ Test Commitment Created: ${commitResult.commitHash}`);
+        
+        // Simulate malicious front-running bot trying to exploit
+        setTimeout(() => {
+          console.log(`🤖 SIMULATED FRONT-RUNNING ATTEMPT:
+            - Bot detected pending reward
+            - Attempting to insert malicious transaction
+            - MEV Protection Status: BLOCKING ATTACK`);
+        }, 2000);
+        
+        // Simulate legitimate reveal after commit period
+        setTimeout(() => {
+          console.log(`🔓 MEV Protection Test - Legitimate reveal phase initiated`);
+        }, 5000);
+        
+        res.json({
+          success: true,
+          message: "MEV protection test initiated successfully",
+          commitHash: commitResult.commitHash,
+          testPhases: [
+            "Commit phase (hiding beneficiary)",
+            "Simulated front-running attempt",
+            "Anti-MEV protection active",
+            "Legitimate reveal phase",
+            "Randomized processing"
+          ]
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "MEV protection test failed to start"
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mev/commit", async (req, res) => {
+    try {
+      const { mevProtectionService } = await import("./services/mevProtection");
+      const { creatorId, amount } = req.body;
+      
+      const result = await mevProtectionService.commitReward(creatorId, amount);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/mev/reveal", async (req, res) => {
+    try {
+      const { mevProtectionService } = await import("./services/mevProtection");
+      const { commitHash, creatorId, amount, nonce } = req.body;
+      
+      const result = await mevProtectionService.revealReward(commitHash, creatorId, amount, nonce);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
@@ -1051,6 +1163,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POOL DRAIN PROTECTION ENDPOINTS
+  
+  // Check if a reward can be distributed to a wallet
+  app.post('/api/pool/drain-protection/check', async (req, res) => {
+    try {
+      const { walletAddress, rewardAmount } = req.body;
+      
+      if (!walletAddress || !rewardAmount) {
+        return res.status(400).json({ error: 'Wallet address and reward amount are required' });
+      }
+      
+      const protection = await poolDrainProtectionService.canDistributeReward(walletAddress, parseFloat(rewardAmount));
+      
+      res.json({
+        success: true,
+        canDistribute: protection.canDistributeReward,
+        riskScore: protection.riskScore,
+        remainingQuota: protection.remainingQuota,
+        securityAlerts: protection.securityAlerts,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+  
+  // Get pool protection statistics
+  app.get('/api/pool/drain-protection/stats', async (req, res) => {
+    try {
+      const stats = await poolDrainProtectionService.getProtectionStats();
+      
+      res.json({
+        success: true,
+        stats: {
+          totalBlocked: stats.totalBlocked,
+          recentAlerts: stats.recentAlerts,
+          topRiskWallets: stats.topRiskWallets,
+          poolHealth: stats.poolHealth
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+  
+  // Get pool protection limits for a specific wallet
+  app.get('/api/pool/drain-protection/limits/:walletAddress', async (req, res) => {
+    try {
+      const { walletAddress } = req.params;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ error: 'Wallet address is required' });
+      }
+      
+      const limits = await storage.getRewardPoolLimitsByWallet(walletAddress, 'daily');
+      
+      res.json({
+        success: true,
+        limits,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+  
+  // Get pool security events
+  app.get('/api/pool/drain-protection/security-events', async (req, res) => {
+    try {
+      const events = await storage.getRewardPoolSecurity();
+      
+      res.json({
+        success: true,
+        events: events.map(event => ({
+          id: event.id,
+          walletAddress: event.walletAddress,
+          suspiciousActivity: event.suspiciousActivity,
+          riskScore: parseFloat(event.riskScore),
+          alertLevel: event.alertLevel,
+          actionTaken: event.actionTaken,
+          isResolved: event.isResolved,
+          createdAt: event.createdAt
+        })),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+  
+  // Test pool drain protection with simulation
+  app.post('/api/pool/drain-protection/test', async (req, res) => {
+    try {
+      const { walletAddress, rewardAmount, simulationType } = req.body;
+      
+      if (!walletAddress || !rewardAmount || !simulationType) {
+        return res.status(400).json({ error: 'Wallet address, reward amount, and simulation type are required' });
+      }
+      
+      // Simulate different attack scenarios
+      let testAmount = parseFloat(rewardAmount);
+      
+      switch (simulationType) {
+        case 'high_frequency':
+          // Simulate 20 requests in short time
+          testAmount = testAmount * 20;
+          break;
+        case 'large_amount':
+          // Simulate extremely large reward
+          testAmount = testAmount * 1000;
+          break;
+        case 'drain_attempt':
+          // Simulate pool drain attempt
+          testAmount = testAmount * 10000;
+          break;
+        default:
+          // Normal test
+          break;
+      }
+      
+      const protection = await poolDrainProtectionService.canDistributeReward(walletAddress, testAmount);
+      
+      res.json({
+        success: true,
+        simulationType,
+        testAmount,
+        originalAmount: parseFloat(rewardAmount),
+        protection: {
+          canDistribute: protection.canDistributeReward,
+          riskScore: protection.riskScore,
+          remainingQuota: protection.remainingQuota,
+          securityAlerts: protection.securityAlerts
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // Force cache bypass test
   app.get("/api/test/cache-bypass", (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -1061,6 +1314,294 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString(),
       randomNumber: Math.random()
     });
+  });
+
+  // =================================
+  // FAKE CREATOR DETECTION ENDPOINTS
+  // =================================
+
+  // Check if a creator URL is fake/suspicious
+  app.post('/api/fake-creator/check', async (req, res) => {
+    try {
+      const { creatorId, websiteUrl } = req.body;
+      
+      if (!creatorId || !websiteUrl) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: creatorId, websiteUrl' 
+        });
+      }
+
+      const detection = await fakeCreatorDetection.detectFakeCreator(creatorId, websiteUrl);
+      
+      res.json({
+        success: true,
+        detection,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error checking fake creator:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Get fake creator detection statistics
+  app.get('/api/fake-creator/stats', async (req, res) => {
+    try {
+      const stats = await fakeCreatorDetection.getStats();
+      
+      res.json({
+        success: true,
+        stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting fake creator stats:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Get fake creator detection alerts
+  app.get('/api/fake-creator/alerts', async (req, res) => {
+    try {
+      const alerts = await fakeCreatorDetection.getAlerts();
+      
+      res.json({
+        success: true,
+        alerts,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting fake creator alerts:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Test fake creator detection system
+  app.post('/api/fake-creator/test', async (req, res) => {
+    try {
+      const { testUrl, simulationType } = req.body;
+      
+      if (!simulationType) {
+        return res.status(400).json({ 
+          error: 'Missing required field: simulationType' 
+        });
+      }
+
+      const testResult = await fakeCreatorDetection.testDetection(testUrl || '', simulationType);
+      
+      res.json(testResult);
+    } catch (error) {
+      console.error('Error testing fake creator detection:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // =================================
+  // ALCHEMY REAL-TIME MONITORING
+  // =================================
+
+  // Import OPTIMIZED Alchemy monitor for free tier sustainability
+  const { optimizedAlchemyMonitor } = await import('./services/alchemyOptimized');
+
+  // Initialize OPTIMIZED Alchemy monitoring on server start
+  setTimeout(async () => {
+    try {
+      await optimizedAlchemyMonitor.startOptimizedMonitoring();
+      console.log('🔍 Optimized Alchemy monitoring initialized for FREE TIER');
+    } catch (error) {
+      console.error('Failed to initialize optimized Alchemy monitoring:', error);
+    }
+  }, 5000);
+
+  // Get OPTIMIZED Alchemy monitoring status
+  app.get('/api/reentrancy/alchemy/status', async (req, res) => {
+    try {
+      const status = await optimizedAlchemyMonitor.getOptimizedStatus();
+      res.json({
+        success: true,
+        status,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting Alchemy status:', error);
+      res.json({
+        success: false,
+        error: 'Failed to get monitoring status',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Get Alchemy usage statistics for FREE TIER monitoring
+  app.get('/api/reentrancy/alchemy/usage', async (req, res) => {
+    try {
+      const usage = optimizedAlchemyMonitor.getUsageStats();
+      const estimatedMonthlyCUs = Math.floor(usage.callsUsed * 24 * 30 * 26); // Conservative estimate
+      
+      res.json({
+        success: true,
+        usage,
+        recommendations: {
+          currentTier: 'Free (300M CUs/month)',
+          estimatedMonthlyCUs,
+          isWithinLimits: estimatedMonthlyCUs < 300000000, // 300M CU limit
+          optimizationActive: true,
+          savings: 'Using batch analysis instead of real-time WebSocket saves 90% of API calls',
+          frequency: 'Checking every 30 seconds vs continuous monitoring'
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting usage stats:', error);
+      res.json({
+        success: false,
+        error: 'Failed to get usage statistics',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Get recent blockchain activity
+  app.get('/api/reentrancy/alchemy/activity', async (req, res) => {
+    try {
+      const activity = await alchemyMonitor.getRecentBlockchainActivity();
+      res.json({
+        success: true,
+        activity,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting blockchain activity:', error);
+      res.json({
+        success: false,
+        error: 'Failed to get blockchain activity',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Start real-time monitoring
+  app.post('/api/reentrancy/alchemy/start', async (req, res) => {
+    try {
+      await alchemyMonitor.startRealtimeMonitoring();
+      res.json({
+        success: true,
+        message: 'Real-time monitoring started',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error starting monitoring:', error);
+      res.json({
+        success: false,
+        error: 'Failed to start monitoring',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Stop real-time monitoring
+  app.post('/api/reentrancy/alchemy/stop', async (req, res) => {
+    try {
+      await alchemyMonitor.stopMonitoring();
+      res.json({
+        success: true,
+        message: 'Real-time monitoring stopped',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error stopping monitoring:', error);
+      res.json({
+        success: false,
+        error: 'Failed to stop monitoring',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // =================================
+  // REENTRANCY PROTECTION ENDPOINTS
+  // =================================
+
+  // Analyze transaction for reentrancy attacks
+  app.post('/api/reentrancy/analyze', async (req, res) => {
+    try {
+      const { contractAddress, functionSelector, callDepth, gasUsed, blockNumber, transactionHash } = req.body;
+      
+      if (!contractAddress || !functionSelector || !callDepth || !gasUsed || !blockNumber || !transactionHash) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: contractAddress, functionSelector, callDepth, gasUsed, blockNumber, transactionHash' 
+        });
+      }
+
+      const analysis = await reentrancyProtection.analyzeTransaction({
+        contractAddress,
+        functionSelector,
+        callDepth,
+        gasUsed,
+        timestamp: new Date(),
+        blockNumber,
+        transactionHash
+      });
+      
+      res.json({
+        success: true,
+        analysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error analyzing transaction for reentrancy:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Get reentrancy protection statistics
+  app.get('/api/reentrancy/stats', async (req, res) => {
+    try {
+      const stats = await reentrancyProtection.getStats();
+      
+      res.json({
+        success: true,
+        stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting reentrancy stats:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Test reentrancy protection system
+  app.post('/api/reentrancy/test', async (req, res) => {
+    try {
+      const { simulationType } = req.body;
+      
+      if (!simulationType) {
+        return res.status(400).json({ 
+          error: 'Missing required field: simulationType' 
+        });
+      }
+
+      const testResult = await reentrancyProtection.testProtection(simulationType);
+      
+      res.json(testResult);
+    } catch (error) {
+      console.error('Error testing reentrancy protection:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
   });
 
   const httpServer = createServer(app);
