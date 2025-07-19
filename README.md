@@ -19,8 +19,9 @@ WebPayback Protocol bridges the gap between AI advancement and creator compensat
 - **🤖 AI Detection**: Identifies 20+ AI models with 98.5% accuracy
 - **💰 Automatic Rewards**: Zero-friction compensation distribution  
 - **🔗 Multi-Chain**: Ethereum, Polygon, BSC, Arbitrum support
-- **🛡️ Fraud Protection**: Advanced anti-farming security system
+- **🛡️ Enterprise Security**: Multi-layer protection including reentrancy, pool drain, and fake creator detection
 - **⚡ Gas Optimization**: 95% cost reduction through batch processing
+- **🔧 API Optimization**: Alchemy FREE TIER compatible with 90% usage reduction
 - **🌍 Global Scale**: Supports 100+ social media and content platforms
 
 ---
@@ -326,14 +327,14 @@ See the [LICENSE](./LICENSE) file for full details.
 
 ### Community
 
-- **Discord**: Join our community server   (https://discord.com/channels/1394808861508112474/1394808861508112476)
-- **Twitter**: [https://x.com/WEBPAYBACK](https://x.com/WEBPAYBACK)
+- **Discord**: Join our community server
+- **Twitter**: [@WebPaybackHQ](https://twitter.com/WebPaybackHQ)
 - **Blog**: Latest updates and insights
 - **Newsletter**: Monthly protocol updates
 
 ### Business Inquiries
 
-- **Partnerships**: 
+- **Partnerships**: claudiob73@hotmail.com
 - **Enterprise**: claudiob73@hotmail.com
 - **Press**: claudiob73@hotmail.com
 - **General**: claudiob73@hotmail.com
