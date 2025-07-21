@@ -10,7 +10,7 @@ A cutting-edge multi-agent blockchain protocol that automatically rewards conten
 ## 🌟 Key Features
 
 ### 📊 Authentic Pool Data Integration
-- **Real-Time Uniswap V3 Data**: Direct integration with authentic Polygon pools (USDC/WETH, WMATIC/USDC)  
+- **Real-Time Uniswap V2 Data**: Direct integration with authentic Polygon pools (USDC/WETH, WMATIC/USDC)  
 - **24-Hour Intelligent Caching**: Cost-effective API usage with smart cache management
 - **Zero Simulation Policy**: 100% authentic blockchain data - no artificial inflation or fake values
 - **Transparent Data Source**: Real-time cache status and data source validation
