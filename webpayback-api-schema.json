@@ -1,0 +1,712 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "WebPayback Protocol API",
+    "description": "Comprehensive API for WebPayback Protocol - a blockchain-based content creator reward system with AI tracking, fraud detection, and authentic blockchain integration",
+    "version": "2.0.0",
+    "contact": {
+      "name": "WebPayback Protocol",
+      "url": "https://web-payback-tokenizer.replit.app"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://web-payback-tokenizer.replit.app",
+      "description": "Production Server"
+    }
+  ],
+  "security": [
+    {
+      "csrfToken": []
+    },
+    {
+      "sessionAuth": []
+    }
+  ],
+  "paths": {
+    "/api/csrf/token": {
+      "get": {
+        "summary": "Get CSRF Token",
+        "description": "Generate CSRF token for secure API access",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "CSRF token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "csrfToken": {"type": "string"},
+                    "expires": {"type": "number"}
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/creators": {
+      "get": {
+        "summary": "Get User Creators",
+        "description": "Retrieve all creators owned by the authenticated user (IDOR protected)",
+        "tags": ["Creators"],
+        "security": [{"sessionAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of user creators",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Creator"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Register New Creator",
+        "description": "Register a new content creator with website verification",
+        "tags": ["Creators"],
+        "security": [{"csrfToken": [], "sessionAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCreatorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creator registered successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/rewards": {
+      "get": {
+        "summary": "Get Reward History",
+        "description": "Retrieve reward distribution history for user creators",
+        "tags": ["Rewards"],
+        "security": [{"sessionAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Reward history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reward"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Distribute Rewards",
+        "description": "Distribute WPT tokens to creators (protected against reentrancy)",
+        "tags": ["Rewards"],
+        "security": [{"csrfToken": [], "sessionAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributeRewardRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rewards distributed successfully"
+          }
+        }
+      }
+    },
+    "/api/web3/pool-info": {
+      "get": {
+        "summary": "Get Pool Information",
+        "description": "Get authentic Uniswap V3 pool data from Polygon network",
+        "tags": ["Blockchain"],
+        "responses": {
+          "200": {
+            "description": "Pool information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/web3/token-info": {
+      "get": {
+        "summary": "Get WPT Token Info",
+        "description": "Get authentic WPT token information from blockchain",
+        "tags": ["Blockchain"],
+        "responses": {
+          "200": {
+            "description": "Token information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/web3/network-status": {
+      "get": {
+        "summary": "Get Network Status",
+        "description": "Get current blockchain network status",
+        "tags": ["Blockchain"],
+        "responses": {
+          "200": {
+            "description": "Network status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pool/drain-protection/stats": {
+      "get": {
+        "summary": "Pool Drain Protection Stats",
+        "description": "Get real-time pool drain protection statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Protection statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrainProtectionStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pool/drain-protection/security-events": {
+      "get": {
+        "summary": "Security Events",
+        "description": "Get security events detected by drain protection system",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Security events list"
+          }
+        }
+      }
+    },
+    "/api/agents/communications": {
+      "get": {
+        "summary": "Agent Communications",
+        "description": "Get inter-agent communication logs",
+        "tags": ["AI Agents"],
+        "responses": {
+          "200": {
+            "description": "Agent communications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentCommunication"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analytics/dashboard": {
+      "get": {
+        "summary": "Analytics Dashboard",
+        "description": "Get comprehensive analytics dashboard data",
+        "tags": ["Analytics"],
+        "responses": {
+          "200": {
+            "description": "Dashboard analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsDashboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gas/status": {
+      "get": {
+        "summary": "Gas Pool Status",
+        "description": "Get gas pool status with real fees collected",
+        "tags": ["Blockchain"],
+        "responses": {
+          "200": {
+            "description": "Gas pool status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cultural/stats": {
+      "get": {
+        "summary": "Cultural Intelligence Stats",
+        "description": "Get Qloo Cultural Intelligence API statistics",
+        "tags": ["AI"],
+        "responses": {
+          "200": {
+            "description": "Cultural stats"
+          }
+        }
+      }
+    },
+    "/api/cultural/trending": {
+      "get": {
+        "summary": "Cultural Trending",
+        "description": "Get trending cultural opportunities via Qloo API",
+        "tags": ["AI"],
+        "responses": {
+          "200": {
+            "description": "Trending opportunities"
+          }
+        }
+      }
+    },
+    "/api/reentrancy/stats": {
+      "get": {
+        "summary": "Reentrancy Protection Stats",
+        "description": "Get reentrancy attack protection statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Reentrancy stats"
+          }
+        }
+      }
+    },
+    "/api/reentrancy/alchemy/status": {
+      "get": {
+        "summary": "Alchemy Reentrancy Status",
+        "description": "Get Alchemy API reentrancy monitoring status",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Alchemy status"
+          }
+        }
+      }
+    },
+    "/api/reentrancy/alchemy/usage": {
+      "get": {
+        "summary": "Alchemy API Usage",
+        "description": "Get Alchemy API call usage statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "API usage stats"
+          }
+        }
+      }
+    },
+    "/api/ai-query/stats": {
+      "get": {
+        "summary": "AI Query Protection Stats",
+        "description": "Get AI query protection statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "AI query stats"
+          }
+        }
+      }
+    },
+    "/api/vpn/stats": {
+      "get": {
+        "summary": "VPN Detection Stats",
+        "description": "Get VPN detection statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "VPN detection stats"
+          }
+        }
+      }
+    },
+    "/api/fake-creator/stats": {
+      "get": {
+        "summary": "Fake Creator Detection Stats",
+        "description": "Get fake creator detection statistics",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Fake creator stats"
+          }
+        }
+      }
+    },
+    "/api/fake-creator/alerts": {
+      "get": {
+        "summary": "Fake Creator Alerts",
+        "description": "Get fake creator detection alerts",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Fake creator alerts"
+          }
+        }
+      }
+    },
+    "/api/citations/process": {
+      "post": {
+        "summary": "Process Citation Event",
+        "description": "Process a citation event for reward calculation",
+        "tags": ["Citations"],
+        "security": [{"csrfToken": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CitationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Citation processed successfully"
+          }
+        }
+      }
+    },
+    "/api/citations/wallet/{walletAddress}": {
+      "get": {
+        "summary": "Get Citations by Wallet",
+        "description": "Get citation statistics for a specific wallet address",
+        "tags": ["Citations"],
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Citation statistics for wallet"
+          }
+        }
+      }
+    },
+    "/api/security/rate-limit/stats": {
+      "get": {
+        "summary": "Rate Limit Statistics",
+        "description": "Get rate limiting statistics and test endpoints",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Rate limit stats"
+          }
+        }
+      }
+    },
+    "/api/security/rate-limit/test": {
+      "post": {
+        "summary": "Test Rate Limiting",
+        "description": "Test endpoint for rate limiting functionality",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "Rate limit test successful"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/security/reentrancy/test": {
+      "post": {
+        "summary": "Test Reentrancy Protection",
+        "description": "Test reentrancy attack detection with various scenarios",
+        "tags": ["Security"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scenario": {
+                    "type": "string",
+                    "enum": ["normal", "high_gas", "withdraw_attack", "deep_calls"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reentrancy test completed"
+          }
+        }
+      }
+    },
+    "/api/idor/test": {
+      "get": {
+        "summary": "IDOR Protection Test",
+        "description": "Test endpoint for IDOR (Insecure Direct Object Reference) protection",
+        "tags": ["Security"],
+        "responses": {
+          "200": {
+            "description": "IDOR test information"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-Token"
+      },
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Session-ID"
+      }
+    },
+    "schemas": {
+      "Creator": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "userId": {"type": "integer"},
+          "websiteUrl": {"type": "string", "format": "uri"},
+          "walletAddress": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "verificationStatus": {"type": "string", "enum": ["pending", "verified", "failed"]},
+          "reputationScore": {"type": "number"},
+          "channelType": {"type": "string"},
+          "isVerified": {"type": "boolean"},
+          "createdAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "CreateCreatorRequest": {
+        "type": "object",
+        "required": ["websiteUrl", "walletAddress"],
+        "properties": {
+          "websiteUrl": {"type": "string", "format": "uri"},
+          "walletAddress": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "channelType": {"type": "string"},
+          "verificationMethod": {"type": "string"}
+        }
+      },
+      "Reward": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "creatorId": {"type": "integer"},
+          "amount": {"type": "string"},
+          "transactionHash": {"type": "string"},
+          "blockNumber": {"type": "integer"},
+          "status": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      },
+      "DistributeRewardRequest": {
+        "type": "object",
+        "required": ["creatorId", "amount"],
+        "properties": {
+          "creatorId": {"type": "integer"},
+          "amount": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      },
+      "PoolInfo": {
+        "type": "object",
+        "properties": {
+          "poolAddress": {"type": "string", "example": "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3"},
+          "token0": {"type": "string"},
+          "token1": {"type": "string"},
+          "fee": {"type": "number"},
+          "liquidity": {"type": "string"},
+          "sqrtPriceX96": {"type": "string"},
+          "tick": {"type": "integer"}
+        }
+      },
+      "TokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {"type": "string", "example": "0x9408f17a8B4666f8cb8231BA213DE04137dc3825"},
+          "name": {"type": "string", "example": "WebPayback Token"},
+          "symbol": {"type": "string", "example": "WPT"},
+          "decimals": {"type": "integer"},
+          "totalSupply": {"type": "string"}
+        }
+      },
+      "NetworkStatus": {
+        "type": "object",
+        "properties": {
+          "chainId": {"type": "integer", "example": 137},
+          "networkName": {"type": "string", "example": "Polygon"},
+          "blockNumber": {"type": "integer"},
+          "gasPrice": {"type": "string"}
+        }
+      },
+      "DrainProtectionStats": {
+        "type": "object",
+        "properties": {
+          "totalChecks": {"type": "integer"},
+          "suspiciousTransactions": {"type": "integer"},
+          "blockedTransactions": {"type": "integer"},
+          "protectedValue": {"type": "string"}
+        }
+      },
+      "AgentCommunication": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "fromAgentId": {"type": "integer"},
+          "toAgentId": {"type": "integer"},
+          "message": {"type": "string"},
+          "priority": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      },
+      "AnalyticsDashboard": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "status": {"type": "string"},
+                "accuracy": {"type": "number"},
+                "uptime": {"type": "number"},
+                "level": {"type": "integer"}
+              }
+            }
+          },
+          "totalTransactions": {"type": "integer"},
+          "totalRewards": {"type": "string"},
+          "activeCreators": {"type": "integer"}
+        }
+      },
+      "GasStatus": {
+        "type": "object",
+        "properties": {
+          "gasPool": {
+            "type": "object",
+            "properties": {
+              "totalFeesCollected": {"type": "number", "example": 0.014107999},
+              "availableBalance": {"type": "string"},
+              "utilizationRate": {"type": "number"}
+            }
+          }
+        }
+      },
+      "CitationRequest": {
+        "type": "object",
+        "required": ["sourceUrl", "citationContext", "aiModel"],
+        "properties": {
+          "sourceUrl": {"type": "string", "format": "uri"},
+          "citationContext": {"type": "string"},
+          "citationType": {"type": "string"},
+          "querySource": {"type": "string"},
+          "aiModel": {"type": "string"},
+          "userAgent": {"type": "string"},
+          "sessionId": {"type": "string"},
+          "citationConfidence": {"type": "string"}
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Security",
+      "description": "Security endpoints including CSRF, rate limiting, reentrancy protection, and fraud detection"
+    },
+    {
+      "name": "Creators",
+      "description": "Content creator management and verification"
+    },
+    {
+      "name": "Rewards",
+      "description": "Token reward distribution and tracking"
+    },
+    {
+      "name": "Blockchain",
+      "description": "Authentic blockchain data and Web3 integration"
+    },
+    {
+      "name": "AI Agents",
+      "description": "AI agent communication and coordination"
+    },
+    {
+      "name": "Analytics",
+      "description": "Platform analytics and monitoring"
+    },
+    {
+      "name": "Citations",
+      "description": "Content citation tracking and reward processing"
+    },
+    {
+      "name": "AI",
+      "description": "AI-powered features and cultural intelligence"
+    }
+  ]
+}
