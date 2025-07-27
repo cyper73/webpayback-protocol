@@ -1,1 +1,348 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+:root {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+  
+  /* Custom WebPayback Colors */
+  --electric-blue: hsl(190, 100%, 50%);
+  --neon-green: hsl(150, 100%, 50%);
+  --cyber-purple: hsl(255, 84%, 64%);
+  --deep-space: hsl(240, 33%, 6%);
+  --dark-gray: hsl(240, 6%, 10%);
+  --glass-dark: hsla(240, 6%, 10%, 0.8);
+  --glass-light: hsla(0, 0%, 100%, 0.1);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground;
+    background: var(--deep-space);
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: var(--glass-dark);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-light);
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }
+  
+  .floating-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(45deg, var(--electric-blue), var(--neon-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .blockchain-grid {
+    background-image: radial-gradient(circle at 1px 1px, hsla(190, 100%, 50%, 0.3) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  .transaction-flow {
+    background: linear-gradient(90deg, transparent, hsla(150, 100%, 50%, 0.3), transparent);
+    animation: flow 3s linear infinite;
+  }
+  
+  .shadow-neon-blue {
+    box-shadow: 0 0 20px hsla(190, 100%, 50%, 0.3);
+  }
+  
+  .shadow-neon-green {
+    box-shadow: 0 0 20px hsla(150, 100%, 50%, 0.3);
+  }
+  
+  .shadow-neon-purple {
+    box-shadow: 0 0 20px hsla(255, 84%, 64%, 0.3);
+  }
+  
+  .border-electric-blue {
+    border-color: var(--electric-blue);
+  }
+  
+  .border-neon-green {
+    border-color: var(--neon-green);
+  }
+  
+  .border-cyber-purple {
+    border-color: var(--cyber-purple);
+  }
+  
+  .text-electric-blue {
+    color: var(--electric-blue);
+  }
+  
+  .text-neon-green {
+    color: var(--neon-green);
+  }
+  
+  .text-cyber-purple {
+    color: var(--cyber-purple);
+  }
+  
+  .bg-electric-blue {
+    background-color: var(--electric-blue);
+  }
+  
+  .bg-neon-green {
+    background-color: var(--neon-green);
+  }
+  
+  .bg-cyber-purple {
+    background-color: var(--cyber-purple);
+  }
+  
+  .bg-deep-space {
+    background-color: var(--deep-space);
+  }
+  
+  .bg-glass-dark {
+    background-color: var(--glass-dark);
+  }
+  
+  .animate-scroll {
+    animation: scroll 30s linear infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Dashboard Layout Optimization */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 100%;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+  width: 100%;
+}
+
+.dashboard-section {
+  width: 100%;
+  min-height: fit-content;
+}
+
+/* Ensure consistent card heights and better spacing */
+.glass-card {
+  height: fit-content !important;
+  min-height: auto !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-card .card-header {
+  padding: 1rem 1.25rem 0.75rem 1.25rem !important;
+}
+
+.glass-card .card-content {
+  padding: 0.75rem 1.25rem 1rem 1.25rem !important;
+  flex: 1;
+}
+
+/* Better alignment for grid layouts */
+.xl\:grid-cols-2 > * {
+  height: fit-content;
+  align-self: start;
+  min-height: 200px;
+}
+
+.xl\:grid-cols-3 > * {
+  height: fit-content;
+  align-self: start;
+  min-height: 200px;
+}
+
+/* Compact spacing for internal components */
+.space-y-6 > * + * {
+  margin-top: 1.25rem !important;
+}
+
+.space-y-4 > * + * {
+  margin-top: 0.875rem !important;
+}
+
+/* Optimize card content spacing */
+.glass-card .grid {
+  gap: 0.875rem !important;
+}
+
+.glass-card .space-y-3 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+/* Security Systems specific optimization */
+.dashboard-section .space-y-6 .glass-card {
+  min-height: 340px;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Better grid alignment for security cards */
+.dashboard-section .space-y-6 {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Prevent text overlap in security cards */
+.glass-card .grid .space-y-2 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.glass-card .grid .space-y-3 > * + * {
+  margin-top: 1rem !important;
+}
+
+/* Ensure proper spacing for security metrics */
+.glass-card .grid > div {
+  min-height: 80px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Fix overlapping headers and content */
+.glass-card .card-header {
+  z-index: 10;
+  position: relative;
+  padding-bottom: 0.75rem !important;
+}
+
+.glass-card .card-content {
+  z-index: 5;
+  position: relative;
+  margin-top: 0;
+  padding-top: 0 !important;
+}
+
+/* Security cards metric numbers styling */
+.glass-card .text-2xl, .glass-card .text-3xl {
+  line-height: 1.1 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.glass-card .text-xs, .glass-card .text-sm {
+  line-height: 1.2 !important;
+  margin-top: 0.125rem !important;
+}
+
+/* Prevent metric overflow */
+.glass-card .grid > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Better spacing between security metrics */
+@media (min-width: 1280px) {
+  .dashboard-section .space-y-6 .glass-card .grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.25rem !important;
+  }
+}
+
+/* Fix badge positioning to prevent overlap */
+.glass-card .card-header .flex.items-center.justify-between {
+  margin-bottom: 0.5rem;
+  align-items: flex-start !important;
+}
+
+.glass-card .card-header .badge {
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+/* Ensure security metric containers have proper height */
+.glass-card .bg-gray-800\/50 {
+  min-height: 70px !important;
+  padding: 0.75rem !important;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Fix "At Risk" and other status badges */
+.glass-card .bg-red-500\/20, .glass-card .bg-blue-500\/20 {
+  position: relative;
+  z-index: 1;
+}
