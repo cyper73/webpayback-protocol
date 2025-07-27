@@ -32,8 +32,17 @@ Domain configuration: webpayback.com registered on Ionos with Domain Guard, redi
 - **NEW REPOSITORY**: Migrated to dedicated webpayback-protocol repository at https://github.com/cyper73/webpayback-protocol/tree/webpayback
 - **LINK UPDATES COMPLETED**: Updated all GitHub repository links across documentation and codebase
 - **FILES UPDATED**: replit.md, docs/README.md, PrivacyPolicy.tsx, dashboard.tsx, dashboard-static.tsx, dashboard-working.tsx
-- **ARCHIVE READY**: webpayback-complete-final-20250727-2146.tar.gz prepared with .gitignore for GitHub upload
+- **ARCHIVE READY**: webpayback-protocol-v2.tar.gz prepared with .gitignore for GitHub upload (540KB optimized)
 - **PROFESSIONAL BRANDING**: New repository provides better SEO and professional presentation for WebPayback Protocol
+
+### Licensing Protection Implementation (July 27, 2025)
+- **CUSTOM LICENSE CREATED**: WebPayback Protocol License v1.0 with commercial use restrictions  
+- **INTELLECTUAL PROPERTY PROTECTION**: Prevents unauthorized commercial use while allowing educational/research use
+- **TOKEN SEPARATION**: License covers only source code - WPT token operations remain completely unrestricted
+- **COMMERCIAL LICENSING**: Requires written permission from copyright holder for commercial use
+- **CLEAR TERMS**: Non-commercial use (education, research, personal projects) fully permitted
+- **CONTACT**: Commercial licensing inquiries directed to info@webpayback.com
+- **DOCUMENTATION UPDATED**: README.md updated to reflect new licensing terms and restrictions
 
 ### Latest Security Fixes (July 26, 2025)
 - Fixed pool address to correct Uniswap V3 contract (0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3)
