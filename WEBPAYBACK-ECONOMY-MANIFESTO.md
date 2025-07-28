@@ -53,7 +53,7 @@
 ### 📞 **START NOW**
 
 1. **Register** as Creator on webpayback.com
-2. **Connect** your MetaMask wallet
+2. **Connect** your  wallet
 3. **Support the pool** with any amount (starting from $10)
 4. **Earn WPT rewards** monthly for your original content
 5. **Help govern** the platform together with the community
