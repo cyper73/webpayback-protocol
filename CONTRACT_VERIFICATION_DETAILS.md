@@ -48,28 +48,6 @@ The contract constructor takes no parameters - all values are hardcoded for secu
 
 ## PolygonScan Verification Steps
 
-### 1. Go to PolygonScan
-Visit: https://polygonscan.com/address/0x9408f17a8B4666f8cb8231BA213DE04137dc3825#code
-
-### 2. Click "Verify and Publish"
-Select "Verify & Publish Contract Source Code"
-
-### 3. Fill in the Details
-- **Contract Address**: `0x9408f17a8B4666f8cb8231BA213DE04137dc3825`
-- **Compiler Type**: Solidity (Single file)
-- **Compiler Version**: v0.8.19+commit.7dd6d404
-- **Open Source License Type**: MIT
-
-### 4. Optimization Settings
-- **Optimization**: Yes
-- **Runs**: 200
-
-### 5. Contract Source Code
-Copy the entire contents of `contracts/WPTv2.sol`
-
-### 6. Constructor Arguments
-Leave empty (no constructor arguments)
-
 ## Contract ABI
 The contract follows standard ERC-20 ABI with additional functions:
 - `burn(uint256 amount)`
@@ -77,14 +55,6 @@ The contract follows standard ERC-20 ABI with additional functions:
 - `getCreatorWallet()`
 - `isCreator(address account)`
 - `FEE_RATE` constant (returns 10)
-
-## Verification Troubleshooting
-
-### If Verification Fails
-1. **Check Compiler Version**: Ensure exact match with v0.8.19+commit.7dd6d404
-2. **Optimization Settings**: Must be enabled with 200 runs
-3. **License Type**: Select MIT License
-4. **Source Code**: Copy complete file including all imports
 
 ### Common Issues
 - **Import Statements**: All OpenZeppelin imports should be included
