@@ -46,6 +46,7 @@ The contract constructor takes no parameters - all values are hardcoded for secu
 - **Deployer Address**: `0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba`
 - **Gas Used**: Approximately 1,200,000 gas
 
+<<<<<<< HEAD
 ## PolygonScan Verification Steps
 
 ### 1. Go to PolygonScan
@@ -70,6 +71,8 @@ Copy the entire contents of `contracts/WPTv2.sol`
 ### 6. Constructor Arguments
 Leave empty (no constructor arguments)
 
+=======
+>>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
 ## Contract ABI
 The contract follows standard ERC-20 ABI with additional functions:
 - `burn(uint256 amount)`
@@ -108,4 +111,8 @@ The contract follows standard ERC-20 ABI with additional functions:
 ---
 *Prepared for manual verification on PolygonScan*
 *Contract Address: 0x9408f17a8B4666f8cb8231BA213DE04137dc3825*
+<<<<<<< HEAD
 *Date: July 26, 2025*
+=======
+*Date: July 26, 2025*
+>>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
