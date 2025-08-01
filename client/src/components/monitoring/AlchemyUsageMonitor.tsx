@@ -103,7 +103,7 @@ export function AlchemyUsageMonitor() {
               <span className="text-sm font-medium">Calls Used</span>
             </div>
             <div className="text-2xl font-bold">{usage.callsUsed}</div>
-            <div className="text-xs text-gray-500">of {usage.maxCallsPerHour}/hour</div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">of {usage.maxCallsPerHour}/hour</div>
           </div>
 
           <div className="space-y-2">
@@ -112,7 +112,7 @@ export function AlchemyUsageMonitor() {
               <span className="text-sm font-medium">Remaining</span>
             </div>
             <div className="text-2xl font-bold text-green-600">{usage.remainingCalls}</div>
-            <div className="text-xs text-gray-500">calls available</div>
+            <div className="text-xs text-gray-700 dark:text-gray-300">calls available</div>
           </div>
 
           <div className="space-y-2">
