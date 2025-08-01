@@ -7,7 +7,7 @@
 ## ✅ DEPLOYMENT VERIFICATION PASSED
 
 ### 📊 Contract Details (from deployments/wpt-v2-polygon.json)
-- **Deployer**: `0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba`
+- **Deployer**: `*****************************`
 - **Deployment Block**: 74,410,147
 - **Gas Used**: 846,703
 - **Deployment Hash**: `0xb010aaad276f7d7750eb1c109c33c0c442c824b06d9a1375959a2c4e4671c618`
