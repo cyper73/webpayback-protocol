@@ -45,7 +45,7 @@ export class QlooService {
   private baseUrl = 'https://hackathon.api.qloo.com';
   
   constructor() {
-    this.apiKey = process.env.QLOO_API_KEY || '8oruYQqpoCoCq7ydB2KPXk5q_Vrr-0e9wrbCk4vvp5Q';
+    this.apiKey = process.env.QLOO_API_KEY || '[REDACTED_FOR_GITHUB_SECURITY]'; // [REDACTED_FOR_GITHUB_SECURITY]
     console.log('🚀 Qloo LIVE API integration activated with hackathon endpoint!');
   }
 

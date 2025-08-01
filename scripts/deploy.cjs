@@ -59,7 +59,7 @@ async function main() {
   console.log("💸 Creator Fee:", creatorFee.toString(), "basis points (0.1%)");
   
   // Verify creator wallet is correct
-  const expectedWallet = "0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba";
+  const expectedWallet = process.env.FOUNDER_WALLET || "0x***********************************************[FOUNDER]";
   if (creatorWallet.toLowerCase() !== expectedWallet.toLowerCase()) {
     console.error("❌ ERROR: Creator wallet mismatch!");
     console.error("Expected:", expectedWallet);

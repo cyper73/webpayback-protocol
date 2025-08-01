@@ -92,11 +92,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm">
                 <Wallet className="text-electric-blue" />
-<<<<<<< HEAD
                 <span className="font-mono">0x9408...825</span>
-=======
-                <span className="font-mono">0x9077...91e</span>
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
               </div>
               <div className="flex items-center space-x-2 bg-glass-dark px-3 py-1 rounded-lg">
                 <Coins className="text-amber-400" />

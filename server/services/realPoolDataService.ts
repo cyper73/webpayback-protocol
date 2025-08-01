@@ -73,7 +73,7 @@ class RealPoolDataService {
       console.log(`🔍 Fetching authentic pool data for ${poolAddress}...`);
       
       // Use Alchemy API for direct blockchain queries (more reliable than subgraphs)
-      const alchemyEndpoint = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+      const alchemyEndpoint = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`; // [REDACTED_FOR_GITHUB_SECURITY]
       
       // Check if pool exists on blockchain (basic validation)
       if (!poolAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
@@ -125,7 +125,7 @@ class RealPoolDataService {
       console.log("🔍 Getting REAL TVL directly from blockchain contract...");
       
       // Get authentic data from blockchain using Alchemy
-      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`; // [REDACTED_FOR_GITHUB_SECURITY]
       
       // Get token balances in the pool directly from blockchain
       const currentPool = poolAddress || (poolType === 'usdt' ? this.USDT_WPT_POOL_V2 : this.WMATIC_WPT_POOL);
@@ -205,7 +205,7 @@ class RealPoolDataService {
   // Get token balance from blockchain directly
   private async getTokenBalance(tokenAddress: string, holderAddress: string): Promise<number> {
     try {
-      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`; // [REDACTED_FOR_GITHUB_SECURITY]
       
       // ERC20 balanceOf call
       const balanceCall = {
@@ -243,7 +243,7 @@ class RealPoolDataService {
   // Get reserves from Uniswap V2 pool directly
   private async getUniswapV2Reserves(poolAddress: string): Promise<{reserve0: number, reserve1: number}> {
     try {
-      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+      const alchemyUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`; // [REDACTED_FOR_GITHUB_SECURITY]
       
       // Call getReserves() function on Uniswap V2 pool
       const reservesCall = {

@@ -8,7 +8,7 @@ Complete resolution of Pool Drain Protection founder wallet restrictions and ful
 ### 🔧 **TECHNICAL IMPROVEMENTS**
 
 #### Backend Enhancements
-- **Founder Wallet Exception**: Automatic exclusion of founder wallet (0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba) from security alerts
+- **Founder Wallet Exception**: Automatic exclusion of founder wallet ([REDACTED_FOR_GITHUB_SECURITY]) from security alerts
 - **Security Events API**: Enhanced `/api/pool/drain-protection/security-events` endpoint with proper filtering
 - **Database Integration**: PostgreSQL-based security events tracking with authentic data storage
 - **Cleanup System**: Automatic founder security events cleanup on service initialization

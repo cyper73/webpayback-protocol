@@ -21,7 +21,7 @@
 1. **Vai su PolygonScan**: https://polygonscan.com/address/0x9077051D318b614F915E8A07861090856FDEC91e
 2. **Controlla "Token Approvals"**: https://polygonscan.com/tokenapprovalchecker?search=0x9077051D318b614F915E8A07861090856FDEC91e
 3. **Revoca TUTTE le approvazioni attive**
-4. **Usa Revoke.cash**: https://revoke.cash/address/0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
+4. **Usa Revoke.cash**: https://revoke.cash/address/[REDACTED_FOR_GITHUB_SECURITY]
 
 ---
 
@@ -64,7 +64,7 @@ Dal PolygonScan del contratto V1:
 ### **1. REVOCA APPROVAZIONI (5 minuti)**
 ```bash
 # Controlla approvazioni attive
-curl -X GET "https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress=0x9077051D318b614F915E8A07861090856FDEC91e&address=0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba&apikey=YOUR_API_KEY"
+curl -X GET "https://api.polygonscan.com/api?module=account&action=tokennfttx&contractaddress=0x9077051D318b614F915E8A07861090856FDEC91e&address=[REDACTED_FOR_GITHUB_SECURITY]&apikey=YOUR_API_KEY"
 
 # Revoca tramite MetaMask/Web3
 # approve(spender, 0) per ogni approvazione attiva

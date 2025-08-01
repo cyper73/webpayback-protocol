@@ -41,7 +41,7 @@ Default (london)
 
 2. **Fixed Parameters**:
    ```solidity
-   address public constant creatorWallet = 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba;
+   address public constant creatorWallet = [REDACTED_FOR_GITHUB_SECURITY]; // Use process.env.FOUNDER_WALLET
    uint256 public constant creatorFeeBasisPoints = 10; // 0.1%
    ```
 

@@ -40,7 +40,7 @@ Router: 0xE592427A0AEce92De3Edee1F18E0157C05861564
 
 ### **Step 1: Approva Token**
 1. Vai su [Uniswap](https://app.uniswap.org/)
-2. Connetti wallet 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
+2. Connetti wallet [REDACTED_FOR_GITHUB_SECURITY]
 3. Seleziona "Pool" → "Add Liquidity"
 4. Token A: WMATIC (0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270)
 5. Token B: WPT (0x9408f17a8B4666f8cb8231BA213DE04137dc3825)

@@ -55,7 +55,7 @@ interface ProtectionTestResult {
 export default function PoolDrainProtection() {
   const [testResult, setTestResult] = useState<ProtectionTestResult | null>(null);
   const [testLoading, setTestLoading] = useState(false);
-  const [selectedWallet, setSelectedWallet] = useState("0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba");
+  const [selectedWallet, setSelectedWallet] = useState("");
 
   const { data: stats, isLoading: statsLoading } = useQuery<PoolProtectionStats>({
     queryKey: ['/api/pool/drain-protection/stats'],

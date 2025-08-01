@@ -9,8 +9,8 @@ export class ContentCertificateNftService {
   private signer: ethers.Wallet;
   
   constructor() {
-    this.provider = new ethers.providers.AlchemyProvider('matic', process.env.ALCHEMY_API_KEY);
-    this.signer = new ethers.Wallet(process.env.PRIVATE_KEY!, this.provider);
+    this.provider = new ethers.providers.AlchemyProvider('matic', process.env.ALCHEMY_API_KEY); // [REDACTED_FOR_GITHUB_SECURITY]
+    this.signer = new ethers.Wallet(process.env.PRIVATE_KEY!, this.provider); // [REDACTED_FOR_GITHUB_SECURITY]
   }
 
   // Generate content fingerprint using SHA-256

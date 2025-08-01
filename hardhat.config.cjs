@@ -33,8 +33,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || ""
+      polygon: process.env.POLYGONSCAN_API_KEY || "", // [REDACTED_FOR_GITHUB_SECURITY]
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "" // [REDACTED_FOR_GITHUB_SECURITY]
     }
   },
   paths: {

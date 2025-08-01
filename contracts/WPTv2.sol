@@ -157,7 +157,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 // *** WEBPAYBACK TOKEN V2 - OPTIMIZED FOR SCANNERS ***
 contract WebPaybackTokenV2 is ERC20 {
     // FIXED IMMUTABLE PARAMETERS (cannot be changed by anyone)
-    address public constant creatorWallet = 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba; // Your wallet
+    address public constant creatorWallet = [REDACTED_FOR_GITHUB_SECURITY]; // Configure in deployment
     uint256 public constant creatorFeeBasisPoints = 10; // 0.1% (10 basis points) - FIXED FOREVER
     
     // Events for transparency

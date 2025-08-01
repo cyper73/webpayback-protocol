@@ -7,7 +7,7 @@
 - [x] Immutable parameters (no owner functions)
 - [x] Scanner-friendly design
 - [x] Solidity 0.8.19, 200 optimization runs
-- [x] Creator wallet: 0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba
+- [x] Creator wallet: 0x***********************************************[FOUNDER]
 
 ### Deployment Configuration ✅
 - [x] Hardhat config ready
@@ -34,10 +34,10 @@
 
 ### Phase 1: Contract Deployment (Today)
 ```
-1. Setup private key in hardhat.config.js
+1. Setup private key in hardhat.config.js [REDACTED_FOR_SECURITY]
 2. Run: npm install --save-dev hardhat @nomiclabs/hardhat-ethers
 3. Deploy: npx hardhat run scripts/deploy.js --network polygon
-4. Verify on PolygonScan
+4. Verify on PolygonScan [REQUIRES_API_KEY]
 5. Test basic functions
 ```
 

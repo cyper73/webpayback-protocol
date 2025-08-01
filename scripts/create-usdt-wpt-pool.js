@@ -41,7 +41,7 @@ const ERC20_ABI = [
 
 class USDTWPTPoolCreator {
   constructor() {
-    this.provider = new ethers.JsonRpcProvider(`https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`);
+    this.provider = new ethers.JsonRpcProvider(`https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`); // [REDACTED_FOR_GITHUB_SECURITY]
     this.factory = new ethers.Contract(UNISWAP_V3_FACTORY, FACTORY_ABI, this.provider);
     this.positionManager = new ethers.Contract(UNISWAP_V3_POSITION_MANAGER, POSITION_MANAGER_ABI, this.provider);
   }

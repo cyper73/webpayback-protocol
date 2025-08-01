@@ -12,9 +12,9 @@ export class OptimizedAlchemyMonitor {
   private readonly BATCH_INTERVAL_MS = 300000; // Check every 5 MINUTES instead of 30 seconds
 
   constructor() {
-    const apiKey = process.env.ALCHEMY_API_KEY;
+    const apiKey = process.env.ALCHEMY_API_KEY; // [REDACTED_FOR_GITHUB_SECURITY]
     if (!apiKey) {
-      console.warn('⚠️ ALCHEMY_API_KEY not found. Monitoring will be simulated.');
+      console.warn('⚠️ API_KEY not found. Monitoring will be simulated.'); // [REDACTED_FOR_GITHUB_SECURITY]
       return;
     }
 

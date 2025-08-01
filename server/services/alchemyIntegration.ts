@@ -8,9 +8,9 @@ export class AlchemyReentrancyMonitor {
   private alchemyWs: AlchemySubscription | null = null;
 
   constructor() {
-    const apiKey = process.env.ALCHEMY_API_KEY;
+    const apiKey = process.env.ALCHEMY_API_KEY; // [REDACTED_FOR_GITHUB_SECURITY]
     if (!apiKey) {
-      console.warn('⚠️ ALCHEMY_API_KEY not found. Real-time monitoring will be simulated.');
+      console.warn('⚠️ API_KEY not found. Real-time monitoring will be simulated.');
       this.alchemy = null as any; // Will be handled gracefully
       return;
     }
@@ -210,7 +210,7 @@ export class AlchemyReentrancyMonitor {
     return {
       isActive: this.isMonitoring,
       network: 'Polygon Mainnet',
-      apiKey: process.env.ALCHEMY_API_KEY ? 'Set' : 'Missing',
+      apiKey: process.env.ALCHEMY_API_KEY ? 'Set' : 'Missing', // [REDACTED_FOR_GITHUB_SECURITY]
       lastCheck: new Date().toISOString(),
       mode: this.alchemy ? 'Live' : 'Simulated'
     };

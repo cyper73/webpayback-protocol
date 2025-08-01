@@ -47,7 +47,7 @@ interface PoolDebugInfo {
 }
 
 export default function PoolLiquidityDebugger() {
-  const [walletAddress, setWalletAddress] = useState("0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba");
+  const [walletAddress, setWalletAddress] = useState("");
   const [wmaticAmount, setWmaticAmount] = useState("10");
   const [wptAmount, setWptAmount] = useState("1000");
   const [slippage, setSlippage] = useState("3");
@@ -362,7 +362,7 @@ export default function PoolLiquidityDebugger() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => copyToClipboard("0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba")}
+              onClick={() => copyToClipboard("[REDACTED_FOR_GITHUB_SECURITY]")}
             >
               Copy Wallet Address
             </Button>

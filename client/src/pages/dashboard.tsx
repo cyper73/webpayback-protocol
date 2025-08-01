@@ -21,7 +21,6 @@ import { AlchemyUsageMonitor } from "@/components/monitoring/AlchemyUsageMonitor
 import QlooCulturalDashboard from "@/components/cultural/QlooCulturalDashboard";
 import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtectionDashboard";
 
-<<<<<<< HEAD
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity } from "lucide-react";
 import { Link as RouterLink } from "wouter";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -34,13 +33,6 @@ const isFounderDevice = () => {
   return userAgent.includes('Windows') && (userAgent.includes('Chrome') || userAgent.includes('Firefox'));
 };
 
-=======
-import { Box, Wallet, Coins, Link, Shield, FileText } from "lucide-react";
-import { Link as RouterLink } from "wouter";
-import wptLogo from "@assets/wpt-logo_1752556131899.png";
-import { useState, useEffect } from "react";
-
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
 export default function Dashboard() {
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   
@@ -82,7 +74,6 @@ export default function Dashboard() {
     compliance: []
   };
   
-<<<<<<< HEAD
   const { 
     agents = [], 
     networks = [], 
@@ -96,12 +87,6 @@ export default function Dashboard() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-deep-space text-white">
-=======
-  const { agents, networks, creators, stats, rewards, pool, compliance } = data;
-
-  return (
-    <div className="min-h-screen bg-deep-space text-white">
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
       {/* Clean Navigation Header */}
       <header className="glass-card border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -120,11 +105,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 text-sm">
                 <Wallet className="text-electric-blue w-4 h-4" />
-<<<<<<< HEAD
                 <span className="font-mono text-xs">0x9408...825</span>
-=======
-                <span className="font-mono text-xs">0x9077...91e</span>
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
               </div>
               <div className="flex items-center space-x-2 bg-glass-dark px-2 py-1 rounded-lg">
                 <Coins className="text-amber-400 w-4 h-4" />
@@ -139,17 +120,10 @@ export default function Dashboard() {
       <div className="bg-glass-dark/50 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-wrap items-center justify-center gap-3">
-<<<<<<< HEAD
             <RouterLink to="/getting-started">
               <Button variant="outline" size="sm" className="bg-glass-dark border-blue-500/30 hover:bg-blue-500/20 text-white">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Getting Started
-=======
-            <RouterLink to="/automation">
-              <Button variant="outline" size="sm" className="bg-glass-dark border-emerald-500/30 hover:bg-emerald-500/20 text-white">
-                <Box className="w-4 h-4 mr-2" />
-                Auto Pool Manager
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
               </Button>
             </RouterLink>
             
@@ -166,7 +140,6 @@ export default function Dashboard() {
                 Citations Rewards
               </Button>
             </RouterLink>
-<<<<<<< HEAD
             
             <RouterLink to="/pool-health">
               <Button variant="outline" size="sm" className="bg-glass-dark border-blue-500/30 hover:bg-blue-500/20 text-white">
@@ -174,8 +147,6 @@ export default function Dashboard() {
                 Pool Health
               </Button>
             </RouterLink>
-=======
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
           </div>
         </div>
       </div>
@@ -472,11 +443,7 @@ export default function Dashboard() {
           </div>
         </div>
       </footer>
-<<<<<<< HEAD
       </div>
     </ErrorBoundary>
-=======
-    </div>
->>>>>>> 311f543f194f46e11a56aa7a6d731da287f53cc5
   );
 }

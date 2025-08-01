@@ -27,7 +27,7 @@ async function main() {
   console.log("🏗️  Creazione Pool Uniswap V3 POL/WPT V2...");
   
   // Setup provider e wallet
-  const provider = new ethers.providers.JsonRpcProvider(`https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`);
+  const provider = new ethers.providers.JsonRpcProvider(`https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`); // [REDACTED_FOR_GITHUB_SECURITY]
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   
   console.log("📍 Wallet address:", wallet.address);

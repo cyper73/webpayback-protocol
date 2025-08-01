@@ -22,9 +22,9 @@ export class TokenInjectionService {
   constructor() {
     // Initialize provider and wallet (ethers v5 API)
     this.provider = new ethers.providers.JsonRpcProvider(
-      `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+      `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}` // [REDACTED_FOR_GITHUB_SECURITY]
     );
-    this.wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, this.provider);
+    this.wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, this.provider); // [REDACTED_FOR_GITHUB_SECURITY]
 
     // WPT contract ABI (minimal for transfer)
     const wptABI = [
