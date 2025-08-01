@@ -75,7 +75,7 @@ npx hardhat compile
 - **License**: MIT
 
 ### 4. Initial Supply Distribution
-- **Total Supply**: 1,000,000 WPT (same as V1)
+- **Total Supply**: 10,000,000 WPT 
 - **Minted To**: Deployer address
 - **Decimals**: 18
 
@@ -84,7 +84,7 @@ npx hardhat compile
 ### Immediate Verification
 - [ ] Contract deployed successfully
 - [ ] Source code verified on PolygonScan
-- [ ] Total supply matches (1M WPT)
+- [ ] Total supply matches (10M WPT)
 - [ ] Creator wallet address correct
 - [ ] Fee rate shows 0.1% (10 basis points)
 
