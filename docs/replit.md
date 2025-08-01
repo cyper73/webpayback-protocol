@@ -189,7 +189,7 @@ The architecture emphasizes modularity, type safety, and real-time capabilities 
   - **SOLUTION VERIFIED**: All components updated with correct WPT contract address and optimized parameters for successful liquidity addition
 
 - **POOL DRAIN PROTECTION SYSTEM FULLY OPERATIONAL WITH SECURITY EVENTS DASHBOARD** (January 24, 2025):
-  - **COMPLETE RESOLUTION**: Pool Drain Protection founder wallet bug completely resolved with zero restrictions for founder wallet (0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba)
+  - **COMPLETE RESOLUTION**: Pool Drain Protection founder wallet bug completely resolved with zero restrictions for founder wallet (*************************)
   - **SECURITY EVENTS DASHBOARD IMPLEMENTED**: Recent Security Events section now fully visible and functional in Pool Drain Protection dashboard
   - **AUTHENTIC DATA INTEGRATION**: Security events display 3 active events with authentic wallet addresses, risk scores (0.55-0.75), and activity details
   - **BACKEND-FRONTEND ALIGNMENT**: Fixed TypeScript interfaces to match PostgreSQL database structure and API response format
