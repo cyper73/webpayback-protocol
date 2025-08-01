@@ -235,7 +235,13 @@ Detailed documentation is available in the `docs/` folder:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+**WebPayback Protocol License v1.0** - Custom license with commercial restrictions
+
+- ✅ **Free for non-commercial use**: Education, research, personal projects
+- ❌ **Commercial use requires permission**: Contact info@webpayback.com for licensing
+- 🪙 **Token operations unrestricted**: WPT trading and smart contract interactions remain fully open
+
+See [LICENSE](LICENSE) file for complete terms.
 
 ---
 

@@ -49,7 +49,6 @@ const allowedOrigins = [
 - **Networks**: Polygon mainnet (primary), Ethereum, BSC, Arbitrum
 - **Contract**: WebPayback Token v2 (0x9408f17a8B4666f8cb8231BA213DE04137dc3825)
 - **Pool**: POL/WPT Uniswap V3 (0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3)
-- USDT/WPT V2 Pool LIVE: Successfully created at address 0xe021e5817E8867D7CeA10f63BC47E118f3aB9E4A on July 27, 2025
 - **Monitoring**: Real-time blockchain data integration
 
 ### Security Monitoring
