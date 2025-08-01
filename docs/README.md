@@ -77,8 +77,8 @@ A cutting-edge multi-agent blockchain protocol that automatically rewards conten
 
 ## 📊 System Statistics
 
-- **Total Creators**: 1,200+
-- **WPT Distributed**: 45,000+ tokens
+- **Total Creators**: ****
+- **WPT Distributed**: 190 tokens
 - **AI Models Supported**: 20+ (ChatGPT, Claude, Gemini, etc.)
 - **Gas Optimization**: 95% cost reduction through batching
 - **Uptime**: 99.9%
@@ -94,7 +94,7 @@ A cutting-edge multi-agent blockchain protocol that automatically rewards conten
 
 ```bash
 # Clone repository
-git clone https://github.com/cyper73/webpayback.git
+git clone https://github.com/cyper73/webpayback-protocol/
 cd webpayback
 
 # Install dependencies
