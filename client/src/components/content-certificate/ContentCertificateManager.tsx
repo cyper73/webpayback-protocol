@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Shield, FileText, Zap, TrendingUp, AlertTriangle, ExternalLink, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeUrl, sanitizeInput } from "@/lib/security";
 import type { ContentCertificateNft, GoogleAiOverviewDetection } from "@shared/schema";
 
 interface ContentCertificateManagerProps {
@@ -122,11 +123,25 @@ export function ContentCertificateManager({ creatorId }: ContentCertificateManag
       return;
     }
 
+    // XSS PROTECTION: Sanitize all inputs before sending to server
+    const sanitizedUrl = sanitizeUrl(contentUrl);
+    const sanitizedTitle = sanitizeInput(contentTitle, 200);
+    const sanitizedContent = sanitizeInput(contentText, 50000);
+
+    if (!sanitizedUrl) {
+      toast({
+        title: "Invalid URL",
+        description: "Please provide a valid HTTP/HTTPS URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
     mintCertificate.mutate({
       creatorId,
-      contentUrl,
-      contentTitle,
-      contentText,
+      contentUrl: sanitizedUrl,
+      contentTitle: sanitizedTitle,
+      contentText: sanitizedContent,
       royaltyPercentage
     });
   };
@@ -141,9 +156,13 @@ export function ContentCertificateManager({ creatorId }: ContentCertificateManag
       return;
     }
 
+    // XSS PROTECTION: Sanitize test inputs
+    const sanitizedQuery = sanitizeInput(testQuery, 500);
+    const sanitizedOverview = sanitizeInput(testAiOverview, 10000);
+
     testDetection.mutate({
-      querySearched: testQuery,
-      aiOverviewText: testAiOverview
+      querySearched: sanitizedQuery,
+      aiOverviewText: sanitizedOverview
     });
   };
 

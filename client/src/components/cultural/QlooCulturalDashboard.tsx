@@ -225,7 +225,7 @@ const QlooCulturalDashboard: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-medium capitalize">
-                              {category.category.replace('_', ' ')}
+                              {(category.category || '').toString().replace(/_/g, ' ')}
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {category.creator_count} creators
@@ -385,7 +385,7 @@ const QlooCulturalDashboard: React.FC = () => {
                       <div className="flex flex-wrap gap-2">
                         {analysisResult.cultural_analysis.detected_categories.map((category: string) => (
                           <Badge key={category} variant="outline" className="text-xs">
-                            {category.replace('_', ' ')}
+                            {(category || '').toString().replace(/_/g, ' ')}
                           </Badge>
                         ))}
                       </div>
@@ -457,12 +457,12 @@ const QlooCulturalDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {trending?.trending_categories?.map((category: string, index: number) => (
-                      <div key={category} className="flex items-center gap-2 p-2 bg-muted/20 rounded">
+                    {trending?.trending_categories?.map((category, index: number) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-muted/20 rounded">
                         <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center text-xs">
                           {index + 1}
                         </Badge>
-                        <span className="text-sm capitalize">{category.replace('_', ' ')}</span>
+                        <span className="text-sm capitalize">{(category?.name || category || '').toString().replace(/_/g, ' ')}</span>
                       </div>
                     ))}
                   </div>
@@ -480,9 +480,9 @@ const QlooCulturalDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {trending?.high_reward_potential?.map((category: string, index: number) => (
-                      <div key={category} className="flex items-center justify-between p-2 bg-yellow-500/10 rounded">
-                        <span className="text-sm capitalize">{category.replace('_', ' ')}</span>
+                    {trending?.high_reward_potential?.map((category, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-yellow-500/10 rounded">
+                        <span className="text-sm capitalize">{(category || '').toString().replace(/_/g, ' ')}</span>
                         <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
                           +{15 + index * 5}%
                         </Badge>
@@ -503,9 +503,9 @@ const QlooCulturalDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {trending?.underrepresented_cultures?.map((culture: string) => (
-                      <div key={culture} className="flex items-center justify-between p-2 bg-pink-500/10 rounded">
-                        <span className="text-sm capitalize">{culture.replace('_', ' ')}</span>
+                    {trending?.underrepresented_cultures?.map((culture, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-pink-500/10 rounded">
+                        <span className="text-sm capitalize">{(culture || '').toString().replace(/_/g, ' ')}</span>
                         <Badge variant="secondary" className="bg-pink-500/20 text-pink-400">
                           +50% Bonus
                         </Badge>
@@ -526,9 +526,9 @@ const QlooCulturalDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {trending?.cross_cultural_opportunities?.map((opportunity: string) => (
-                      <div key={opportunity} className="p-2 bg-blue-500/10 rounded">
-                        <span className="text-sm capitalize">{opportunity.replace('_', ' ')}</span>
+                    {trending?.cross_cultural_opportunities?.map((opportunity, index: number) => (
+                      <div key={index} className="p-2 bg-blue-500/10 rounded">
+                        <span className="text-sm capitalize">{(opportunity || '').toString().replace(/_/g, ' ')}</span>
                       </div>
                     ))}
                   </div>
