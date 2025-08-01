@@ -14,7 +14,7 @@ Automated allowance management system for WPT tokens in the WebPayback Protocol,
 - **Pool Reserve Status**: $539 USDT/WPT V2 pool (authentic TVL verified)
 
 ### Configured Addresses
-- **Wallet Address**: 0x742d35Cc6634C0532925a3b8D7a6d88b86e5f9a8
+- **Wallet Address**: ****************************************
 - **Contract Address**: 0x9408f17a8B4666f8cb8231BA213DE04137dc3825
 - **Token Address**: 0x9408f17a8B4666f8cb8231BA213DE04137dc3825
 
@@ -79,7 +79,7 @@ Automated allowance management system for WPT tokens in the WebPayback Protocol,
 
 ### Founder-Only Access
 The system is designed exclusively for protocol founder access:
-- Wallet: 0x742d35Cc6634C0532925a3b8D7a6d88b86e5f9a8
+- Wallet: *****************************
 - Device: Windows + Chrome/Firefox
 - All other access attempts are blocked
 
