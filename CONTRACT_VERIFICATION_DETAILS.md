@@ -46,30 +46,6 @@ The contract constructor takes no parameters - all values are hardcoded for secu
 - **Deployer Address**: `0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba`
 - **Gas Used**: Approximately 1,200,000 gas
 
-## PolygonScan Verification Steps
-
-### 1. Go to PolygonScan
-Visit: https://polygonscan.com/address/0x9408f17a8B4666f8cb8231BA213DE04137dc3825#code
-
-### 2. Click "Verify and Publish"
-Select "Verify & Publish Contract Source Code"
-
-### 3. Fill in the Details
-- **Contract Address**: `0x9408f17a8B4666f8cb8231BA213DE04137dc3825`
-- **Compiler Type**: Solidity (Single file)
-- **Compiler Version**: v0.8.19+commit.7dd6d404
-- **Open Source License Type**: MIT
-
-### 4. Optimization Settings
-- **Optimization**: Yes
-- **Runs**: 200
-
-### 5. Contract Source Code
-Copy the entire contents of `contracts/WPTv2.sol`
-
-### 6. Constructor Arguments
-Leave empty (no constructor arguments)
-
 ## Contract ABI
 The contract follows standard ERC-20 ABI with additional functions:
 - `burn(uint256 amount)`
