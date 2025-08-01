@@ -242,6 +242,8 @@ Detailed documentation is available in the `docs/` folder:
 
 See [LICENSE](LICENSE) file for complete terms.
 
+wpt-verify-orzcwqyf61
+
 ---
 
 **WebPayback Protocol v2.0** - Protecting creators in the age of AI
