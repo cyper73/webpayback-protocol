@@ -1,118 +1,49 @@
 # WebPayback Protocol
 
 ## Overview
-
-WebPayback Protocol is a sophisticated multi-agent blockchain application that automatically rewards content creators when AI systems use their work. The platform combines React frontend with Node.js backend, PostgreSQL database, and extensive blockchain integration across multiple networks (Ethereum, Polygon, BSC, Arbitrum). It features advanced AI agent orchestration, comprehensive fraud detection, and real-time pool monitoring with authentic data sources.
+WebPayback Protocol is a multi-agent blockchain application that rewards content creators when AI systems utilize their work. The platform aims to establish a self-sustaining creator economy, combining a React frontend with a Node.js backend, PostgreSQL database, and extensive blockchain integration. Key capabilities include AI agent orchestration, fraud detection, real-time pool monitoring, and a comprehensive NFT content certificate system for intellectual property protection. The project envisions significant market potential by empowering creators and ensuring fair compensation in the age of AI.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
+Interface language: English-only for better international understanding and system stability.
+Admin Authentication: Successfully implemented secure admin system with Sirio/Flender73 credentials, localStorage token management, and protected module access (July 31, 2025).
+MetaMask Wallet Verification: Fully implemented cryptographic signature verification with automatic MetaMask integration and manual fallback options. Uses ethereumjs-util for proper signature validation with Ethereum message prefix. Content Certificate NFTs now use wallet-based authentication bypassing IDOR session issues for streamlined access (August 1, 2025).
+Wallet Security Audit: Completed comprehensive security audit of all 22 registered wallet entries. Removed 1 malicious XSS attempt entry, confirmed 8 unique legitimate wallets with no suspicious exchange connections. Database schema corrected with missing verification fields for automatic wallet verification system (August 1, 2025).
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript and Vite for fast development
-- **UI Components**: Radix UI primitives with shadcn/ui component library
-- **Styling**: Tailwind CSS with custom WebPayback dark theme and CSS variables
-- **State Management**: TanStack Query (React Query) for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **Form Management**: React Hook Form with Zod validation and Hookform resolvers
+### UI/UX Decisions
+The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, Radix UI, and shadcn/ui. A custom WebPayback dark theme and CSS variables are applied. Text readability is prioritized with optimal contrast styling (e.g., `text-gray-700 dark:text-gray-300`). The platform features a responsive design, including a reorganized navigation header and a "Quick Actions Bar" for improved mobile and desktop experience. A custom favicon and comprehensive SEO meta tags enhance branding and discoverability.
 
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework using ES modules
-- **Language**: Full TypeScript with shared schemas between client and server
-- **Database**: PostgreSQL with Drizzle ORM and Neon Database serverless driver
-- **Session Management**: PostgreSQL-based sessions using connect-pg-simple
-- **Security**: Comprehensive CSRF protection, rate limiting, IDOR protection, and input validation
+### Technical Implementations
+The backend is built with Node.js and Express.js, entirely in TypeScript, sharing schemas with the client. PostgreSQL is used with Drizzle ORM and Neon Database serverless driver for data persistence and session management. Key security features include comprehensive CSRF protection, rate limiting, and input validation. Development uses a monorepo structure with TypeScript path aliases and Vite for frontend bundling, esbuild for backend.
 
-### Development Environment
-- **Monorepo Structure**: Shared TypeScript schemas in `/shared` directory
-- **Path Aliases**: TypeScript path mapping for clean imports (@/, @shared/)
-- **Build System**: Vite for frontend, esbuild for backend bundling
-- **Database Migrations**: Drizzle Kit for schema management and PostgreSQL dialect
+### Feature Specifications
+**AI Agent System**: Four specialized agents (WebPayback, Autoregolator, PoolAgent, TransparentAgent) coordinate through a database-backed messaging system, ensuring protocol orchestration, AI usage tracking, liquidity management, and transparency.
+**Blockchain Infrastructure**: Supports multi-chain deployment (Ethereum, BSC, Polygon, Arbitrum) with ERC-20 WPT token management, automated smart contract deployment, and real-time network monitoring.
+**Content Creator Economy**: Includes creator registration, website verification, wallet integration, and channel monitoring for various platforms (YouTube, Instagram, TikTok, Twitter/X). A tiered system (Bronze, Silver, Gold) encourages investor-creators, and a sustainable community-driven ecosystem model is emphasized.
+**Security & Fraud Detection**: Multi-layer protection (CSRF tokens, rate limiting, IDOR protection, input validation) and a real-time fraud detection engine analyze suspicious patterns. An allowance management system provides founder-only access with multi-layer security for token distribution. Cryptographic wallet verification prevents address spoofing using MetaMask signature verification with proper Ethereum message prefix handling.
+**Content Certificate System**: An NFT-based system uses SHA-256 fingerprinting to detect unauthorized AI usage of creator content, minting NFT certificates and enabling WPT rewards for content theft. Features wallet-based authentication system mirroring Citation Rewards module for direct access without session complexities. Includes /api/content-certificate/verify-wallet endpoint for Creator Portal verification and cryptographic validation. Full XSS protection through URL sanitization and input validation ensures enterprise-grade security.
+**Automated Pool Manager**: A zero-touch system for automated pool management, including server-side automation, intelligent range management, spending caps, real-time monitoring, and emergency stop controls.
 
-## Key Components
-
-### AI Agent System
-- **Four Specialized Agents**: WebPayback (protocol orchestration), Autoregolator (AI tracking), PoolAgent (liquidity management), and TransparentAgent (transparency monitoring)
-- **Performance Tracking**: Real-time metrics including accuracy (98.9-99.8%), uptime (99.5-99.9%), and task completion counts
-- **Inter-Agent Communication**: Database-backed messaging system for agent coordination
-- **Level 280 Expertise**: High-level AI agents with specialized capabilities for each domain
-
-### Blockchain Infrastructure
-- **Multi-Chain Support**: Deployed across Ethereum, BSC, Polygon, and Arbitrum networks
-- **WPT Token Management**: ERC-20 token with configurable fee structures and creator rewards
-- **Smart Contract Deployment**: Automated deployment system with gas optimization and transaction monitoring
-- **Real-time Network Monitoring**: Live tracking of deployment status and blockchain interactions
-
-### Content Creator Economy
-- **Creator Registration**: Website verification, wallet integration, and content category classification
-- **Channel Monitoring**: Support for YouTube channels, Instagram profiles, TikTok accounts, and Twitter/X profiles
-- **Referral System**: Multi-level referral tracking with bonus calculations
-- **Reputation Scoring**: Dynamic creator reputation based on authenticity and engagement
-
-### Security & Fraud Detection
-- **Multi-Layer Protection**: CSRF tokens, rate limiting, input validation, and IDOR protection
-- **Fraud Detection Engine**: Real-time analysis of suspicious patterns, IP tracking, and reputation scoring
-- **Pool Drain Protection**: Advanced monitoring to prevent malicious liquidity withdrawals
-- **Reentrancy Protection**: Smart contract security measures against callback attacks
-
-## Data Flow
-
-### Content Monitoring Flow
-1. **AI Detection**: Monitor for AI agent access to creator content via user-agent analysis
-2. **Content Fingerprinting**: Generate unique hashes for content identification
-3. **Reward Calculation**: Determine WPT token rewards based on usage patterns and creator reputation
-4. **Distribution**: Automated token distribution through smart contracts
-5. **Tracking**: Comprehensive logging of all interactions for transparency
-
-### Verification Pipeline
-1. **Domain Verification**: Multiple methods including DNS TXT records, HTML meta tags, and file uploads
-2. **Social Proof**: Integration with major platforms for identity verification
-3. **Channel Mapping**: Automatic detection and mapping of content URLs to creator channels
-4. **Reputation Building**: Continuous scoring based on authentic content and community engagement
-
-### Security Event Processing
-1. **Real-time Monitoring**: Continuous analysis of access patterns and behavior
-2. **Risk Scoring**: Multi-factor risk assessment using machine learning patterns
-3. **Alert Generation**: Automated alerts for suspicious activities with severity levels
-4. **Response Actions**: Automated blocking, flagging, or manual review triggers
+### System Design Choices
+The architecture emphasizes performance, scalability, and security. Frontend state is managed with TanStack Query and client-side routing with Wouter. Form management uses React Hook Form with Zod validation. PostgreSQL-based sessions ensure robust user management. The system prioritizes authentic blockchain data integration, eliminating cached or simulated data for accurate pool and token information. Cost optimization is a key consideration, with API call frequencies reduced and monitoring for compute overage.
 
 ## External Dependencies
 
 ### Blockchain Services
-- **Neon Database**: Serverless PostgreSQL hosting with WebSocket support
-- **Alchemy SDK**: Ethereum and Polygon blockchain data and real-time monitoring
-- **Chainlink Integration**: Price feeds, VRF randomness, and external data oracles
-- **Web3 Providers**: Multiple RPC endpoints for blockchain network connectivity
+- **Neon Database**: Serverless PostgreSQL hosting.
+- **Alchemy SDK**: Blockchain data and real-time monitoring for Ethereum and Polygon.
+- **Chainlink**: Price feeds, VRF randomness, and external data oracles.
+- **Web3 Providers**: Multiple RPC endpoints for blockchain network connectivity.
 
 ### AI & Content Analysis
-- **Multiple AI Model Detection**: Support for Claude, GPT, Gemini, DeepSeek, Grok, and 25+ other AI models
-- **Content Fingerprinting**: Advanced hashing algorithms for content uniqueness
-- **Natural Language Processing**: Text analysis for content categorization and quality assessment
+- **Multiple AI Model Detection**: Supports detection of Claude, GPT, Gemini, DeepSeek, Grok, and over 25 other AI models.
+- **Content Fingerprinting**: Advanced hashing algorithms for content uniqueness.
+- **Natural Language Processing**: Used for content categorization and quality assessment.
 
 ### External APIs
-- **Domain Verification**: DNS lookup services and domain reputation checking
-- **IP Geolocation**: VPN detection and geographic analysis
-- **Social Media APIs**: Integration with YouTube, Instagram, Twitter for verification
-- **Price Data**: Real-time cryptocurrency price feeds for WPT valuation
-
-## Deployment Strategy
-
-### Production Architecture
-- **Frontend**: Static assets served via Vite build with optimized bundles
-- **Backend**: Node.js server with Express middleware and TypeScript compilation
-- **Database**: PostgreSQL with Drizzle schema migrations and connection pooling
-- **Environment**: Replit hosting with custom domain support and SSL certificates
-
-### Scalability Considerations
-- **Database**: Connection pooling with Neon serverless for automatic scaling
-- **Caching**: Intelligent caching for blockchain data and expensive API calls
-- **Rate Limiting**: Tiered rate limiting to handle traffic spikes
-- **Load Balancing**: Ready for horizontal scaling with stateless backend design
-
-### Monitoring & Analytics
-- **Real-time Dashboards**: Live monitoring of all system components
-- **Performance Metrics**: Agent performance, API response times, and error rates
-- **Security Monitoring**: Continuous fraud detection and security event tracking
-- **Business Intelligence**: Creator analytics, reward distribution, and platform growth metrics
+- **Domain Verification Services**: For DNS lookup and domain reputation checks.
+- **IP Geolocation Services**: For VPN detection and geographic analysis.
+- **Social Media APIs**: Integrations with YouTube, Instagram, and Twitter for creator verification.
+- **Real-time Cryptocurrency Price Feeds**: For WPT token valuation.

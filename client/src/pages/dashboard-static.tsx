@@ -92,7 +92,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm">
                 <Wallet className="text-electric-blue" />
-                <span className="font-mono">0x9077...91e</span>
+                <span className="font-mono">0x9408...825</span>
               </div>
               <div className="flex items-center space-x-2 bg-glass-dark px-3 py-1 rounded-lg">
                 <Coins className="text-amber-400" />
@@ -261,7 +261,7 @@ export default function Dashboard() {
                     Complete source code available on GitHub
                   </p>
                   <a
-                    href="https://github.com/cyper73/webpayback"
+                    href="https://github.com/cyper73/webpayback-protocol/tree/webpayback"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-glass-dark hover:bg-electric-blue/20 text-electric-blue border border-electric-blue/30 rounded-lg transition-all duration-200 hover:scale-105 text-sm font-medium"

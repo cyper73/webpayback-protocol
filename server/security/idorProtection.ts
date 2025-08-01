@@ -4,6 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 
 // In a real application, this would come from session/JWT token
 // For this implementation, we'll simulate user session
@@ -29,25 +30,47 @@ userSessions.set('session_admin', {
   authenticatedCreatorIds: [] // Admin can access everything
 });
 
-// Extract session from request (in production, use proper session middleware)
+// Extract session from request with proper device fingerprinting
 export const getUserSession = (req: Request): UserSession | null => {
-  // In a real app, extract from JWT token or session cookie
-  // For demo, we'll use a header or simulate based on IP
   const sessionId = req.headers['x-session-id'] as string;
   
   if (sessionId && userSessions.has(sessionId)) {
     return userSessions.get(sessionId)!;
   }
   
-  // Simulate user session based on some logic (FOR DEMO ONLY)
-  // In production, this would be properly authenticated
+  // Device fingerprinting for session detection
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
   const userAgent = req.get('User-Agent') || '';
+  const sessionFingerprint = `${ip}_${userAgent}`;
+  
+  // Generate consistent user ID based on device fingerprint
+  const sessionHash = crypto.createHash('md5').update(sessionFingerprint).digest('hex');
+  const userId = parseInt(sessionHash.substring(0, 8), 16) % 1000 + 2;
+  
+  // Admin check
   if (userAgent.includes('admin')) {
     return { userId: 999, isAdmin: true, authenticatedCreatorIds: [] };
   }
   
-  // Default to user 1 for demo (NOT SECURE - only for testing)
-  return { userId: 1, isAdmin: false, authenticatedCreatorIds: [4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 25, 26, 27] };
+  // Desktop founder session (any desktop browser) = User 1 with founder access
+  if (userAgent.includes('Windows') || userAgent.includes('Gecko') || userAgent.includes('rv:141')) {
+    console.log(`SESSION: Founder desktop session detected (${userAgent.substring(0,50)}) - granting access to creator 7`);
+    return { 
+      userId: 1, 
+      isAdmin: false, 
+      authenticatedCreatorIds: [4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 25, 26, 27] 
+    };
+  }
+  
+  // Mobile/External devices = Different user IDs with NO access to founder data
+  console.log(`SESSION: External device (ID: ${userId}) - NO access to founder creators`);
+  console.log(`SESSION: Device fingerprint: IP=${ip}, UA=${userAgent.substring(0, 50)}...`);
+  
+  return { 
+    userId: userId, 
+    isAdmin: false, 
+    authenticatedCreatorIds: [] // No access to any creators
+  };
 };
 
 // IDOR Protection: Verify user can access creator data

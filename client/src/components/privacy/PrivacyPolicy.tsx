@@ -228,7 +228,7 @@ export function PrivacyPolicy() {
                   Read our complete privacy policy on GitHub:
                 </p>
                 <a 
-                  href="https://github.com/cyper73/webpayback/blob/webpayback/privacy.md" 
+                  href="https://github.com/cyper73/webpayback-protocol/tree/webpayback/privacy.md" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1"

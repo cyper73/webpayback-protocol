@@ -29,7 +29,7 @@ A cutting-edge multi-agent blockchain protocol that automatically rewards conten
 ## 🎯 Live Demo
 
 - **🌐 Platform**: [webpayback.replit.app](https://webpayback.replit.app)
-- **📖 Documentation**: [GitHub Repository](https://github.com/cyper73/webpayback)
+- **📖 Documentation**: [GitHub Repository](https://github.com/cyper73/webpayback-protocol/tree/webpayback)
 - **💬 Community**: [Discord Server](https://discord.gg/webpayback)
 
 ## 🏗️ Architecture
@@ -305,7 +305,7 @@ WebPayback Protocol offers the first creator economy platform with native Polygo
 
 ## 📞 Support
 
-- **Business Contact**: [claudiob73@hotmail.com](mailto:claudiob73@hotmail.com)
+- **Business Contact**: [info@webpayback.com](mailto:info@webpayback.com)
 - **Technical Support**: [cyper73@gmail.com](mailto:cyper73@gmail.com)
 - **GitHub Issues**: [Report bugs and request features](https://github.com/cyper73/webpayback/issues)
 - **Privacy Requests**: [cyper73@gmail.com](mailto:cyper73@gmail.com)

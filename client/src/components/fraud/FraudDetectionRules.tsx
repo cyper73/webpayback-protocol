@@ -160,7 +160,7 @@ export default function FraudDetectionRules({ rules = FRAUD_RULES }: FraudDetect
                     {getRuleIcon(rule.ruleType)}
                     <div>
                       <h3 className="font-semibold text-sm">{rule.ruleName}</h3>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
                         {rule.description}
                       </p>
                     </div>
@@ -175,7 +175,7 @@ export default function FraudDetectionRules({ rules = FRAUD_RULES }: FraudDetect
 
                 {/* Rule Parameters */}
                 <div className="mt-3 pl-7">
-                  <div className="text-xs text-muted-foreground space-y-1">
+                  <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
                     {rule.ruleType === 'domain_limit' && (
                       <>
                         <div>• Max daily accesses per domain: {rule.parameters.maxDailyAccessesPerDomain}</div>
@@ -238,7 +238,7 @@ How the System Works
               <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
               <div>
                 <p className="font-medium">Real-time Monitoring</p>
-                <p className="text-muted-foreground">
+                <p className="text-gray-700 dark:text-gray-300">
                   Every AI access is analyzed for suspicious patterns, IP/domain concentration and request diversity.
                 </p>
               </div>
@@ -248,7 +248,7 @@ How the System Works
               <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
               <div>
                 <p className="font-medium">Intelligent Scoring</p>
-                <p className="text-muted-foreground">
+                <p className="text-gray-700 dark:text-gray-300">
                   The system calculates a risk score based on multiple metrics and anomalous behaviors.
                 </p>
               </div>
@@ -258,7 +258,7 @@ How the System Works
               <div className="w-2 h-2 rounded-full bg-yellow-500 mt-2"></div>
               <div>
                 <p className="font-medium">Automatic Actions</p>
-                <p className="text-muted-foreground">
+                <p className="text-gray-700 dark:text-gray-300">
                   Rewards blocked, reputation penalties and alerts generated automatically for suspicious activities.
                 </p>
               </div>
@@ -268,7 +268,7 @@ How the System Works
               <div className="w-2 h-2 rounded-full bg-red-500 mt-2"></div>
               <div>
                 <p className="font-medium">Total Transparency</p>
-                <p className="text-muted-foreground">
+                <p className="text-gray-700 dark:text-gray-300">
                   All controls are visible and documented to ensure a fair and transparent system.
                 </p>
               </div>

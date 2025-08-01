@@ -7,9 +7,9 @@ export class OptimizedAlchemyMonitor {
   private callCount = 0;
   private lastReset = Date.now();
   
-  // Rate limiting for free tier sustainability
-  private readonly MAX_CALLS_PER_HOUR = 1000; // Conservative limit for free tier
-  private readonly BATCH_INTERVAL_MS = 30000; // Check every 30 seconds instead of real-time
+  // EMERGENCY COST OPTIMIZATION - Drastically reduced calls
+  private readonly MAX_CALLS_PER_HOUR = 200; // Emergency cost reduction
+  private readonly BATCH_INTERVAL_MS = 300000; // Check every 5 MINUTES instead of 30 seconds
 
   constructor() {
     const apiKey = process.env.ALCHEMY_API_KEY;
@@ -31,7 +31,7 @@ export class OptimizedAlchemyMonitor {
       return;
     }
 
-    console.log('🚀 Starting OPTIMIZED Alchemy monitoring (FREE TIER FRIENDLY)');
+    console.log('🚀 EMERGENCY MODE: Starting COST-OPTIMIZED monitoring (5min intervals)');
     
     // Use batch checking instead of real-time WebSocket to save CUs
     this.batchInterval = setInterval(async () => {

@@ -113,34 +113,60 @@ class Web3Service {
     }
   }
 
-  // Get pool liquidity and price information - ONLY WMATIC/WPT pool
-  async getPoolInfo(poolType?: string) {
+  // Get pool liquidity and price information - USDT/WPT V2 is PRIMARY pool
+  async getPoolInfo(poolType: 'wmatic' | 'usdt' = 'usdt') {
     try {
-      // Hardcoded WMATIC/WPT pool data - authentic V3 pool address
-      const poolAddress = "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3";
-      
-      return {
-        poolAddress: poolAddress,
-        token0: "WMATIC",
+      // Get authentic pool data from realPoolDataService (refreshed every 12h)
+      const { realPoolDataService } = await import('./realPoolDataService');
+      const realPoolData = await realPoolDataService.getPoolData(poolType);
+
+      // Pool-specific configuration
+      const poolConfig = poolType === 'usdt' ? {
+        poolAddress: "0xe021e5817E8867D7CeA10f63BC47E118f3aB9E4A",
+        token0: "USDT",
         token1: "WPT",
-        fee: "0.30%",
-        totalValueLocked: "€500", // User's manually added liquidity
-        volume24h: "$0",
-        fees24h: "$0",
-        price: "124.993", // User reported: 124.993 WPT = 1 WMATIC
-        participants: 1, // User as liquidity provider
+        version: "V2",
+        name: "USDT/WPT Liquidity Pool V2",
+        poolType: "USDT/WPT Uniswap V2",
+        benefits: [
+          "No 'out of range' issues (V2 full range)",
+          "0.3% fees on all USDT/WPT swaps", 
+          "Stable USD-based liquidity",
+          "Lower gas costs than V3"
+        ]
+      } : {
+        poolAddress: "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3",
+        token0: "WMATIC",
+        token1: "WPT", 
+        version: "V3",
+        name: "WMATIC/WPT Liquidity Pool V3",
+        poolType: "WMATIC/WPT Uniswap V3",
+        benefits: [
+          "Concentrated liquidity for better capital efficiency",
+          "Higher potential returns in range",
+          "Advanced position management",
+          "0.3% fees on swaps"
+        ]
+      };
+
+      return {
+        ...poolConfig,
+        fee: realPoolData.fee || "0.30%",
+        totalValueLocked: realPoolData.totalValueLocked, // Real data from blockchain
+        volume24h: realPoolData.volume24h,
+        fees24h: realPoolData.fees24h,
+        price: realPoolData.price, // Real exchange rate
+        participants: realPoolData.participants,
         apy: "0%",
         stakingApy: "0%",
         combinedApy: "0%",
-        myLiquidity: "$0",
+        myLiquidity: realPoolData.totalValueLocked,
         unclaimedFees: "$0",
         stakingRewards: "$0",
-        poolType: "WMATIC/WPT Uniswap V3",
-        liquidity: "0",
+        liquidity: realPoolData.totalValueLocked,
         isActive: true,
-        name: "WMATIC/WPT Pool",
         dataSource: 'authentic',
-        lastUpdated: Date.now()
+        lastUpdated: realPoolData.lastUpdated
       };
     } catch (error) {
       throw new Error(`Failed to get pool info: ${error instanceof Error ? error.message : String(error)}`);

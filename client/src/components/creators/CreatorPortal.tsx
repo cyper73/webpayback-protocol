@@ -14,11 +14,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code } from "lucide-react";
 import { sanitizeUrl, sanitizeWalletAddress, sanitizeToastContent, validateDomain, sanitizeContentCategory } from "@/lib/security";
+import { WalletVerification } from "@/components/wallet/WalletVerification";
 
 const formSchema = insertCreatorSchema.extend({
   termsAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the terms and conditions"
-  })
+  }),
+  walletSignature: z.string().optional(),
+  verificationMessage: z.string().optional()
 }).omit({ userId: true });
 
 type FormData = z.infer<typeof formSchema>;
@@ -30,6 +33,9 @@ export default function CreatorPortal() {
   const [domainVerification, setDomainVerification] = useState<any>(null);
   const [isCheckingDomain, setIsCheckingDomain] = useState(false);
   const [isDomainVerified, setIsDomainVerified] = useState(false);
+  const [walletSignature, setWalletSignature] = useState("");
+  const [verificationMessage, setVerificationMessage] = useState("");
+  const [isWalletVerified, setIsWalletVerified] = useState(false);
 
   const {
     register,
@@ -43,6 +49,8 @@ export default function CreatorPortal() {
     defaultValues: {
       websiteUrl: "",
       walletAddress: "",
+      walletSignature: "",
+      verificationMessage: "",
       contentCategory: "blog_articles" as const,
       termsAccepted: false
     }
@@ -455,11 +463,24 @@ export default function CreatorPortal() {
       setIsSubmitting(false);
       return;
     }
+
+    // WALLET CRYPTOGRAPHIC VERIFICATION - Block registration if wallet not verified
+    if (!isWalletVerified || !walletSignature || !verificationMessage) {
+      toast({
+        title: "Wallet Verification Required",
+        description: "Please complete wallet ownership verification before registration.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
     
-    // Add userId to the data
+    // Add userId and wallet verification data
     const creatorData = {
       ...data,
-      userId: 1 // Demo user ID
+      userId: 1, // Demo user ID
+      walletSignature,
+      verificationMessage
     };
     
     createCreatorMutation.mutate(creatorData);
@@ -516,6 +537,28 @@ export default function CreatorPortal() {
             )}
             {renderDomainVerificationStatus()}
           </div>
+
+          {/* WALLET CRYPTOGRAPHIC VERIFICATION */}
+          <WalletVerification
+            walletAddress={watch("walletAddress")}
+            onVerificationComplete={(signature, message) => {
+              setWalletSignature(signature);
+              setVerificationMessage(message);
+              setIsWalletVerified(true);
+              setValue("walletSignature", signature);
+              setValue("verificationMessage", message);
+              toast({
+                title: "Wallet Verified",
+                description: "Your wallet ownership has been cryptographically verified",
+              });
+            }}
+            onWalletChange={(address) => {
+              setValue("walletAddress", address);
+              setIsWalletVerified(false);
+              setWalletSignature("");
+              setVerificationMessage("");
+            }}
+          />
           
           <div>
             <Label htmlFor="contentCategory" className="block text-sm font-medium mb-2">
@@ -544,21 +587,7 @@ export default function CreatorPortal() {
             )}
           </div>
           
-          <div>
-            <Label htmlFor="walletAddress" className="block text-sm font-medium mb-2">
-              Wallet Address
-            </Label>
-            <Input
-              id="walletAddress"
-              type="text"
-              placeholder="0x..."
-              className="w-full bg-glass-dark border border-white/10 rounded-lg px-4 py-2 focus:border-electric-blue focus:outline-none font-mono text-white"
-              {...register("walletAddress")}
-            />
-            {errors.walletAddress && (
-              <p className="text-red-400 text-sm mt-1">{errors.walletAddress.message}</p>
-            )}
-          </div>
+          {/* Wallet address field is now handled by WalletVerification component */}
           
           
           <div className="flex items-center space-x-2">
@@ -577,10 +606,12 @@ export default function CreatorPortal() {
           
           <Button
             type="submit"
-            disabled={isSubmitting || createCreatorMutation.isPending}
-            className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white py-3 rounded-lg font-medium transition-colors"
+            disabled={isSubmitting || createCreatorMutation.isPending || !isWalletVerified}
+            className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting || createCreatorMutation.isPending ? "Registering..." : "Register for WebPayback"}
+            {isSubmitting || createCreatorMutation.isPending ? "Registering..." : 
+             !isWalletVerified ? "Complete Wallet Verification First" : 
+             "Register for WebPayback"}
           </Button>
         </form>
       </CardContent>
