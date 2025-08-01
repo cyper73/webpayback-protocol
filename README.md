@@ -135,7 +135,6 @@ A revolutionary blockchain protocol that automatically rewards content creators 
 │   └── security/        # Security middleware
 ├── shared/              # Shared TypeScript schemas
 ├── contracts/           # Smart contracts (Hardhat)
-├── deployments/         # Deployment configurations
 └── docs/               # Project documentation
 ```
 
@@ -218,8 +217,8 @@ Detailed documentation is available in the `docs/` folder:
 
 - [Deployment Guide](docs/DEPLOYMENT_PARAMETERS.md)
 - [Pool Strategy](docs/UNISWAP_V3_POOL_STRATEGY.md)
-- [Security Features](docs/POOL_DRAIN_PROTECTION_UPDATE.md)
-- [API Reference](docs/API_DOCUMENTATION.md)
+- [Deployment Results](docs/DEPLOYMENT_RESULTS.md)
+- [Token V1 Disabling Guide](docs/WPT_V1_DISABLING_GUIDE.md)
 
 ## Support & Community
 
