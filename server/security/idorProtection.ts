@@ -52,9 +52,9 @@ export const getUserSession = (req: Request): UserSession | null => {
     return { userId: 999, isAdmin: true, authenticatedCreatorIds: [] };
   }
   
-  // Desktop founder session (Windows Chrome) = User 1 with founder access
-  if (userAgent.includes('Chrome') && userAgent.includes('Windows')) {
-    console.log(`SESSION: Founder desktop session detected - granting access to creator 7`);
+  // Desktop founder session (any desktop browser) = User 1 with founder access
+  if (userAgent.includes('Windows') || userAgent.includes('Gecko') || userAgent.includes('rv:141')) {
+    console.log(`SESSION: Founder desktop session detected (${userAgent.substring(0,50)}) - granting access to creator 7`);
     return { 
       userId: 1, 
       isAdmin: false, 

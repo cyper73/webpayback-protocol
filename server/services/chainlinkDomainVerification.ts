@@ -440,67 +440,63 @@ Steps:
     console.log('🔗 Verifying meta tag for:', websiteUrl, 'with token:', verificationToken);
     
     try {
+      // ⚠️ CRITICAL XSS PROTECTION: Sanitize inputs before processing
+      const { escapeHtml, sanitizeTextInput, urlValidationSchema } = await import('../security/inputValidation');
+      
+      // Validate URL to prevent XSS injection
+      try {
+        urlValidationSchema.parse(websiteUrl);
+      } catch (error) {
+        console.error('❌ URL validation failed:', error);
+        return false;
+      }
+      
+      // Sanitize verification token to prevent RegExp injection
+      const sanitizedToken = sanitizeTextInput(verificationToken, 50)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape regex special characters
+      
+      if (!sanitizedToken || sanitizedToken.length < 10) {
+        console.error('❌ Invalid or dangerous verification token');
+        return false;
+      }
+      
       const domain = this.extractDomain(websiteUrl);
       console.log('🔗 Simulating platform-specific verification for:', domain);
       
-      // Simulate HTTP request to fetch page content
-      const pageContent = await this.simulatePageContentFetch(websiteUrl, domain, verificationToken);
+      // Fetch and sanitize page content
+      let pageContent = await this.simulatePageContentFetch(websiteUrl, domain, sanitizedToken);
       
-      // Platform-specific verification patterns - FLEXIBLE MATCHING
-      let verificationPatterns: RegExp[] = [];
+      // ⚠️ CRITICAL XSS PROTECTION: Sanitize fetched content
+      pageContent = escapeHtml(pageContent);
       
-      switch (domain) {
-        case 'youtube.com':
-        case 'instagram.com':
-        case 'tiktok.com':
-        case 'twitter.com':
-        case 'x.com':
-        case 'discord.com':
-        case 'twitch.tv':
-        case 'medium.com':
-        case 'patreon.com':
-        case 'github.com':
-          // For all platforms, look for various verification formats:
-          verificationPatterns = [
-            new RegExp(`WPT-VERIFY:\\s*${verificationToken}`, 'i'),
-            new RegExp(`wpt-verify:\\s*${verificationToken}`, 'i'), 
-            new RegExp(`WPT-VERIFY\\s*${verificationToken}`, 'i'),
-            new RegExp(`wpt-verify\\s*${verificationToken}`, 'i'),
-            new RegExp(`${verificationToken}`, 'i') // Just the token itself
-          ];
-          break;
-        default:
-          // For regular websites, look for HTML meta tag AND text patterns
-          verificationPatterns = [
-            new RegExp(`<meta\\s+name=["']wpt-verification["']\\s+content=["']${verificationToken}["']\\s*/?>`, 'i'),
-            new RegExp(`WPT-VERIFY:\\s*${verificationToken}`, 'i'),
-            new RegExp(`wpt-verify:\\s*${verificationToken}`, 'i'),
-            new RegExp(`${verificationToken}`, 'i') // Just the token itself
-          ];
-          break;
-      }
-      
-      // Test all patterns and return true if any match
+      // Safe verification using simple string searches instead of dynamic RegExp
       let isVerified = false;
       let matchedPattern = '';
       
-      for (const pattern of verificationPatterns) {
-        if (pattern.test(pageContent)) {
+      // Platform-specific verification with SAFE string matching
+      const verificationFormats = [
+        `WPT-VERIFY: ${sanitizedToken}`,
+        `wpt-verify: ${sanitizedToken}`,
+        `WPT-VERIFY ${sanitizedToken}`,
+        `wpt-verify ${sanitizedToken}`,
+        `wpt-verification" content="${sanitizedToken}"`, // Meta tag format
+        sanitizedToken // Just the token itself
+      ];
+      
+      // Safe verification without dynamic RegExp construction
+      for (const format of verificationFormats) {
+        if (pageContent.toLowerCase().includes(format.toLowerCase())) {
           isVerified = true;
-          matchedPattern = pattern.toString();
+          matchedPattern = format;
           break;
         }
       }
       
-      console.log('🔗 FLEXIBLE verification result:', isVerified);
+      console.log('🔗 SECURE verification result:', isVerified);
       console.log('🔗 Matched pattern:', matchedPattern || 'NONE');
-      console.log('🔗 All patterns tested:', verificationPatterns.length);
-      console.log('🔗 Page content snippet:', pageContent.substring(0, 300) + '...');
-      console.log('🔗 Looking for token in content:', verificationToken);
-      
-      // Additional debug: check if token appears anywhere in content
-      const tokenExists = pageContent.toLowerCase().includes(verificationToken?.toLowerCase() || '');
-      console.log('🔗 Token exists in content (simple search):', tokenExists);
+      console.log('🔗 All patterns tested:', verificationFormats.length);
+      console.log('🔗 Page content snippet (sanitized):', pageContent.substring(0, 200) + '...');
+      console.log('🔗 Looking for token in content:', sanitizedToken);
       
       return isVerified;
     } catch (error) {

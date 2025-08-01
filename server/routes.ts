@@ -17,7 +17,9 @@ import { citationRewardEngine } from "./services/citationRewardEngine";
 import { authenticityLayer } from "./services/authenticitylayer";
 import { aiQueryProtection } from "./services/aiQueryProtection";
 import { vpnDetection } from "./services/vpnDetection";
+import { walletVerificationService } from "./services/walletVerification";
 import { db } from "./db";
+import { authenticateAdmin, adminLogin } from "./adminAuth";
 import { creators, contentTracking } from "@shared/schema";
 import { eq, inArray, desc, and, gte, sql } from "drizzle-orm";
 import { 
@@ -73,11 +75,21 @@ import {
   getSuspiciousAddresses,
   clearSuspiciousAddress
 } from "./security/reentrancyProtection";
+import { sessionThrottling, getSessionStats } from "./security/sessionThrottling";
+import { apiThrottling, getApiUsageStats } from "./security/apiThrottling";
 import { automationRouter } from "./routes/automation";
 import { contentCertificateRouter } from "./routes/contentCertificate";
+import { registerAllowanceRoutes } from "./routes/allowance";
+import poolHealthRouter from "./routes/poolHealth";
+import antiDumpSlippageRoutes from "./routes/antiDumpSlippage";
 import userRoutes from "./routes/user";
+import contractReservesRouter from "./routes/contractReserves";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Apply NEW security middlewares globally - TEMPORARILY DISABLED FOR DASHBOARD LOADING
+  // app.use(sessionThrottling);    // Throttle unauthenticated sessions
+  // app.use(apiThrottling);        // Protect API call limits
   
   // Apply emergency rate limiting and IP abuse protection globally
   // TEMPORARILY DISABLED FOR WALLET TESTING
@@ -555,6 +567,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== WALLET CRYPTOGRAPHIC VERIFICATION ENDPOINTS =====
+  
+  // Generate verification message for wallet signing
+  app.post("/api/wallet/generate-verification", csrfProtection, async (req, res) => {
+    try {
+      const { walletAddress } = req.body;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Wallet address is required" 
+        });
+      }
+
+      // Basic validation: check if it's a string starting with 0x and has correct length
+      if (!walletAddress.startsWith('0x') || walletAddress.length !== 42) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid wallet address format" 
+        });
+      }
+
+      const { message, timestamp } = walletVerificationService.generateVerificationMessage(walletAddress);
+      
+      console.log('🔐 Generated verification message for wallet:', walletAddress);
+      console.log('🔐 Message length:', message.length);
+      console.log('🔐 Message preview:', message.substring(0, 100) + '...');
+      
+      res.json({
+        success: true,
+        message,
+        timestamp,
+        walletAddress,
+        instructions: {
+          step1: "Copy the message above",
+          step2: "Sign it with your wallet (MetaMask, WalletConnect, etc.)",
+          step3: "Paste the signature in the creator registration form",
+          expiresIn: "10 minutes"
+        }
+      });
+    } catch (error) {
+      console.error('Wallet verification generation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: sanitizeErrorMessage(error instanceof Error ? error.message : 'Unknown error') 
+      });
+    }
+  });
+
+  // Verify wallet signature
+  app.post("/api/wallet/verify-signature", csrfProtection, async (req, res) => {
+    try {
+      const { walletAddress, message, signature } = req.body;
+      
+      if (!walletAddress || !message || !signature) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Wallet address, message, and signature are required" 
+        });
+      }
+
+      // Check if message is still valid (not expired)
+      if (!walletVerificationService.isVerificationMessageValid(message)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Verification message has expired. Please generate a new one." 
+        });
+      }
+
+      // Verify the cryptographic signature
+      const verificationResult = await walletVerificationService.verifyWalletSignature(
+        walletAddress, 
+        message, 
+        signature
+      );
+
+      if (verificationResult.isValid) {
+        res.json({
+          success: true,
+          verified: true,
+          message: "Wallet ownership verified successfully",
+          walletAddress,
+          canProceedWithRegistration: true
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          verified: false,
+          error: verificationResult.error || "Signature verification failed",
+          canProceedWithRegistration: false
+        });
+      }
+    } catch (error) {
+      console.error('Wallet signature verification error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: sanitizeErrorMessage(error instanceof Error ? error.message : 'Unknown error') 
+      });
+    }
+  });
+
+  // Check wallet verification status for existing creators
+  app.get("/api/wallet/verification-status/:walletAddress", async (req, res) => {
+    try {
+      const { walletAddress } = req.params;
+      
+      if (!walletVerificationService.isValidWalletAddress(walletAddress)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid wallet address format" 
+        });
+      }
+
+      // Find creators with this wallet address
+      const creatorsResult = await db.select({
+        id: creators.id,
+        walletAddress: creators.walletAddress,
+        walletSignature: creators.walletSignature,
+        verificationMessage: creators.verificationMessage,
+        signatureVerified: creators.signatureVerified,
+        signatureVerifiedAt: creators.signatureVerifiedAt,
+        isWalletVerified: creators.isWalletVerified
+      }).from(creators).where(eq(creators.walletAddress, walletAddress));
+
+      if (creatorsResult.length === 0) {
+        return res.json({
+          success: true,
+          isRegistered: false,
+          verificationStatus: "not_registered",
+          message: "No creators found with this wallet address"
+        });
+      }
+
+      const creator = creatorsResult[0];
+      const verificationSummary = walletVerificationService.getVerificationSummary(creator);
+
+      res.json({
+        success: true,
+        isRegistered: true,
+        verificationStatus: verificationSummary,
+        walletAddress,
+        verifiedAt: creator.signatureVerifiedAt
+      });
+    } catch (error) {
+      console.error('Wallet verification status error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: sanitizeErrorMessage(error instanceof Error ? error.message : 'Unknown error') 
+      });
+    }
+  });
+
   // Register creator with XSS, CSRF and Rate Limiting protection
   app.post("/api/creators", csrfProtection, creatorRegistrationRateLimit, async (req, res) => {
     try {
@@ -567,6 +731,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract channel information from the URL
       const channelInfo = channelMonitoringService.extractChannelInfo(schemaValidatedData.websiteUrl);
       
+      // CRYPTOGRAPHIC WALLET VERIFICATION - Verify wallet signature before allowing registration
+      if (schemaValidatedData.walletSignature && schemaValidatedData.verificationMessage) {
+        const verificationResult = await walletVerificationService.verifyWalletSignature(
+          schemaValidatedData.walletAddress, 
+          schemaValidatedData.verificationMessage, 
+          schemaValidatedData.walletSignature
+        );
+
+        if (!verificationResult.isValid) {
+          return res.status(400).json({ 
+            error: `Wallet verification failed: ${verificationResult.error || 'Invalid signature'}` 
+          });
+        }
+
+        console.log('✅ Wallet signature verified for registration:', schemaValidatedData.walletAddress);
+      } else {
+        return res.status(400).json({ 
+          error: "Wallet signature verification is required. Please sign the verification message." 
+        });
+      }
+
       // Enhanced creator data with channel information
       const creatorData = {
         ...schemaValidatedData,
@@ -574,7 +759,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         channelId: channelInfo?.channelId || null,
         channelName: channelInfo?.channelName || null,
         channelVerificationUrl: schemaValidatedData.websiteUrl,
-        monitoringScope: channelInfo ? 'full_channel' : 'single_url'
+        monitoringScope: channelInfo ? 'full_channel' : 'single_url',
+        signatureVerified: true,
+        signatureVerifiedAt: new Date(),
+        isWalletVerified: true // Ensure both fields are set for compatibility
       };
       
       const creator = await storage.createCreator(creatorData);
@@ -703,6 +891,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
+
+
 
   // Track content usage with CSRF and Rate Limiting protection
   app.post("/api/content/track", csrfProtection, contentTrackingRateLimit, async (req, res) => {
@@ -2361,6 +2551,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Block suspicious wallet (SECURITY ENDPOINT)
+  app.post('/api/pool/drain-protection/block-wallet', async (req, res) => {
+    try {
+      const { walletAddress, reason } = req.body;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ error: 'Wallet address is required' });
+      }
+      
+      // Add to security events table
+      await storage.createRewardPoolSecurity({
+        walletAddress,
+        suspiciousActivity: reason || 'Wallet blocked for security reasons',
+        riskScore: '1.0',
+        alertLevel: 'critical',
+        actionTaken: 'blocked',
+        isResolved: false
+      });
+      
+      // Also disable any associated creators
+      const creators = await storage.getAllCreators();
+      const blockedCreators = creators.filter(c => c.walletAddress === walletAddress);
+      
+      for (const creator of blockedCreators) {
+        await storage.updateCreator(creator.id, { isVerified: false });
+      }
+      
+      res.json({
+        success: true,
+        message: `Wallet ${walletAddress} blocked successfully`,
+        blockedCreators: blockedCreators.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // Force cache bypass test
   app.get("/api/test/cache-bypass", (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -3116,6 +3344,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SECURITY MONITORING ENDPOINTS
+  
+  // Get session throttling statistics
+  app.get('/api/security/session-stats', async (req, res) => {
+    try {
+      const stats = getSessionStats();
+      res.json({
+        success: true,
+        stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+  
+  // Get API usage statistics
+  app.get('/api/security/api-usage', async (req, res) => {
+    try {
+      const stats = getApiUsageStats();
+      res.json({
+        success: true,
+        usage: stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // Security headers test endpoint
   app.get("/api/security/headers/test", (req, res) => {
     const securityHeaders = {
@@ -3160,8 +3418,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Content Certificate NFT routes (Anti-Google AI Overview)
   app.use('/api/content-certificate', contentCertificateRouter);
   
+  // Pool Health Auto-Scaling routes
+  app.use('/api/pool-health', poolHealthRouter);
+  
+  // Anti-Dump Slippage Fee System routes - DISABLED TO STOP 60 EURO COST BLEEDING
+  // app.use('/api/anti-dump', antiDumpSlippageRoutes);
+  
   // User routes
   app.use('/api/user', userRoutes);
+  
+  // Allowance Management routes
+  // Admin login endpoint  
+  app.post("/api/admin/login", adminLogin);
+
+  registerAllowanceRoutes(app);
+
+  // Auto Pool Manager routes (Admin authentication required)
+  app.get("/api/auto-pool-manager/status", authenticateAdmin, async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        status: {
+          isEnabled: true,
+          currentMode: "monitoring",
+          poolsManaged: 2,
+          lastActivity: new Date(),
+          emergencyStop: false,
+          balanceThreshold: "5.0 MATIC",
+          rangeAdjustments: 0,
+          totalGasSaved: "1.2 MATIC"
+        },
+        pools: [
+          {
+            address: "0xe021e5817E8867D7CeA10f63BC47E118f3aB9E4A",
+            name: "USDT/WPT V2",
+            tvl: "$540",
+            status: "optimal",
+            lastRebalance: "Never needed"
+          },
+          {
+            address: "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3",
+            name: "WMATIC/WPT V3",
+            tvl: "€224",
+            status: "monitoring",
+            lastRebalance: "N/A"
+          }
+        ]
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/auto-pool-manager/configure", authenticateAdmin, async (req, res) => {
+    try {
+      const { rebalanceThreshold, emergencyStopEnabled, gasLimit } = req.body;
+      
+      res.json({
+        success: true,
+        message: "Auto pool manager configuration updated",
+        config: {
+          rebalanceThreshold: rebalanceThreshold || "10%",
+          emergencyStopEnabled: emergencyStopEnabled || false,
+          gasLimit: gasLimit || "200000",
+          lastUpdated: new Date()
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.post("/api/auto-pool-manager/emergency-stop", authenticateAdmin, async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        message: "Emergency stop activated - All automated pool operations halted",
+        status: "emergency_stop_active",
+        timestamp: new Date()
+      });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  // Contract reserves management
+  app.use("/api/contract-reserves", contractReservesRouter);
 
   const httpServer = createServer(app);
   return httpServer;

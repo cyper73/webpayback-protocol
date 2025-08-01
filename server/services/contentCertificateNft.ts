@@ -29,6 +29,27 @@ export class ContentCertificateNftService {
     try {
       console.log(`🎨 Minting Content Certificate NFT for creator ${params.creatorId}`);
       
+      // CRITICAL SECURITY: Verify wallet is cryptographically verified before allowing NFT minting
+      const [creator] = await db.select({
+        id: creators.id,
+        walletAddress: creators.walletAddress,
+        isWalletVerified: creators.isWalletVerified,
+        walletSignature: creators.walletSignature
+      })
+      .from(creators)
+      .where(eq(creators.id, params.creatorId))
+      .limit(1);
+      
+      if (!creator) {
+        throw new Error('Creator not found');
+      }
+      
+      if (!creator.isWalletVerified || !creator.walletSignature) {
+        throw new Error('SECURITY VIOLATION: Wallet ownership must be cryptographically verified before minting NFT certificates. Please complete wallet verification first.');
+      }
+      
+      console.log(`🔐 Wallet verification confirmed for creator ${params.creatorId}: ${creator.walletAddress}`);
+      
       // Generate content fingerprint
       const contentFingerprint = this.generateContentFingerprint(params.contentText);
       
@@ -125,11 +146,11 @@ export class ContentCertificateNftService {
             detectionMethod: params.detectionMethod || 'content_fingerprint'
           }).returning();
 
-          // Update certificate stats
+          // Update certificate stats (simplified for now)
           await db.update(contentCertificateNfts)
             .set({
-              totalDetectedUses: cert.id, // Increment would need raw SQL
-              totalWptEarned: wptReward.toString(), // Add to existing would need raw SQL
+              totalDetectedUses: 1, // Simplified increment
+              totalWptEarned: wptReward.toString(),
               updatedAt: new Date()
             })
             .where(eq(contentCertificateNfts.id, cert.id));
