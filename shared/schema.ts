@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -14,6 +14,11 @@ export const creators = pgTable("creators", {
   userId: integer("user_id").references(() => users.id),
   websiteUrl: text("website_url").notNull(),
   walletAddress: text("wallet_address").notNull(),
+  walletSignature: text("wallet_signature"), // Cryptographic signature proving wallet ownership
+  verificationMessage: text("verification_message"), // Message that was signed
+  signatureVerified: boolean("signature_verified").default(false), // Backend compatibility field
+  signatureVerifiedAt: timestamp("signature_verified_at"), // Verification timestamp
+  isWalletVerified: boolean("is_wallet_verified").default(false), // True if signature is valid
   contentCategory: text("content_category").notNull(),
   isVerified: boolean("is_verified").default(false),
   isEarlyAdopter: boolean("is_early_adopter").default(false),
@@ -274,8 +279,74 @@ export const fraudDetectionAlerts = pgTable("fraud_detection_alerts", {
   severity: text("severity").default("medium"), // low, medium, high, critical
   status: text("status").default("active"), // active, resolved, ignored
   details: jsonb("details").default({}),
-  evidence: jsonb("evidence").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Allowance Management System for Automated Token Reserve Refills
+export const allowanceManagement = pgTable("allowance_management", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(),
+  contractAddress: text("contract_address").notNull(),
+  tokenAddress: text("token_address").notNull(), // WPT token address
+  maxAllowance: decimal("max_allowance", { precision: 18, scale: 8 }).notNull(), // 5M WPT
+  currentAllowance: decimal("current_allowance", { precision: 18, scale: 8 }).default("0"),
+  usedAllowance: decimal("used_allowance", { precision: 18, scale: 8 }).default("0"),
+  refillThreshold: decimal("refill_threshold", { precision: 18, scale: 8 }).default("50000"), // Auto-refill when reserves < 50k WPT
+  refillAmount: decimal("refill_amount", { precision: 18, scale: 8 }).default("500000"), // 500k WPT per refill
+  isActive: boolean("is_active").default(true),
+  lastRefillAt: timestamp("last_refill_at"),
+  alertThreshold: decimal("alert_threshold", { precision: 18, scale: 8 }).default("100000"), // Alert when < 100k WPT
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Auto-Refill Transaction History
+export const allowanceTransactions = pgTable("allowance_transactions", {
+  id: serial("id").primaryKey(),
+  allowanceId: integer("allowance_id").references(() => allowanceManagement.id).notNull(),
+  transactionType: text("transaction_type").notNull(), // approve, refill, revoke
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  transactionHash: text("transaction_hash").notNull(),
+  gasUsed: text("gas_used"),
+  gasPrice: text("gas_price"),
+  blockNumber: integer("block_number"),
+  status: text("status").default("pending"), // pending, confirmed, failed
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  confirmedAt: timestamp("confirmed_at"),
+});
+
+// Reserve Pool Monitoring
+export const reservePoolStatus = pgTable("reserve_pool_status", {
+  id: serial("id").primaryKey(),
+  contractAddress: text("contract_address").notNull(),
+  currentBalance: decimal("current_balance", { precision: 18, scale: 8 }).notNull(),
+  minimumThreshold: decimal("minimum_threshold", { precision: 18, scale: 8 }).default("50000"),
+  optimalBalance: decimal("optimal_balance", { precision: 18, scale: 8 }).default("2000000"), // 2M WPT
+  totalDistributedToday: decimal("total_distributed_today", { precision: 18, scale: 8 }).default("0"),
+  totalDistributedWeek: decimal("total_distributed_week", { precision: 18, scale: 8 }).default("0"),
+  totalDistributedMonth: decimal("total_distributed_month", { precision: 18, scale: 8 }).default("0"),
+  averageDailyUsage: decimal("average_daily_usage", { precision: 18, scale: 8 }).default("0"),
+  projectedDaysRemaining: integer("projected_days_remaining"),
+  lastRefillAmount: decimal("last_refill_amount", { precision: 18, scale: 8 }),
+  lastRefillAt: timestamp("last_refill_at"),
+  nextScheduledRefill: timestamp("next_scheduled_refill"),
+  alertLevel: text("alert_level").default("normal"), // normal, warning, critical, emergency
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Allowance Security Monitoring
+export const allowanceSecurity = pgTable("allowance_security", {
+  id: serial("id").primaryKey(),
+  allowanceId: integer("allowance_id").references(() => allowanceManagement.id).notNull(),
+  securityEventType: text("security_event_type").notNull(), // unusual_usage, threshold_breach, unauthorized_access
+  riskLevel: text("risk_level").notNull(), // low, medium, high, critical
+  description: text("description").notNull(),
+  affectedAmount: decimal("affected_amount", { precision: 18, scale: 8 }),
+  actionTaken: text("action_taken"), // monitored, throttled, blocked, manual_review
+  isResolved: boolean("is_resolved").default(false),
   resolvedAt: timestamp("resolved_at"),
+  evidence: jsonb("evidence").default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -367,6 +438,22 @@ export const aiKnowledgeIndex = pgTable("ai_knowledge_index", {
   isActive: boolean("is_active").default(true), // Whether this content is still generating citations
   metadata: jsonb("metadata").default({}),
 });
+
+// Pool Health Metrics - tracks pool liquidity health for auto-scaling rewards
+export const poolHealthMetrics = pgTable("pool_health_metrics", {
+  id: serial("id").primaryKey(),
+  usdtPoolTvl: decimal("usdt_pool_tvl", { precision: 18, scale: 8 }).notNull(),
+  wmaticPoolTvl: decimal("wmatic_pool_tvl", { precision: 18, scale: 8 }).notNull(),
+  usdtHealthLevel: text("usdt_health_level").notNull(), // healthy, warning, critical, emergency
+  wmaticHealthLevel: text("wmatic_health_level").notNull(), // healthy, warning, critical, emergency
+  rewardScaleFactor: decimal("reward_scale_factor", { precision: 5, scale: 4 }).notNull(), // 0.6-1.05
+  belowActivationThreshold: boolean("below_activation_threshold").default(true), // Below $20K threshold
+  alertsGenerated: jsonb("alerts_generated").default([]),
+  checkedAt: timestamp("checked_at").defaultNow(),
+});
+
+export type PoolHealthMetrics = typeof poolHealthMetrics.$inferSelect;
+export type InsertPoolHealthMetrics = typeof poolHealthMetrics.$inferInsert;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -500,6 +587,26 @@ export const domainVerificationsRelations = relations(domainVerifications, ({ on
   }),
 }));
 
+// Allowance Management Relations
+export const allowanceManagementRelations = relations(allowanceManagement, ({ many }) => ({
+  transactions: many(allowanceTransactions),
+  securityEvents: many(allowanceSecurity),
+}));
+
+export const allowanceTransactionsRelations = relations(allowanceTransactions, ({ one }) => ({
+  allowance: one(allowanceManagement, {
+    fields: [allowanceTransactions.allowanceId],
+    references: [allowanceManagement.id],
+  }),
+}));
+
+export const allowanceSecurityRelations = relations(allowanceSecurity, ({ one }) => ({
+  allowance: one(allowanceManagement, {
+    fields: [allowanceSecurity.allowanceId],
+    references: [allowanceManagement.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -525,6 +632,9 @@ export const insertCreatorSchema = createInsertSchema(creators).pick({
   userId: true,
   websiteUrl: true,
   walletAddress: true,
+  walletSignature: true,
+  verificationMessage: true,
+  isWalletVerified: true,
   contentCategory: true,
   platformType: true,
   channelId: true,
@@ -619,6 +729,59 @@ export const insertFraudDetectionAlertSchema = createInsertSchema(fraudDetection
   severity: true,
   status: true,
   details: true,
+});
+
+// Allowance Management insert schemas
+export const insertAllowanceManagementSchema = createInsertSchema(allowanceManagement).pick({
+  walletAddress: true,
+  contractAddress: true,
+  tokenAddress: true,
+  maxAllowance: true,
+  currentAllowance: true,
+  usedAllowance: true,
+  refillThreshold: true,
+  refillAmount: true,
+  isActive: true,
+  alertThreshold: true,
+});
+
+export const insertAllowanceTransactionSchema = createInsertSchema(allowanceTransactions).pick({
+  allowanceId: true,
+  transactionType: true,
+  amount: true,
+  transactionHash: true,
+  gasUsed: true,
+  gasPrice: true,
+  blockNumber: true,
+  status: true,
+  errorMessage: true,
+});
+
+export const insertReservePoolStatusSchema = createInsertSchema(reservePoolStatus).pick({
+  contractAddress: true,
+  currentBalance: true,
+  minimumThreshold: true,
+  optimalBalance: true,
+  totalDistributedToday: true,
+  totalDistributedWeek: true,
+  totalDistributedMonth: true,
+  averageDailyUsage: true,
+  projectedDaysRemaining: true,
+  lastRefillAmount: true,
+  lastRefillAt: true,
+  nextScheduledRefill: true,
+  alertLevel: true,
+});
+
+export const insertAllowanceSecuritySchema = createInsertSchema(allowanceSecurity).pick({
+  allowanceId: true,
+  securityEventType: true,
+  riskLevel: true,
+  description: true,
+  affectedAmount: true,
+  actionTaken: true,
+  isResolved: true,
+  resolvedAt: true,
   evidence: true,
 });
 
@@ -765,6 +928,47 @@ export type CitationTracking = typeof citationTracking.$inferSelect;
 
 export type InsertAiKnowledgeIndex = z.infer<typeof insertAiKnowledgeIndexSchema>;
 
+// Anti-dump slippage fee tracking
+export const slippageFeeEvents = pgTable("slippage_fee_events", {
+  id: serial("id").primaryKey(),
+  walletAddress: varchar("wallet_address", { length: 42 }).notNull(),
+  transactionHash: varchar("transaction_hash", { length: 66 }).notNull(),
+  transactionType: varchar("transaction_type", { length: 20 }).notNull(),
+  amount: decimal("amount", { precision: 18, scale: 6 }).notNull(),
+  slippageFeeApplied: decimal("slippage_fee_applied", { precision: 10, scale: 4 }).notNull(),
+  feeAmountWpt: decimal("fee_amount_wpt", { precision: 18, scale: 6 }).notNull(),
+  penaltyReason: text("penalty_reason"),
+  blockNumber: integer("block_number").notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const walletCashoutVelocity = pgTable("wallet_cashout_velocity", {
+  id: serial("id").primaryKey(),
+  walletAddress: varchar("wallet_address", { length: 42 }).notNull().unique(),
+  totalRewardsAccumulated: decimal("total_rewards_accumulated", { precision: 18, scale: 6 }).notNull().default("0"),
+  totalCashoutAmount: decimal("total_cashout_amount", { precision: 18, scale: 6 }).notNull().default("0"),
+  velocityScore: decimal("velocity_score", { precision: 10, scale: 4 }).notNull().default("0"),
+  isHighRiskDumper: boolean("is_high_risk_dumper").notNull().default(false),
+  lastUpdated: timestamp("last_updated").defaultNow()
+});
+
+export const antiDumpConfig = pgTable("anti_dump_config", {
+  id: serial("id").primaryKey(),
+  configName: varchar("config_name", { length: 50 }).notNull().unique(),
+  baseSlippageFee: decimal("base_slippage_fee", { precision: 10, scale: 4 }).notNull().default("0.5"),
+  velocityThresholdLow: decimal("velocity_threshold_low", { precision: 10, scale: 4 }).notNull().default("2.0"),
+  velocityThresholdHigh: decimal("velocity_threshold_high", { precision: 10, scale: 4 }).notNull().default("5.0"),
+  penaltyFeeLight: decimal("penalty_fee_light", { precision: 10, scale: 4 }).notNull().default("1.0"),
+  penaltyFeeMedium: decimal("penalty_fee_medium", { precision: 10, scale: 4 }).notNull().default("2.5"),
+  penaltyFeeHeavy: decimal("penalty_fee_heavy", { precision: 10, scale: 4 }).notNull().default("5.0"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export type SlippageFeeEvent = typeof slippageFeeEvents.$inferSelect;
+export type WalletCashoutVelocity = typeof walletCashoutVelocity.$inferSelect;
+export type AntiDumpConfig = typeof antiDumpConfig.$inferSelect;
+
 // Insert schemas for Content Certificate NFTs
 export const insertContentCertificateNftSchema = createInsertSchema(contentCertificateNfts).omit({
   id: true,
@@ -806,3 +1010,16 @@ export type ReentrancyProtectionLog = typeof reentrancyProtectionLogs.$inferSele
 
 export type FakeCreatorDetection = typeof fakeCreatorDetection.$inferSelect;
 export type InsertFakeCreatorDetection = typeof fakeCreatorDetection.$inferInsert;
+
+// Allowance Management Types
+export type AllowanceManagement = typeof allowanceManagement.$inferSelect;
+export type InsertAllowanceManagement = z.infer<typeof insertAllowanceManagementSchema>;
+
+export type AllowanceTransaction = typeof allowanceTransactions.$inferSelect;
+export type InsertAllowanceTransaction = z.infer<typeof insertAllowanceTransactionSchema>;
+
+export type ReservePoolStatus = typeof reservePoolStatus.$inferSelect;
+export type InsertReservePoolStatus = z.infer<typeof insertReservePoolStatusSchema>;
+
+export type AllowanceSecurity = typeof allowanceSecurity.$inferSelect;
+export type InsertAllowanceSecurity = z.infer<typeof insertAllowanceSecuritySchema>;
