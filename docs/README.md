@@ -275,7 +275,7 @@ WebPayback Protocol respects your privacy and protects your data with enterprise
 **Contact for Privacy Requests**: [cyper73@gmail.com](mailto:cyper73@gmail.com)
 
 **Full Privacy Policy**: [privacy.md](./privacy.md)  
-**Security Audit Report**: [SECURITY_AUDIT_XSS.md](./SECURITY_AUDIT_XSS.md)
+**Security Audit Report**: [COMPREHENSIVE_SECURITY_TESTING_RESULTS.md)
 
 ## 📄 License
 
