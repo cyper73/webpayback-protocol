@@ -13,7 +13,7 @@
 • Network: Polygon (137)
 
 💎 NEW USDT/WPT UNISWAP V2 POOL LAUNCHED:
-• Stable liquidity with $1,000 initial investment
+• Stable liquidity initial investment
 • Zero "out of range" issues compared to V3
 • Enhanced price stability with USDT pairing
 • Superior user experience for trading and liquidity provision
