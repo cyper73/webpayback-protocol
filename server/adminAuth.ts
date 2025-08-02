@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
 
-// Admin credentials - Set these in production environment
+// Admin credentials for allowance management and pool manager
 const ADMIN_CREDENTIALS = {
-  username: process.env.ADMIN_USERNAME || "[SET_IN_PRODUCTION]",
-  password: process.env.ADMIN_PASSWORD || "[SET_IN_PRODUCTION]"
+  username: process.env.ADMIN_USERNAME || "admin",
+  password: process.env.ADMIN_PASSWORD || "changeme"
 };
 
 // Admin authentication middleware
