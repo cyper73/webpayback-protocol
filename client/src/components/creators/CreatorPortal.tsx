@@ -12,9 +12,12 @@ import { insertCreatorSchema, contentCategoryEnum, type InsertCreator } from "@s
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code } from "lucide-react";
+import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock } from "lucide-react";
 import { sanitizeUrl, sanitizeWalletAddress, sanitizeToastContent, validateDomain, sanitizeContentCategory } from "@/lib/security";
 import { WalletVerification } from "@/components/wallet/WalletVerification";
+import TwoFactorAuthSetup from "@/components/security/TwoFactorAuthSetup";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = insertCreatorSchema.extend({
   termsAccepted: z.boolean().refine(val => val === true, {
@@ -36,6 +39,9 @@ export default function CreatorPortal() {
   const [walletSignature, setWalletSignature] = useState("");
   const [verificationMessage, setVerificationMessage] = useState("");
   const [isWalletVerified, setIsWalletVerified] = useState(false);
+  const [activeTab, setActiveTab] = useState("registration");
+  const [currentCreatorId, setCurrentCreatorId] = useState<number | null>(null);
+  const [preGeneratedTwoFactorSetup, setPreGeneratedTwoFactorSetup] = useState<any>(null);
 
   const {
     register,
@@ -165,17 +171,33 @@ export default function CreatorPortal() {
     mutationFn: async (data: any) => {
       const { termsAccepted, ...creatorData } = data;
       const response = await apiRequest("POST", "/api/creators", creatorData);
-      return response;
+      return response.json(); // Parse JSON to get the data with 2FA setup
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
-        title: "Registration Successful",
-        description: "You have been successfully registered as a content creator!",
+        title: "Registration Successful", 
+        description: "Now setting up mandatory 2FA security for your account...",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
       reset();
       setDomainVerification(null);
       setIsDomainVerified(false);
+      
+      // AUTOMATIC 2FA SETUP: Check if 2FA setup was generated
+      if (data?.id && data?.requiresImmediateTwoFactorSetup) {
+        setCurrentCreatorId(data.id);
+        setPreGeneratedTwoFactorSetup(data.twoFactorSetup);
+        setActiveTab("security");
+        
+        // Show security requirement message
+        setTimeout(() => {
+          toast({
+            title: "Security Setup Required",
+            description: "2FA is mandatory for all users. Please complete Google Authenticator setup to secure your account.",
+            variant: "default",
+          });
+        }, 1000);
+      }
     },
     onError: (error) => {
       toast({
@@ -487,13 +509,29 @@ export default function CreatorPortal() {
     setIsSubmitting(false);
   };
 
+  // Demo email for 2FA setup
+  const demoEmail = "creator@webpayback.com";
+
   return (
     <Card className="glass-card rounded-2xl">
       <CardHeader>
-        <CardTitle className="text-xl font-bold gradient-text">Creator Registration Portal</CardTitle>
+        <CardTitle className="text-xl font-bold gradient-text">Creator Portal</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="registration" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Registration
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              Security (2FA)
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="registration" className="mt-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label htmlFor="websiteUrl" className="block text-sm font-medium mb-2">
               Website URL
@@ -613,7 +651,57 @@ export default function CreatorPortal() {
              !isWalletVerified ? "Complete Wallet Verification First" : 
              "Register for WebPayback"}
           </Button>
-        </form>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="security" className="mt-6">
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold mb-2">Two-Factor Authentication</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Enhance your Creator Portal security with Google Authenticator
+                </p>
+              </div>
+              
+              {currentCreatorId ? (
+                <>
+                  <div className="text-xs text-gray-500 mb-2">
+                    Debug: CreatorID={currentCreatorId}, Email={demoEmail}
+                  </div>
+                  <TwoFactorAuthSetup 
+                    creatorId={currentCreatorId}
+                    creatorEmail={demoEmail}
+                    preGeneratedSetup={preGeneratedTwoFactorSetup}
+                    onSetupComplete={() => {
+                      toast({
+                        title: "Security Enhanced!",
+                        description: "Your account is now protected with 2FA",
+                      });
+                      // Clear pre-generated setup after completion
+                      setPreGeneratedTwoFactorSetup(null);
+                    }}
+                  />
+                </>
+              ) : (
+                <Card className="w-full">
+                  <CardContent className="p-6 text-center">
+                    <Lock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <h4 className="text-lg font-semibold mb-2">Complete Registration First</h4>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Register as a creator first to enable Two-Factor Authentication for your account.
+                    </p>
+                    <Button 
+                      onClick={() => setActiveTab("registration")}
+                      className="bg-electric-blue hover:bg-electric-blue/80"
+                    >
+                      Go to Registration
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

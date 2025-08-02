@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, XCircle, Copy, Shield, Zap } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Copy, Shield, Zap, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { MultiWalletSelector } from './MultiWalletSelector';
 
 // MetaMask types
 declare global {
@@ -21,12 +22,14 @@ interface WalletVerificationProps {
   walletAddress: string;
   onVerificationComplete: (signature: string, message: string) => void;
   onWalletChange: (address: string) => void;
+  showMultiWalletSupport?: boolean;
 }
 
 export function WalletVerification({ 
   walletAddress, 
   onVerificationComplete, 
-  onWalletChange 
+  onWalletChange,
+  showMultiWalletSupport = false
 }: WalletVerificationProps) {
   const [verificationMessage, setVerificationMessage] = useState('');
   const [signature, setSignature] = useState('');
@@ -35,6 +38,10 @@ export function WalletVerification({
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
   const [isSigningWithMetaMask, setIsSigningWithMetaMask] = useState(false);
+  const [useMultiWallet, setUseMultiWallet] = useState(false);
+  const [selectedWalletType, setSelectedWalletType] = useState<string>('');
+  const [selectedWalletName, setSelectedWalletName] = useState<string>('');
+  const [walletInstructions, setWalletInstructions] = useState<any>(null);
   const { toast } = useToast();
 
   const generateVerificationMessage = async () => {
@@ -48,9 +55,22 @@ export function WalletVerification({
     
     try {
       console.log('🔐 Generating verification message for wallet:', walletAddress);
-      const response = await apiRequest('POST', '/api/wallet/generate-verification', { 
-        walletAddress 
-      });
+      
+      // Use multi-wallet API if wallet type is selected
+      const endpoint = useMultiWallet && selectedWalletType 
+        ? '/api/wallet/generate-verification-multi'
+        : '/api/wallet/generate-verification';
+      
+      const payload = useMultiWallet && selectedWalletType 
+        ? { 
+            walletAddress,
+            walletType: selectedWalletType,
+            userAgent: navigator.userAgent,
+            walletInfo: { name: selectedWalletName.toLowerCase() }
+          }
+        : { walletAddress };
+      
+      const response = await apiRequest('POST', endpoint, payload);
       const result = await response.json();
       console.log('🔐 Server response:', result);
 
@@ -59,9 +79,16 @@ export function WalletVerification({
         console.log('🔐 Message length:', result.message.length);
         // Force update without sanitization for display
         setVerificationMessage(String(result.message));
+        
+        // Store wallet-specific instructions if using multi-wallet
+        if (result.instructions) {
+          setWalletInstructions(result.instructions);
+        }
+        
+        const walletName = result.walletName || 'your wallet';
         toast({
           title: "Verification message generated",
-          description: "Copy the message and sign it with your wallet",
+          description: `Copy the message and sign it with ${walletName}`,
         });
       } else {
         console.error('🔐 Server error:', result.error);
@@ -179,19 +206,33 @@ export function WalletVerification({
     setError('');
     
     try {
-      const response = await apiRequest('POST', '/api/wallet/verify-signature', {
-        walletAddress,
-        message: verificationMessage,
-        signature
-      });
+      // Use multi-wallet API if wallet type is selected
+      const endpoint = useMultiWallet && selectedWalletType 
+        ? '/api/wallet/verify-signature-multi'
+        : '/api/wallet/verify-signature';
+      
+      const payload = useMultiWallet && selectedWalletType 
+        ? { 
+            walletAddress,
+            message: verificationMessage,
+            signature,
+            walletType: selectedWalletType,
+            userAgent: navigator.userAgent,
+            walletInfo: { name: selectedWalletName.toLowerCase() }
+          }
+        : { walletAddress, message: verificationMessage, signature };
+      
+      const response = await apiRequest('POST', endpoint, payload);
       const result = await response.json();
 
       if (result.success) {
         setVerificationStatus('success');
         onVerificationComplete(signature, verificationMessage);
+        const walletName = result.walletName || 'Wallet';
+        const method = result.verificationMethod || 'standard';
         toast({
-          title: "Wallet verified successfully",
-          description: "Your wallet ownership has been confirmed",
+          title: `${walletName} verified successfully`,
+          description: `Your wallet ownership has been confirmed using ${method} method`,
         });
       } else {
         setVerificationStatus('error');
@@ -232,15 +273,67 @@ export function WalletVerification({
     }
   };
 
+  const handleWalletSelect = (walletType: string, walletName: string) => {
+    setSelectedWalletType(walletType);
+    setSelectedWalletName(walletName);
+    setUseMultiWallet(true);
+    // Reset previous states
+    setVerificationMessage('');
+    setSignature('');
+    setError('');
+    setVerificationStatus('idle');
+    setWalletInstructions(null);
+  };
+
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5" />
-          Wallet Verification
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-6">
+      {/* Multi-Wallet Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium">Wallet Verification Method</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setUseMultiWallet(!useMultiWallet)}
+            >
+              {useMultiWallet ? 'Use Standard Mode' : 'Use Advanced Mode'}
+            </Button>
+          </div>
+          
+          {useMultiWallet && (
+            <MultiWalletSelector
+              onWalletSelect={handleWalletSelect}
+              selectedWalletType={selectedWalletType}
+            />
+          )}
+          
+          {!useMultiWallet && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Standard mode works with most Ethereum-compatible wallets. 
+                Use Advanced mode for wallet-specific optimizations and better Phantom/hardware wallet support.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Main Verification Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Wallet Verification
+            {selectedWalletName && (
+              <span className="text-sm font-normal text-gray-500">
+                ({selectedWalletName})
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
         <Alert>
           <Shield className="h-4 w-4" />
           <AlertDescription>
@@ -408,7 +501,8 @@ export function WalletVerification({
             </AlertDescription>
           </Alert>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
