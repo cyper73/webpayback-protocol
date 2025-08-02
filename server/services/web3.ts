@@ -15,7 +15,7 @@ const POLYGON_CONFIG = {
 // Ethereum Mainnet Configuration (Ready for WPT mainnet deployment)
 const ETHEREUM_CONFIG = {
   chainId: 1,
-  rpcUrl: "https://mainnet.infura.io/v3/YOUR_INFURA_KEY",
+  rpcUrl: process.env.ETHEREUM_RPC_URL || "https://mainnet.infura.io/v3/YOUR_INFURA_KEY",
   explorerUrl: "https://etherscan.io",
   tokenAddress: "0x0000000000000000000000000000000000000000", // WPT mainnet address (to be updated)
   poolAddress: "0x0000000000000000000000000000000000000000", // ETH/WPT pool (to be updated)
