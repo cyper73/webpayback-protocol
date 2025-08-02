@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function AllowanceAdmin() {
   const { toast } = useToast();
-  const [selectedWallet, setSelectedWallet] = useState("[WALLET_ADDRESS_FROM_ENV]");
+  const [selectedWallet, setSelectedWallet] = useState("0xca5Ea48C76C72cc37cFb75c452457d0e6d0508Ba");
   
   const authToken = localStorage.getItem("admin_token") || "";
 
@@ -76,32 +76,71 @@ export default function AllowanceAdmin() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Database className="w-5 h-5" />
-                Admin Access Control
+                System Status
               </CardTitle>
-              <CardDescription className="text-gray-300">
-                Secure administration of token allowance system
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-white">Authentication Status</span>
-                </div>
-                <Badge variant="default">Authenticated</Badge>
-              </div>
-              
-              <div className="mt-4">
-                <Button 
-                  onClick={() => testMutation.mutate()}
-                  disabled={testMutation.isPending}
-                  className="w-full"
-                >
-                  {testMutation.isPending ? "Testing..." : "Test Access"}
-                </Button>
+              <div className="flex items-center gap-4">
+                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Active
+                </Badge>
+                <span className="text-gray-300">Admin access authenticated</span>
               </div>
             </CardContent>
           </Card>
+
+          {/* Wallet Configuration */}
+          <Card className="bg-white/10 border border-white/20 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-white">Founder Wallet Configuration</CardTitle>
+              <CardDescription className="text-gray-300">
+                Current wallet: {selectedWallet}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                onClick={() => testMutation.mutate()}
+                disabled={testMutation.isPending || isLoading}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {testMutation.isPending ? "Testing..." : "Test Allowance Access"}
+              </Button>
+              
+              {config && (
+                <div className="p-4 bg-black/20 rounded-lg">
+                  <pre className="text-green-400 text-sm overflow-auto">
+                    {JSON.stringify(config, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Security Notice */}
+          <Card className="bg-orange-500/10 border border-orange-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-orange-400 mt-0.5" />
+                <div>
+                  <h3 className="text-orange-400 font-semibold">Security Notice</h3>
+                  <p className="text-orange-200 text-sm">
+                    This module manages founder wallet allowances. Only authorized admin users can access these functions.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8 text-center">
+          <Button
+            onClick={() => window.location.href = "/admin"}
+            variant="outline"
+            className="border-white/20 text-white hover:bg-white/10"
+          >
+            Back to Admin Dashboard
+          </Button>
         </div>
       </div>
     </div>

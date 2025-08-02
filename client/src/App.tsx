@@ -15,6 +15,7 @@ import CitationsByWallet from "@/pages/CitationsByWallet";
 import PoolDebugger from "@/pages/PoolDebugger";
 import AutomationPage from "@/pages/AutomationPage";
 import { ContentCertificatePage } from "@/pages/ContentCertificatePage";
+import Login from "@/pages/Login";
 
 import PoolHealthDashboard from "@/pages/PoolHealthDashboard";
 import AntiDumpSlippageDashboard from "@/pages/AntiDumpSlippageDashboard";
@@ -22,15 +23,22 @@ import ContractReserves from "@/pages/ContractReserves";
 import AdminLogin from "@/pages/AdminLogin";
 import AllowanceAdmin from "@/pages/admin/AllowanceAdmin";
 import AutoPoolAdmin from "@/pages/admin/AutoPoolAdmin";
+import CreatorPage from "@/pages/CreatorPage";
+import ProtectedCreatorPortal from "@/components/auth/ProtectedCreatorPortal";
+import ProtectedNFTModule from "@/components/auth/ProtectedNFTModule";
+import ProtectedRewardsModule from "@/components/auth/ProtectedRewardsModule";
 import CookieConsentBanner from "@/components/gdpr/CookieConsentBanner";
+import { SecurityTest } from "@/pages/SecurityTest";
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/getting-started" component={GettingStarted} />
+      <Route path="/login" component={Login} />
+      <Route path="/creators" component={CreatorPage} />
       <Route path="/staking" component={PolStakingPage} />
       <Route path="/automation" component={AutomationPage} />
-      <Route path="/content-certificate" component={ContentCertificatePage} />
+      <Route path="/content-certificate" component={ProtectedNFTModule} />
 
       <Route path="/pool-health" component={PoolHealthDashboard} />
       <Route path="/anti-dump" component={AntiDumpSlippageDashboard} />
@@ -39,8 +47,9 @@ function Router() {
       <Route path="/admin/allowance" component={AllowanceAdmin} />
       <Route path="/admin/auto-pool" component={AutoPoolAdmin} />
       <Route path="/pool-debug" component={PoolDebugger} />
-      <Route path="/citations" component={Citations} />
+      <Route path="/citations" component={ProtectedRewardsModule} />
       <Route path="/citations/:walletAddress" component={CitationsByWallet} />
+      <Route path="/security-test" component={SecurityTest} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
