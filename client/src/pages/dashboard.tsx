@@ -24,7 +24,7 @@ import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtect
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity, User, TrendingUp, AlertTriangle, CheckCircle, Zap, Users, Globe, ArrowUpRight, DollarSign, PieChart, BarChart3, Clock, RefreshCw, Eye, Rocket } from "lucide-react";
 import { Link as RouterLink } from "wouter";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import wptLogo from "@assets/wpt-logo_1752556131899.png";
+// import wptLogo from "@assets/wpt-logo_1752556131899.png"; // Rimosso temporaneamente finché l'asset non è disponibile
 import { useState, useEffect } from "react";
 
 // Founder device detection (Firefox + Windows OK)
@@ -93,7 +93,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <img src={wptLogo} alt="WPT Logo" className="w-8 h-8" />
+                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-electric-blue to-purple-500 flex items-center justify-center text-white font-bold text-xs">WPT</div>
                 <span className="text-lg font-bold gradient-text">WebPayback Protocol</span>
               </div>
               <div className="hidden sm:flex items-center space-x-1 bg-glass-dark px-2 py-1 rounded-full">
@@ -412,7 +412,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src={wptLogo} alt="WPT Logo" className="w-6 h-6" />
+              <div className="h-6 w-6 rounded-full bg-gradient-to-r from-electric-blue to-purple-500 flex items-center justify-center text-white font-bold text-[10px]">WPT</div>
               <span className="text-sm text-gray-400">WebPayback Protocol - Where AI meets fair compensation for creators</span>
             </div>
             <div className="flex items-center space-x-6">

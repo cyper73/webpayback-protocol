@@ -52,20 +52,44 @@ app.use(express.urlencoded({ extended: false }));
 
 // COMPREHENSIVE SECURITY HEADERS INCLUDING CSP
 app.use((req, res, next) => {
-  // Content Security Policy - CRITICAL SECURITY PROTECTION
-  const cspPolicy = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://web-payback-tokenizer.replit.app https://webpayback.com https://polygon-mainnet.g.alchemy.com wss: https:",
-    "frame-src 'none'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "upgrade-insecure-requests"
-  ].join('; ');
+  const isDev = (process.env.NODE_ENV || "development") !== "production";
+  const cspPolicy = (
+    isDev
+      ? [
+          "default-src 'self' data: blob: https: http:",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:",
+          "style-src 'self' 'unsafe-inline'",
+          "font-src 'self' data: https:",
+          "img-src 'self' data: blob: https: http:",
+          "connect-src 'self' data: blob: https: http:",
+          "frame-src 'self' https: http:",
+          "child-src 'self' https: http:",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'none'",
+          "worker-src 'self'",
+          "manifest-src 'self'",
+          "upgrade-insecure-requests"
+        ]
+      : [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://auth.privy.io blob: data:",
+          "style-src 'self' 'unsafe-inline'",
+          "font-src 'self'",
+          "img-src 'self' data: blob: https://i.imgur.com https://imgur.com",
+          "connect-src 'self' https://auth.privy.io wss://relay.walletconnect.com wss://relay.walletconnect.org wss://www.walletlink.org https://*.rpc.privy.systems https://explorer-api.walletconnect.com https://api.humanity.org",
+          "frame-src 'self' https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com",
+          "child-src 'self' https://auth.privy.io https://verify.walletconnect.com https://verify.walletconnect.org",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'none'",
+          "worker-src 'self'",
+          "manifest-src 'self'",
+          "upgrade-insecure-requests"
+        ]
+  ).join("; ");
   
   res.setHeader('Content-Security-Policy', cspPolicy);
   res.setHeader('X-Content-Type-Options', 'nosniff');

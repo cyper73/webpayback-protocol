@@ -7,7 +7,7 @@ const CHAINLINK_FEEDS = {
   ETH_USD: "0xF9680D99D6C9589e2a93a78A04A279e509205945",   // ETH/USD Price Feed (for calculations)
 };
 
-// Polygon RPC endpoint
+// Polygon RPC endpoint (Note: Used for mock Chainlink data if on Humanity chain)
 const POLYGON_RPC = process.env.POLYGON_RPC || "https://polygon-rpc.com/";
 
 class ChainlinkService {
@@ -15,7 +15,8 @@ class ChainlinkService {
   private priceFeeds: { [key: string]: ethers.Contract };
 
   constructor() {
-    this.provider = new ethers.providers.JsonRpcProvider(POLYGON_RPC, 137); // Polygon network ID
+    // Chainlink price feeds typically run on major networks, fallback to Polygon for now
+    this.provider = new ethers.providers.JsonRpcProvider(POLYGON_RPC, 137); 
     this.priceFeeds = {};
     this.initializePriceFeeds();
   }

@@ -1,8 +1,44 @@
 import { Router } from "express";
 import { humanityService } from "../services/humanityProtocol";
 import { z } from "zod";
+import * as jose from 'jose';
 
 const router = Router();
+
+// Privy App ID from environment or fallback
+const PRIVY_APP_ID = process.env.VITE_PRIVY_APP_ID || 'cmn0xgyny01ra0ciijd8kc2kk';
+// JWKS Endpoint for verifying Privy access tokens
+const JWKS_URL = `https://auth.privy.io/api/v1/apps/${PRIVY_APP_ID}/jwks.json`;
+
+// Cache the JWKS keystore
+const JWKS = jose.createRemoteJWKSet(new URL(JWKS_URL));
+
+/**
+ * Middleware to verify Privy access token
+ */
+const verifyPrivyToken = async (req: any, res: any, next: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Missing or invalid Authorization header" });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify token signature against Privy's JWKS
+    const { payload } = await jose.jwtVerify(token, JWKS, {
+      issuer: 'privy.io',
+      audience: PRIVY_APP_ID
+    });
+
+    // Add verified user ID to request
+    req.privyUserId = payload.sub;
+    next();
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    return res.status(401).json({ error: "Invalid access token" });
+  }
+};
 
 // Schema for verification request
 const verifySchema = z.object({
@@ -37,8 +73,8 @@ router.get("/auth-url/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     
-    // In mock mode without SDK, just return a mock URL
-    if (!humanityService.sdk && process.env.MOCK_HUMANITY === 'true') {
+    // In mock mode, just return a mock URL
+    if (process.env.MOCK_HUMANITY === 'true') {
         return res.json({ 
             url: `http://localhost:5000/api/humanity/callback?code=mock_code&state=${Buffer.from(JSON.stringify({ userId })).toString('base64')}`,
             mock: true 
@@ -84,15 +120,15 @@ router.get("/callback", async (req, res) => {
 
     // Get the codeVerifier from the frontend (passed via cookie/session in a real app)
     // For this prototype, if it's a mock, we bypass it
-    if (!humanityService.sdk && process.env.MOCK_HUMANITY === 'true') {
+    if (process.env.MOCK_HUMANITY === 'true') {
         // Mock successful verification
         await humanityService.getStatus(userId); // Just to check DB
         return res.redirect('/creators?humanity_success=true');
     }
 
-    // Note: In a full production app, the `codeVerifier` must be retrieved from the user's session
-    // For now, this endpoint expects the frontend to handle the callback and POST it to a different endpoint
-    res.send("Please close this window and return to the application.");
+    // Instead of showing a blank page, we redirect back to the creator portal
+    // passing the authorization code in the URL so the frontend can complete the verification
+    return res.redirect(`/creators?humanity_code=${code}&humanity_state=${state}`);
 
   } catch (error) {
     console.error("Callback error:", error);
@@ -104,17 +140,17 @@ router.get("/callback", async (req, res) => {
  * POST /api/humanity/verify
  * Trigger a new verification check using the code from the callback
  */
-router.post("/verify", async (req, res) => {
+router.post("/verify", verifyPrivyToken, async (req, res) => {
   try {
     const { userId, code, codeVerifier } = req.body;
     
     // Mock mode bypass
-    if (!humanityService.sdk && process.env.MOCK_HUMANITY === 'true') {
+    if (process.env.MOCK_HUMANITY === 'true') {
         const status = await humanityService.getStatus(userId);
         return res.json({ 
             success: true, 
             message: "Mock verification successful!", 
-            score: status.score 
+            score: status.score || 85
         });
     }
 
@@ -140,8 +176,8 @@ router.post("/verify", async (req, res) => {
     if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
     }
-    console.error("Verification error:", error);
-    res.status(500).json({ error: "Verification process failed" });
+    console.error("Verification error detail:", error);
+    res.status(500).json({ error: "Verification process failed", details: error instanceof Error ? error.message : String(error) });
   }
 });
 

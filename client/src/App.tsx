@@ -74,8 +74,21 @@ function App() {
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
         },
+        supportedChains: [{
+          id: 1942999413, // Humanity Protocol Testnet Chain ID
+          name: 'Humanity Testnet',
+          network: 'humanity-testnet',
+          nativeCurrency: { name: 'tHP', symbol: 'tHP', decimals: 18 },
+          rpcUrls: {
+            default: { http: ['https://rpc.testnet.humanity.org'] },
+            public: { http: ['https://rpc.testnet.humanity.org'] }
+          },
+          blockExplorers: {
+            default: { name: 'Humanity Explorer', url: 'https://explorer.testnet.humanity.org' }
+          }
+        }],
         defaultChain: {
-          id: 1942999413, // Humanity Protocol Testnet Chain ID (Standardized Sepolia rollup)
+          id: 1942999413, // Humanity Protocol Testnet Chain ID
           name: 'Humanity Testnet',
           network: 'humanity-testnet',
           nativeCurrency: { name: 'tHP', symbol: 'tHP', decimals: 18 },

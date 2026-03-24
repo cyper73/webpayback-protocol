@@ -1,12 +1,14 @@
 import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { http } from 'viem';
-import { humanityTestnet } from './chains'; // Assuming a custom chain definition
+import { humanityTestnet } from './chains';
 
-const pimlicoApiKey = import.meta.env.VITE_PIMLICO_API_KEY;
+// Ensure the API key is passed either from env or explicitly
+const pimlicoApiKey = import.meta.env.VITE_PIMLICO_API_KEY || 'pim_cmVijUKyaQ4YSZUEKiav4C';
 
+// Humanity Chain ID (1942999413) used instead of Polygon (137)
 // Create the paymaster client
 export const paymasterClient = createPimlicoPaymasterClient({
-  transport: http(`https://api.pimlico.io/v2/1942999413/rpc?apikey=${pimlicoApiKey}`),
+  transport: http(`https://api.pimlico.io/v2/${humanityTestnet.id}/rpc?apikey=${pimlicoApiKey}`),
   entryPoint: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789', // Standard EntryPoint v0.6
 });
 

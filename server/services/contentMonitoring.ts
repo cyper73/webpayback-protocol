@@ -413,6 +413,29 @@ class ContentMonitoringService {
         creator.walletAddress
       );
 
+      // Trigger the Citation Reward Engine to process the citation properly and apply multipliers
+      try {
+        const { citationRewardEngine } = await import('./citationRewardEngine');
+        const citationResult = await citationRewardEngine.processCitation({
+            sourceUrl: detection.url,
+            citationContext: `AI Access detected by ${detection.aiType}`,
+            citationType: 'content_reference',
+            querySource: `Query to ${detection.aiType}`,
+            aiModel: detection.aiType,
+            userAgent: detection.userAgent,
+            confidence: detection.confidence
+        });
+        if(citationResult.success) {
+            console.log(`✅ Citation Reward Engine processed citation successfully. Reward: ${citationResult.rewardAmount} WPT`);
+            // we could update the rewardAmount here to reflect the final amount after multipliers, but we keep the base rewardAmount for the log below
+            rewardAmount = citationResult.rewardAmount.toFixed(8);
+        } else {
+             console.warn(`⚠️ Citation Reward Engine failed to process citation: ${citationResult.error}`);
+        }
+      } catch (err) {
+         console.warn(`⚠️ Failed to invoke Citation Reward Engine:`, err);
+      }
+
       console.log(`✅ AI Access Detected and Rewarded:
         Creator: ${creator.id}
         URL: ${detection.url}

@@ -21,6 +21,7 @@ import { GaslessWithdrawal } from "@/components/wallet/GaslessWithdrawal";
 import { CashOutGuide } from "@/components/wallet/CashOutGuide";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
+import { usePrivy } from '@privy-io/react-auth';
 
 const formSchema = insertCreatorSchema.extend({
   termsAccepted: z.boolean().refine(val => val === true, {
@@ -46,13 +47,94 @@ export default function CreatorPortal() {
   const [currentCreatorId, setCurrentCreatorId] = useState<number | null>(null);
   const [preGeneratedTwoFactorSetup, setPreGeneratedTwoFactorSetup] = useState<any>(null);
 
+  const { login, logout, authenticated, user, ready, getAccessToken } = usePrivy();
+
+  // If user is authenticated via Privy, set a pseudo creator ID so they can access the tabs
+  useEffect(() => {
+    if (ready && authenticated && user?.wallet?.address && !currentCreatorId) {
+      // In a real app, you would fetch the creator ID from your backend using the wallet address.
+      // For this demo, we'll set a default ID of 1 to unlock the UI tabs.
+      setCurrentCreatorId(1);
+    }
+  }, [ready, authenticated, user, currentCreatorId]);
+
   // Check URL parameters for Humanity Protocol OAuth callback results
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const humanitySuccess = params.get('humanity_success');
     const humanityError = params.get('humanity_error');
+    const humanityCode = params.get('humanity_code');
+    const humanityState = params.get('humanity_state');
 
-    if (humanitySuccess) {
+    if (humanityCode && humanityState) {
+      setActiveTab("humanity");
+      
+      // Try to parse userId from state
+      let parsedUserId = currentCreatorId;
+      try {
+        const decodedState = JSON.parse(atob(humanityState));
+        if (decodedState.userId) {
+          parsedUserId = parseInt(decodedState.userId);
+          setCurrentCreatorId(parsedUserId);
+        }
+      } catch (e) {
+        console.error("Failed to parse humanity state", e);
+      }
+      
+      const codeVerifier = localStorage.getItem('humanity_verifier');
+      
+      if (parsedUserId) {
+        // Prepare the request asynchronously so we can await the access token
+        const verifyHumanity = async () => {
+          try {
+            const accessToken = await getAccessToken();
+            
+            const res = await apiRequest("POST", "/api/humanity/verify", {
+              userId: parsedUserId,
+              code: humanityCode,
+              codeVerifier: codeVerifier || 'mock_verifier'
+            }, {
+              // Add the Privy token for backend verification
+              Authorization: `Bearer ${accessToken}`
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || "Network response was not ok");
+            }
+
+            const data = await res.json();
+            
+            if (data.success) {
+              toast({
+                title: "Verifica Humanity Completata",
+                description: data.message || "Il tuo account è stato verificato con successo da Humanity Protocol!",
+                variant: "default",
+              });
+              queryClient.invalidateQueries({ queryKey: ['humanity-status', parsedUserId] });
+            } else {
+              toast({
+                title: "Errore di Verifica",
+                description: data.message || "Non è stato possibile completare la verifica.",
+                variant: "destructive",
+              });
+            }
+          } catch (err: any) {
+            console.error("Verification connection error:", err);
+            toast({
+              title: "Errore di Connessione",
+              description: err.message || "Impossibile contattare il server per la verifica.",
+              variant: "destructive",
+            });
+          } finally {
+            localStorage.removeItem('humanity_verifier');
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        };
+
+        verifyHumanity();
+      }
+    } else if (humanitySuccess) {
       setActiveTab("humanity");
       toast({
         title: "Verifica Humanity Completata",
@@ -71,7 +153,7 @@ export default function CreatorPortal() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [toast]);
+  }, [toast, currentCreatorId, queryClient]);
 
   const {
     register,

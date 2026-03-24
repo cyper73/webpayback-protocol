@@ -19,6 +19,7 @@ interface CitationStats {
     citationContext: string;
     rewardAmount: string | number;
     timestamp: string;
+    metadata?: any;
   }>;
 }
 
@@ -226,7 +227,14 @@ export function CitationRewardsDashboard({ creatorId }: CitationRewardsDashboard
                         <div className="flex items-center space-x-3">
                           {getAIModelIcon(citation.aiModel)}
                           <div>
-                            <div className="font-medium">{citation.aiModel.toUpperCase()} Citation</div>
+                            <div className="font-medium flex items-center gap-2">
+                              {citation.aiModel.toUpperCase()} Citation
+                              {citation.metadata?.rewardCalculation?.humanityMultiplier > 1 && (
+                                <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/30 text-[10px] h-5 px-1.5">
+                                  Human Bonus {citation.metadata.rewardCalculation.humanityMultiplier}x
+                                </Badge>
+                              )}
+                            </div>
                             <div className="text-sm text-muted-foreground">
                               {citation.citationContext?.slice(0, 50)}...
                             </div>

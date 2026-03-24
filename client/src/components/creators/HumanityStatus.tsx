@@ -38,7 +38,9 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
     },
     onSuccess: (data) => {
       // In a real app with PKCE, we would store data.codeVerifier in localStorage here
-      // localStorage.setItem('humanity_verifier', data.codeVerifier);
+      if (data.codeVerifier) {
+        localStorage.setItem('humanity_verifier', data.codeVerifier);
+      }
       
       // Redirect the user to the Humanity Protocol authorization page
       if (data.url) {

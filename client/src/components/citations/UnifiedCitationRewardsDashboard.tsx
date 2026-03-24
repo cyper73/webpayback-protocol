@@ -18,6 +18,7 @@ interface UnifiedCitationStats {
     citationContext: string;
     rewardAmount: string | number;
     timestamp: string;
+    metadata?: any;
   }>;
   citedSources: string[];
   isAuthentic: boolean;
@@ -302,8 +303,13 @@ export function UnifiedCitationRewardsDashboard({ userId, walletAddress }: Unifi
                             {citation.aiModel}
                           </Badge>
                           <Badge variant="outline" className="border-green-500 text-green-400 bg-green-500/10">
-                            +{Number(citation.rewardAmount).toFixed(2)} WPT
+                            +{Number(citation.rewardAmount).toFixed(4)} WPT
                           </Badge>
+                          {citation.metadata?.rewardCalculation?.humanityMultiplier > 1 && (
+                            <Badge variant="outline" className="border-amber-500 text-amber-500 bg-amber-500/10">
+                              Human Bonus {citation.metadata.rewardCalculation.humanityMultiplier}x
+                            </Badge>
+                          )}
                         </div>
                         <span className="text-sm text-muted-foreground">
                           {new Date(citation.timestamp).toLocaleString()}
