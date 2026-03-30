@@ -61,7 +61,7 @@ export default function Dashboard() {
               <div className="hidden md:flex items-center space-x-1 bg-glass-dark px-3 py-1 rounded-full">
                 <div className={`w-2 h-2 rounded-full ${isFetching ? 'bg-amber-400 animate-pulse' : 'bg-neon-green'} pulse-animation`}></div>
                 <span className="text-sm text-gray-300">
-                  {isFetching ? 'Syncing...' : 'Level 280 AI Agents Active'}
+                  {isFetching ? 'Syncing...' : 'System Active'}
                 </span>
               </div>
             </div>

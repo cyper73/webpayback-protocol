@@ -78,8 +78,8 @@ export function WalletVerification({
         onVerificationComplete(signature, message);
         setVerificationStatus('success');
         toast({
-          title: "Wallet Verificato",
-          description: "Il tuo account è stato collegato con successo.",
+          title: "Wallet Verified",
+          description: "Your account has been successfully linked.",
         });
       } else {
         // Fallback if they logged in with an external wallet via Privy
@@ -90,8 +90,8 @@ export function WalletVerification({
       console.error('Signature error:', err);
       setVerificationStatus('error');
       toast({
-        title: "Errore di Verifica",
-        description: "Impossibile verificare il wallet.",
+        title: "Verification Error",
+        description: "Unable to verify the wallet.",
         variant: "destructive"
       });
     } finally {
@@ -322,10 +322,10 @@ export function WalletVerification({
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
           <Shield className="h-5 w-5 text-electric-blue" />
-          Registrazione Account
+          Account Registration
         </CardTitle>
         <CardDescription>
-          Accedi con Email o Social. Creeremo automaticamente un wallet sicuro per te, senza bisogno di estensioni o password complesse.
+          Verify your humanity to automatically create a secure wallet.
         </CardDescription>
       </CardHeader>
       
@@ -333,18 +333,21 @@ export function WalletVerification({
         {!authenticated ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <div className="bg-electric-blue/10 p-4 rounded-full mb-2">
-              <Mail className="h-12 w-12 text-electric-blue" />
+              <Shield className="h-12 w-12 text-electric-blue" />
             </div>
-            <h3 className="text-lg font-medium text-white text-center">Nessun Wallet Richiesto</h3>
+            <h3 className="text-lg font-medium text-white text-center">Prove Your Humanity</h3>
             <p className="text-sm text-gray-400 text-center max-w-sm mb-4">
-              Usa il tuo account Google, Apple o la tua Email. Gestiremo noi la crittografia in modo sicuro.
+              We use Humanity Protocol to ensure you are a real person. A secure wallet will be created automatically for you.
             </p>
             <Button 
-              onClick={login}
+              onClick={() => {
+                // Redirect to our Humanity login flow instead of Privy
+                window.location.href = '/login';
+              }}
               className="w-full sm:w-auto bg-electric-blue hover:bg-electric-blue/80 text-white px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.5)]"
             >
-              <Wallet className="mr-2 h-5 w-5" />
-              Accedi / Registrati
+              <Shield className="mr-2 h-5 w-5" />
+              Verify & Sign In
             </Button>
           </div>
         ) : (
@@ -352,13 +355,13 @@ export function WalletVerification({
             <Alert className="bg-green-500/10 border-green-500/30">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <AlertDescription className="text-green-200">
-                Sei autenticato! Il tuo wallet è pronto all'uso.
+                You are authenticated! Your wallet is ready to use.
               </AlertDescription>
             </Alert>
             
             <div className="bg-black/60 p-4 rounded-lg border border-gray-800">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-400">Il tuo Indirizzo Wallet:</span>
+                <span className="text-sm text-gray-400">Your Wallet Address:</span>
                 <span className="text-xs bg-electric-blue/20 text-electric-blue px-2 py-1 rounded">Privy Embedded</span>
               </div>
               <code className="text-sm text-white break-all">{user?.wallet?.address || walletAddress}</code>
@@ -367,10 +370,10 @@ export function WalletVerification({
             {verificationStatus === 'success' ? (
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-800">
                 <div className="flex items-center text-green-400 text-sm">
-                  <Shield className="h-4 w-4 mr-1" /> Account Verificato e Sicuro
+                  <Shield className="h-4 w-4 mr-1" /> Verified and Secure Account
                 </div>
                 <Button variant="ghost" size="sm" onClick={logout} className="text-gray-400 hover:text-white">
-                  <LogOut className="h-4 w-4 mr-2" /> Disconnetti
+                  <LogOut className="h-4 w-4 mr-2" /> Log Out
                 </Button>
               </div>
             ) : (
@@ -380,9 +383,9 @@ export function WalletVerification({
                 className="w-full bg-electric-blue hover:bg-electric-blue/80"
               >
                 {isVerifying ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifica in corso...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</>
                 ) : (
-                  <><Shield className="mr-2 h-4 w-4" /> Completa Registrazione</>
+                  <><Shield className="mr-2 h-4 w-4" /> Complete Registration</>
                 )}
               </Button>
             )}

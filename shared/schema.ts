@@ -106,26 +106,7 @@ export const blockchainNetworks = pgTable("blockchain_networks", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const aiAgents = pgTable("ai_agents", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // webpayback, autoregolator, poolagent, transparentagent
-  status: text("status").default("active"), // active, inactive, processing
-  expertiseLevel: integer("expertise_level").default(280),
-  lastActivity: timestamp("last_activity").defaultNow(),
-  metrics: jsonb("metrics").default({}),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const agentCommunications = pgTable("agent_communications", {
-  id: serial("id").primaryKey(),
-  fromAgentId: integer("from_agent_id").references(() => aiAgents.id),
-  toAgentId: integer("to_agent_id").references(() => aiAgents.id),
-  message: text("message").notNull(),
-  messageType: text("message_type").default("question"), // question, answer, notification
-  timestamp: timestamp("timestamp").defaultNow(),
-  isRead: boolean("is_read").default(false),
-});
+// Deprecated Agent tables removed
 
 export const contentTracking = pgTable("content_tracking", {
   id: serial("id").primaryKey(),
@@ -505,23 +486,7 @@ export const blockchainNetworksRelations = relations(blockchainNetworks, ({ many
   poolManagement: many(poolManagement),
 }));
 
-export const aiAgentsRelations = relations(aiAgents, ({ many }) => ({
-  sentMessages: many(agentCommunications, { relationName: "sentMessages" }),
-  receivedMessages: many(agentCommunications, { relationName: "receivedMessages" }),
-}));
-
-export const agentCommunicationsRelations = relations(agentCommunications, ({ one }) => ({
-  fromAgent: one(aiAgents, {
-    fields: [agentCommunications.fromAgentId],
-    references: [aiAgents.id],
-    relationName: "sentMessages",
-  }),
-  toAgent: one(aiAgents, {
-    fields: [agentCommunications.toAgentId],
-    references: [aiAgents.id],
-    relationName: "receivedMessages",
-  }),
-}));
+// Agent relations deprecated
 
 export const contentTrackingRelations = relations(contentTracking, ({ one }) => ({
   creator: one(creators, {
@@ -673,20 +638,7 @@ export const insertBlockchainNetworkSchema = createInsertSchema(blockchainNetwor
   gasUsed: true,
 });
 
-export const insertAiAgentSchema = createInsertSchema(aiAgents).pick({
-  name: true,
-  type: true,
-  status: true,
-  expertiseLevel: true,
-  metrics: true,
-});
-
-export const insertAgentCommunicationSchema = createInsertSchema(agentCommunications).pick({
-  fromAgentId: true,
-  toAgentId: true,
-  message: true,
-  messageType: true,
-});
+// Agent schemas deprecated
 
 export const insertContentTrackingSchema = createInsertSchema(contentTracking).pick({
   creatorId: true,
@@ -883,11 +835,7 @@ export type Creator = typeof creators.$inferSelect;
 export type InsertBlockchainNetwork = z.infer<typeof insertBlockchainNetworkSchema>;
 export type BlockchainNetwork = typeof blockchainNetworks.$inferSelect;
 
-export type InsertAiAgent = z.infer<typeof insertAiAgentSchema>;
-export type AiAgent = typeof aiAgents.$inferSelect;
-
-export type InsertAgentCommunication = z.infer<typeof insertAgentCommunicationSchema>;
-export type AgentCommunication = typeof agentCommunications.$inferSelect;
+// Types for deprecated agents removed
 
 export type InsertContentTracking = z.infer<typeof insertContentTrackingSchema>;
 export type ContentTracking = typeof contentTracking.$inferSelect;

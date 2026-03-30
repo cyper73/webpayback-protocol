@@ -102,14 +102,14 @@ export default function ProtectedRewardsModule() {
               <div className="space-y-3">
                 <Button 
                   onClick={() => window.location.href = '/login'}
-                  className="w-full"
+                  className="w-full bg-electric-blue hover:bg-electric-blue/80"
                 >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Go to Login Page
+                  <Shield className="h-4 w-4 mr-2" />
+                  Verify Humanity & Login
                 </Button>
                 
                 <Button 
-                  onClick={() => window.location.href = '/creators'}
+                  onClick={() => window.location.href = '/login'}
                   variant="outline"
                   className="w-full"
                 >

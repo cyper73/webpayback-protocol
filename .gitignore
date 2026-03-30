@@ -156,3 +156,6 @@ security-monitoring-dashboard.js
 
 # Test pages (internal functionality)
 test-connectivity.tsx
+
+# Private project roadmap
+HUMANITY_GRANT_ROADMAP.md

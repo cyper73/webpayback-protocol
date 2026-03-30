@@ -110,10 +110,10 @@ router.get("/callback", async (req, res) => {
     }
 
     // Decode state to get userId
-    let userId: number;
+    let userId: string | number;
     try {
         const decodedState = JSON.parse(Buffer.from(state as string, 'base64').toString('utf-8'));
-        userId = parseInt(decodedState.userId);
+        userId = decodedState.userId;
     } catch (e) {
         return res.status(400).send("Invalid state parameter");
     }
@@ -121,9 +121,16 @@ router.get("/callback", async (req, res) => {
     // Get the codeVerifier from the frontend (passed via cookie/session in a real app)
     // For this prototype, if it's a mock, we bypass it
     if (process.env.MOCK_HUMANITY === 'true') {
+        if (userId === "login") {
+            return res.redirect('/login?humanity_success=true&mock=true');
+        }
         // Mock successful verification
-        await humanityService.getStatus(userId); // Just to check DB
+        await humanityService.getStatus(userId as number); // Just to check DB
         return res.redirect('/creators?humanity_success=true');
+    }
+
+    if (userId === "login") {
+        return res.redirect(`/login?humanity_code=${code}&humanity_state=${state}`);
     }
 
     // Instead of showing a blank page, we redirect back to the creator portal
@@ -137,7 +144,105 @@ router.get("/callback", async (req, res) => {
 });
 
 /**
+ * POST /api/humanity/login
+ * Handle Humanity First login/registration flow
+ */
+router.post("/login", async (req, res) => {
+  try {
+    const { code, codeVerifier } = req.body;
+
+    if (process.env.MOCK_HUMANITY === 'true') {
+        // Create a mock user
+        const { storage } = await import('../storage');
+        const mockWallet = '0x' + Math.random().toString(16).slice(2, 42).padEnd(40, '0');
+        
+        const newCreator = await storage.createCreator({
+            websiteUrl: 'pending',
+            walletAddress: mockWallet,
+            contentCategory: 'other',
+            isWalletVerified: true,
+            twoFactorEnabled: false,
+            humanityScore: 85,
+            isHumanityVerified: true,
+            humanityVerificationDate: new Date()
+        });
+
+        return res.json({ 
+            success: true, 
+            message: "Mock login successful!", 
+            creator: newCreator,
+            sessionToken: 'mock-session-token'
+        });
+    }
+
+    if (!code || !codeVerifier) {
+        return res.status(400).json({ error: "Missing OAuth parameters" });
+    }
+
+    // 1. Exchange code and verify humanity
+    // Use a special user ID or handle internally in handleCallback if user doesn't exist yet
+    // Wait, handleCallback expects a userId (number). We need a variant for login.
+    const result = await humanityService.handleLoginCallback(code, codeVerifier);
+    
+    if (!result.isVerified) {
+        return res.status(400).json({ 
+            success: false, 
+            message: "Humanity verification failed." 
+        });
+    }
+
+    // 2. Find or create user based on Humanity credentials
+    const { storage } = await import('../storage');
+    // Using email or a unique identifier from Humanity. 
+    // Assuming result.credentialId or result.email is available.
+    const humanityId = result.credentialId || `human_${Date.now()}`;
+    
+    // In a real app, we'd look up by humanityId. Here we'll just create a new one if it's a new login
+    // or look up if we have a way. For simplicity, we create a new wallet via Privy API
+    
+    const { PrivyClient } = await import('@privy-io/node');
+    const privy = new PrivyClient({
+        appId: process.env.VITE_PRIVY_APP_ID || '',
+        appSecret: process.env.PRIVY_APP_SECRET || ''
+    });
+
+    // Create a Privy Server Wallet for this user
+    let walletAddress = "";
+    try {
+        const wallet = await privy.wallets().create({ chainType: 'ethereum' });
+        walletAddress = wallet.address;
+    } catch (e) {
+        console.error("Failed to create Privy wallet:", e);
+        // Fallback for dev
+        walletAddress = '0x' + Math.random().toString(16).slice(2, 42).padEnd(40, '0');
+    }
+
+    const newCreator = await storage.createCreator({
+        websiteUrl: 'pending',
+        walletAddress: walletAddress,
+        contentCategory: 'other',
+        isWalletVerified: true, // We trust Privy server wallets
+        twoFactorEnabled: false,
+        humanityScore: result.score,
+        isHumanityVerified: true,
+        humanityVerificationDate: new Date()
+    });
+
+    res.json({ 
+        success: true, 
+        message: "User authenticated and wallet created!", 
+        creator: newCreator,
+        sessionToken: 'custom-auth-token' // In production, generate a real JWT
+    });
+  } catch (error) {
+    console.error("Login error detail:", error);
+    res.status(500).json({ error: "Login process failed", details: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+/**
  * POST /api/humanity/verify
+
  * Trigger a new verification check using the code from the callback
  */
 router.post("/verify", verifyPrivyToken, async (req, res) => {

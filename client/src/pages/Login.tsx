@@ -16,6 +16,89 @@ export default function Login() {
   const { toast } = useToast();
   const [loginSession, setLoginSession] = useState<LoginSession | null>(null);
 
+  // Handle Humanity Protocol callback redirect
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('humanity_code');
+    const mockSuccess = searchParams.get('humanity_success');
+    const error = searchParams.get('humanity_error');
+
+    if (error) {
+      toast({
+        title: "Verification Failed",
+        description: "There was an error with Humanity Protocol verification.",
+        variant: "destructive"
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/login');
+      return;
+    }
+
+    const completeLogin = async () => {
+      try {
+        setIsConnecting(true);
+        // Get code verifier that was potentially stored before redirecting
+        // Or in mock mode, it doesn't matter
+        
+        const response = await fetch('/api/humanity/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            code: code || 'mock_code', 
+            codeVerifier: 'mock_verifier' // In a real PKCE flow we'd get this from localStorage
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Login failed');
+        }
+
+        // We got a successful login with a wallet created by backend
+        const session = {
+          walletAddress: data.creator.walletAddress,
+          loginTime: new Date().toISOString()
+        };
+        
+        setLoginSession(session);
+        localStorage.setItem('webpayback_session', JSON.stringify({
+          ...session,
+          isAuthenticated: true,
+          token: data.sessionToken
+        }));
+
+        window.dispatchEvent(new CustomEvent('webpayback-login', {
+          detail: session
+        }));
+
+        toast({
+          title: "Humanity Verified",
+          description: "Wallet automatically generated and assigned.",
+        });
+
+        // Redirect to Creator Portal
+        setTimeout(() => {
+          window.location.href = '/creators';
+        }, 1500);
+
+      } catch (err: any) {
+        toast({
+          title: "Login Error",
+          description: err.message,
+          variant: "destructive"
+        });
+      } finally {
+        setIsConnecting(false);
+        window.history.replaceState({}, document.title, '/login');
+      }
+    };
+
+    if (code || mockSuccess === 'true') {
+      completeLogin();
+    }
+  }, []);
+
   // Sync Privy state with local session state
   useEffect(() => {
     if (ready && authenticated && user?.wallet?.address) {
@@ -44,6 +127,32 @@ export default function Login() {
     }
   }, [ready, authenticated, user]);
 
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const handleHumanityLogin = async () => {
+    try {
+      setIsConnecting(true);
+      // In a real implementation this would fetch the auth URL from backend
+      // and redirect to Humanity Protocol OAuth flow
+      const res = await fetch('/api/humanity/auth-url/login');
+      if (!res.ok) throw new Error('Failed to get Humanity Protocol URL');
+      const data = await res.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Invalid URL returned');
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to Humanity Protocol. Please try again.",
+        variant: "destructive"
+      });
+      setIsConnecting(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     toast({
@@ -68,16 +177,16 @@ export default function Login() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-500">
                 <CheckCircle className="h-6 w-6" />
-                Accesso WebPayback Completato
+                WebPayback Login Completed
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center space-y-4">
                 <p className="text-lg font-medium text-white">
-                  Sei autenticato in modo sicuro.
+                  You are securely authenticated.
                 </p>
                 <p className="text-sm text-gray-400">
-                  Il tuo Embedded Wallet è attivo e pronto per interagire con la blockchain.
+                  Your Embedded Wallet is active and ready to interact with the blockchain.
                 </p>
               </div>
 
@@ -85,7 +194,7 @@ export default function Login() {
                 <div className="flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-electric-blue" />
                   <span className="text-sm font-medium text-electric-blue">
-                    Indirizzo Wallet Assegnato
+                    Assigned Wallet Address
                   </span>
                 </div>
                 <p className="text-xs font-mono text-gray-300 bg-black/50 border border-gray-800 p-3 rounded break-all">
@@ -97,12 +206,12 @@ export default function Login() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-white">
-                      Moduli Sbloccati
+                      Unlocked Modules
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-green-500/20 text-green-400 border-none">
-                      Dashboard Creatori ✓
+                      Creator Dashboard ✓
                     </Badge>
                     <Badge className="bg-electric-blue/20 text-electric-blue border-none">
                       Humanity Protocol ✓
@@ -116,14 +225,14 @@ export default function Login() {
                   onClick={() => window.location.href = '/creators'}
                   className="flex-1 bg-electric-blue hover:bg-electric-blue/80 text-white"
                 >
-                  Vai alla Dashboard
+                  Go to Dashboard
                 </Button>
                 <Button 
                   onClick={handleLogout}
                   variant="outline"
                   className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
                 >
-                  <LogOut className="w-4 h-4 mr-2" /> Disconnetti
+                  <LogOut className="w-4 h-4 mr-2" /> Log Out
                 </Button>
               </div>
             </CardContent>
@@ -147,7 +256,7 @@ export default function Login() {
             </h1>
           </div>
           <p className="text-md text-gray-400 max-w-md mx-auto">
-            Accedi senza password. Creeremo automaticamente un wallet sicuro per te.
+            Sign in without a password. We'll automatically create a secure wallet for you.
           </p>
         </div>
 
@@ -155,19 +264,24 @@ export default function Login() {
           <CardContent className="pt-8 pb-8 space-y-6">
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="bg-electric-blue/10 p-4 rounded-full mb-2">
-                <Mail className="h-10 w-10 text-electric-blue" />
+                <Shield className="h-10 w-10 text-electric-blue" />
               </div>
-              <h3 className="text-xl font-medium text-white text-center">Inizia da qui</h3>
+              <h3 className="text-xl font-medium text-white text-center">Prove Your Humanity</h3>
               <p className="text-sm text-gray-400 text-center max-w-sm mb-4">
-                Usa Email, Google o il tuo Wallet Web3. 
-                L'accesso è unificato e sicuro grazie a Privy.
+                We use Humanity Protocol to ensure you are a real person. 
+                A secure wallet will be created automatically for you.
               </p>
               <Button 
-                onClick={login}
+                onClick={handleHumanityLogin}
+                disabled={isConnecting}
                 className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.5)]"
               >
-                <Wallet className="mr-2 h-5 w-5" />
-                Accedi / Registrati
+                {isConnecting ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Shield className="mr-2 h-5 w-5" />
+                )}
+                {isConnecting ? "Connecting..." : "Verify & Sign In"}
               </Button>
             </div>
           </CardContent>
@@ -180,7 +294,7 @@ export default function Login() {
               onClick={() => window.location.href = '/'}
               className="text-gray-400 hover:text-electric-blue"
             >
-              Torna alla Home
+              Back to Home
             </Button>
           </div>
         </div>

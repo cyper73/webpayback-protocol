@@ -1,7 +1,7 @@
 // Simplified English-only translations for better stability and international understanding
 export const translations = {
   webpaybackProtocol: "WebPayback Protocol",
-  level280Agents: "Level 280 AI Agents Active",
+  systemActive: "System Active",
   syncing: "Syncing...",
   tokenLive: "WPT Token Live",
   

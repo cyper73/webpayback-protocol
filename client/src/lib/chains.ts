@@ -1,5 +1,24 @@
 import { defineChain } from 'viem';
 
+export const humanityMainnet = defineChain({
+  id: 6985385,
+  name: 'Humanity Mainnet',
+  network: 'humanity-mainnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'H',
+    symbol: 'H',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://humanity-mainnet.g.alchemy.com/public'],
+    },
+    public: {
+      http: ['https://humanity-mainnet.g.alchemy.com/public'],
+    },
+  },
+});
+
 export const humanityTestnet = defineChain({
   id: 1942999413,
   name: 'Humanity Testnet',

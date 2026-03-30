@@ -32,7 +32,7 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
       setIsVerifying(true);
       const res = await fetch(`/api/humanity/auth-url/${creatorId}`);
       if (!res.ok) {
-        throw new Error('Impossibile connettersi a Humanity Protocol');
+        throw new Error('Unable to connect to Humanity Protocol');
       }
       return res.json();
     },
@@ -49,7 +49,7 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Errore di Connessione",
+        title: "Connection Error",
         description: error.message,
         variant: "destructive",
       });
@@ -90,13 +90,13 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
             Proof of Humanity
           </CardTitle>
           <Badge variant={isVerified ? "default" : "outline"} className={isVerified ? "bg-green-600 hover:bg-green-700" : "text-amber-500 border-amber-500"}>
-            {isVerified ? 'Verificato' : 'Non Verificato'}
+            {isVerified ? 'Verified' : 'Not Verified'}
           </Badge>
         </div>
         <CardDescription>
           {isVerified 
-            ? "La tua identità umana è confermata sulla blockchain."
-            : "Verifica la tua umanità per sbloccare i moltiplicatori di ricompensa."}
+            ? "Your human identity is confirmed on the blockchain."
+            : "Verify your humanity to unlock reward multipliers."}
         </CardDescription>
       </CardHeader>
       
@@ -122,7 +122,7 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
             
             <div className="text-xs text-gray-500 flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-green-500" />
-              Ultima verifica: {status.verificationDate ? new Date(status.verificationDate).toLocaleDateString() : 'N/A'}
+              Last verification: {status.verificationDate ? new Date(status.verificationDate).toLocaleDateString() : 'N/A'}
             </div>
           </div>
         ) : (
@@ -130,11 +130,11 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
             <div className="bg-black/40 rounded-lg p-4 border border-gray-800 flex items-start gap-3">
               <ShieldAlert className="h-5 w-5 text-amber-500 mt-0.5" />
               <div className="text-sm text-gray-300">
-                <p className="font-medium text-white mb-1">Perché verificarsi?</p>
+                <p className="font-medium text-white mb-1">Why verify?</p>
                 <ul className="list-disc pl-4 space-y-1 text-xs">
-                  <li>Moltiplicatore ricompense fino a 2x</li>
-                  <li>Protezione contro i bot e sybil attack</li>
-                  <li>Accesso alla governance del protocollo</li>
+                  <li>Reward multiplier up to 2x</li>
+                  <li>Protection against bots and sybil attacks</li>
+                  <li>Access to protocol governance</li>
                 </ul>
               </div>
             </div>
@@ -147,12 +147,12 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
               {isVerifying ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connessione all'Oracolo...
+                  Connecting to Oracle...
                 </>
               ) : (
                 <>
                   <Fingerprint className="mr-2 h-4 w-4" />
-                  Avvia Verifica Humanity
+                  Start Humanity Verification
                 </>
               )}
             </Button>

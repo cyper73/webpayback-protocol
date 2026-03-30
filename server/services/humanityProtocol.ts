@@ -23,6 +23,15 @@ interface HumanityVerificationResult {
   score: number;
   verificationDate?: string;
   credentialId?: string;
+  socialAccounts?: string[];
+  googleConnected?: boolean;
+  twitterConnected?: boolean;
+  facebookConnected?: boolean;
+  linkedinConnected?: boolean;
+  githubConnected?: boolean;
+  discordConnected?: boolean;
+  telegramConnected?: boolean;
+  email?: string;
 }
 
 export class HumanityProtocolService {
@@ -74,6 +83,55 @@ export class HumanityProtocolService {
   }
 
   /**
+   * Handles the OAuth callback without an existing userId (for Login flow)
+   */
+  async handleLoginCallback(code: string, codeVerifier: string): Promise<HumanityVerificationResult> {
+    if (!this.sdk) throw new Error("SDK not initialized");
+
+    try {
+      const token = await this.sdk.exchangeCodeForToken({
+        code,
+        codeVerifier,
+      });
+
+      let isVerified = true;
+      let score = 100;
+      let credentialId = "";
+
+      try {
+        const results = await this.sdk.verifyPresets({
+          accessToken: token.accessToken,
+          presets: ['is_human', 'humanity_score'],
+        });
+
+        if (results.is_human?.credential?.credentialSubject?.is_human === false) {
+            isVerified = false;
+        }
+
+        if (results.humanity_score?.credential?.credentialSubject?.score) {
+            score = Number(results.humanity_score.credential.credentialSubject.score);
+        }
+
+        // We could extract the unique humanity ID here if available in the credential
+        credentialId = results.is_human?.credential?.id || "";
+
+      } catch (err) {
+        console.warn("Failed to verify some presets during login", err);
+      }
+
+      return {
+        isVerified,
+        score,
+        credentialId,
+        verificationDate: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error("Error exchanging code in handleLoginCallback:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Handles the OAuth callback, exchanges code for token, and verifies presets
    */
   async handleCallback(code: string, codeVerifier: string, userId: number): Promise<HumanityVerificationResult> {
@@ -88,16 +146,46 @@ export class HumanityProtocolService {
 
       let isVerified = true; // Assume true if we got a token with just openid
       let score = 100;
+      let socialAccounts: string[] = [];
+      let googleConnected = false;
+      let twitterConnected = false;
+      let facebookConnected = false;
+      let linkedinConnected = false;
+      let githubConnected = false;
+      let discordConnected = false;
+      let telegramConnected = false;
+      let email = "";
 
       // 2. Try to verify Presets using the token (might fail if scopes were limited)
       try {
         const results = await this.sdk.verifyPresets({
           accessToken: token.accessToken,
-          presets: ['is_human', 'humanity_score'],
+          presets: [
+            'is_human', 
+            'humanity_score', 
+            'social_accounts', 
+            'google_connected', 
+            'twitter_connected',
+            'facebook_connected',
+            'linkedin_connected',
+            'github_connected',
+            'discord_connected',
+            'telegram_connected',
+            'email'
+          ],
         });
         
         isVerified = (results as any)?.is_human?.verified ?? true;
         score = (results as any)?.humanity_score?.value ?? 100;
+        socialAccounts = (results as any)?.social_accounts?.value ?? [];
+        googleConnected = (results as any)?.google_connected?.value ?? false;
+        twitterConnected = (results as any)?.twitter_connected?.value ?? false;
+        facebookConnected = (results as any)?.facebook_connected?.value ?? false;
+        linkedinConnected = (results as any)?.linkedin_connected?.value ?? false;
+        githubConnected = (results as any)?.github_connected?.value ?? false;
+        discordConnected = (results as any)?.discord_connected?.value ?? false;
+        telegramConnected = (results as any)?.telegram_connected?.value ?? false;
+        email = (results as any)?.email?.value ?? "";
       } catch (presetError) {
         console.warn("Could not verify presets (likely due to scope limitations). Proceeding with basic openid verification.", presetError);
       }
@@ -108,13 +196,23 @@ export class HumanityProtocolService {
           isHumanityVerified: isVerified,
           humanityScore: score,
           humanityVerificationDate: isVerified ? new Date() : null,
+          // socialAccounts could be stored in a JSONB field if schema is updated
         })
         .where(eq(creators.id, userId));
 
       return {
         isVerified,
         score,
-        verificationDate: isVerified ? new Date().toISOString() : undefined
+        verificationDate: isVerified ? new Date().toISOString() : undefined,
+        socialAccounts,
+        googleConnected,
+        twitterConnected,
+        facebookConnected,
+        linkedinConnected,
+        githubConnected,
+        discordConnected,
+        telegramConnected,
+        email
       };
 
     } catch (error) {

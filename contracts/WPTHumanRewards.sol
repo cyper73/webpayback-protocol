@@ -30,7 +30,7 @@ contract WPTHumanRewards is ERC20, AccessControl, Pausable {
     
     // 🛡️ ANTI-INFLATION LIMITS
     uint256 public MAX_DAILY_MINT = 10000 * 10**18;
-    uint256 public constant MAX_TOTAL_SUPPLY = 100000000 * 10**18;
+    uint256 public constant MAX_TOTAL_SUPPLY = 100000000 * 10**18; // 100 Million
     
     // 🤖 ANTI-BOT PROTECTIONS
     uint256 public constant TRANSFER_COOLDOWN = 60;
@@ -77,6 +77,10 @@ contract WPTHumanRewards is ERC20, AccessControl, Pausable {
         
         // Whitelist founder
         whitelisted[msg.sender] = true;
+        
+        // As per Tokenomics Phase 1 - 0 Initial Supply.
+        // The token must start with 0 supply and ONLY mint based on human verification and rewards.
+        // No initial minting of the 100M supply here.
     }
     
     // 🔐 SECURITY MODIFIERS

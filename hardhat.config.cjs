@@ -19,10 +19,19 @@ module.exports = {
     }
   },
   networks: {
+    humanityMainnet: {
+      url: "https://humanity-mainnet.g.alchemy.com/public", // L'RPC pubblico ufficiale della Mainnet
+      chainId: 6985385,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    },
     humanityTestnet: {
-      url: "https://rpc.testnet.humanity.org", // L'RPC pubblico ufficiale
+      url: "https://rpc.testnet.humanity.org/",
       chainId: 1942999413,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    },
+    humanityMock: {
+      url: "http://127.0.0.1:8545", // Rete locale per i test falliti
+      chainId: 31337
     },
     polygon: {
       url: "https://polygon-rpc.com/",

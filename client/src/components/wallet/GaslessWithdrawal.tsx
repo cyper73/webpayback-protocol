@@ -112,8 +112,8 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
     } catch (error) {
       console.error("Withdrawal failed:", error);
       toast({
-        title: "Errore di Prelievo",
-        description: "Impossibile completare la transazione gasless al momento.",
+        title: "Withdrawal Error",
+        description: error instanceof Error ? error.message : "Failed to execute gasless withdrawal",
         variant: "destructive"
       });
     } finally {

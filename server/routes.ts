@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { blockchainService } from "./services/blockchain";
-import { agentService } from "./services/agents";
 import { web3Service } from "./services/web3";
 import { contentMonitoringService } from "./services/contentMonitoring";
 import { gasManager } from "./services/gasManager";
@@ -21,12 +20,10 @@ import { multiWalletVerificationService, WalletType } from "./services/multiWall
 import { twoFactorAuthService } from "./services/twoFactorAuth";
 import { require2FA, suggest2FA } from "./middleware/twoFactorProtection";
 import { db } from "./db";
-import { authenticateAdmin, adminLogin } from "./adminAuth";
 import { creators, contentTracking } from "@shared/schema";
 import { eq, inArray, desc, and, gte, sql } from "drizzle-orm";
 import { 
   insertCreatorSchema, 
-  insertAgentCommunicationSchema,
   insertContentTrackingSchema,
   insertRewardDistributionSchema,
   insertBlockchainNetworkSchema,
@@ -82,14 +79,17 @@ import { sessionThrottling, getSessionStats } from "./security/sessionThrottling
 import { apiThrottling, getApiUsageStats } from "./security/apiThrottling";
 import { automationRouter } from "./routes/automation";
 import { contentCertificateRouter } from "./routes/contentCertificate";
-import { registerAllowanceRoutes } from "./routes/allowance";
 import poolHealthRouter from "./routes/poolHealth";
 import antiDumpSlippageRoutes from "./routes/antiDumpSlippage";
 import userRoutes from "./routes/user";
 import contractReservesRouter from "./routes/contractReserves";
 import humanityRouter from "./routes/humanity";
+import { aiShieldMiddleware } from "./security/aiShieldMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Apply AI Shield Middleware globally to protect content endpoints
+  app.use("/api/content", aiShieldMiddleware());
   
   // Apply NEW security middlewares globally - TEMPORARILY DISABLED FOR DASHBOARD LOADING
   // app.use(sessionThrottling);    // Throttle unauthenticated sessions
@@ -498,47 +498,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Initialize AI agents
-  app.post("/api/agents/initialize", async (req, res) => {
-    try {
-      await agentService.initializeAgents();
-      res.json({ success: true, message: "AI agents initialized successfully" });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // Get all agents
-  app.get("/api/agents", async (req, res) => {
-    try {
-      const agents = await storage.getAllAgents();
-      res.json(agents);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // Get agent communications
-  app.get("/api/agents/communications", async (req, res) => {
-    try {
-      const communications = await storage.getAgentCommunications();
-      res.json(communications);
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  // Send agent communication with CSRF protection
-  app.post("/api/agents/communicate", csrfProtection, async (req, res) => {
-    try {
-      const validatedData = insertAgentCommunicationSchema.parse(req.body);
-      const communication = await storage.createAgentCommunication(validatedData);
-      res.json(communication);
-    } catch (error) {
-      res.status(400).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
   // Get blockchain networks
   app.get("/api/blockchain/networks", async (req, res) => {
     try {
@@ -1610,14 +1569,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/access", async (req, res) => {
     try {
       console.log('🔍 AI ACCESS REQUEST RECEIVED');
-      const userAgent = req.get('User-Agent') || '';
+      const userAgent = req.headers['user-agent'] || req.get('User-Agent') || '';
       const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
-      const { url } = req.body;
+      const { url, walletAddress } = req.body;
       
       console.log(`📊 Request Details:`);
       console.log(`   User-Agent: ${userAgent}`);
       console.log(`   IP Address: ${ipAddress}`);
       console.log(`   URL: ${url}`);
+      if (walletAddress) console.log(`   Wallet Address: ${walletAddress}`);
       
       // Simple AI detection without external dependencies
       const lowerUA = userAgent.toLowerCase();
@@ -1648,14 +1608,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiType = 'grok';
         confidence = 0.92;
         console.log('✅ DETECTED: Grok AI (confidence: 92%)');
+      } else if (lowerUA.includes('ccbot') || lowerUA.includes('google-extended')) {
+        aiType = 'crawler';
+        confidence = 0.95;
+        console.log('✅ DETECTED: AI Crawler (confidence: 95%)');
       } else if (lowerUA.includes('ai-agent') || lowerUA.includes('bot')) {
         aiType = 'bot';
         confidence = 0.7;
         console.log('✅ DETECTED: Generic AI Bot (confidence: 70%)');
       } else {
-        confidence = 0.4; // Default low confidence
-        console.log('❌ NO CLEAR AI PATTERN DETECTED (confidence: 40%)');
-        console.log(`   User-Agent analizzato: ${userAgent}`);
+        // If the request came from our middleware or beacon, we trust it more
+        if (req.body.source === 'express_middleware' || walletAddress) {
+           aiType = 'bot';
+           confidence = 0.8;
+           console.log('✅ DETECTED: Verified by Middleware/Beacon (confidence: 80%)');
+        } else {
+          confidence = 0.4; // Default low confidence
+          console.log('❌ NO CLEAR AI PATTERN DETECTED (confidence: 40%)');
+          console.log(`   User-Agent analizzato: ${userAgent}`);
+        }
       }
       
       if (confidence < 0.5) {
@@ -1665,18 +1636,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Find creator by URL pattern matching
+      // Find creator by wallet address or URL pattern matching
       const creators = await storage.getAllCreators();
-      const creator = creators.find(c => 
-        url.includes(c.websiteUrl) || 
-        c.websiteUrl.includes(url) ||
-        (url.includes('4AYDSzfgPNY') && c.id === 4) // Direct match for Creator #4
-      );
+      let creator = null;
+      
+      if (walletAddress) {
+        creator = creators.find(c => c.walletAddress?.toLowerCase() === walletAddress.toLowerCase());
+      }
+      
+      if (!creator && url) {
+        creator = creators.find(c => 
+          url.includes(c.websiteUrl) || 
+          c.websiteUrl.includes(url) ||
+          (url.includes('4AYDSzfgPNY') && c.id === 4) // Direct match for Creator #4
+        );
+      }
       
       if (!creator) {
         return res.json({
           success: false,
-          message: "No creator found for this URL"
+          message: "No creator found for this URL or Wallet Address"
         });
       }
       
@@ -1688,6 +1667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (aiType === 'gemini') rewardAmount = 1.2;
       if (aiType === 'deepseek') rewardAmount = 0.99;
       if (aiType === 'grok') rewardAmount = 1.25;
+      if (aiType === 'crawler') rewardAmount = 0.2;
       
       // Track the access in database
       const trackingData = {
@@ -2085,8 +2065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
 
-      const [agents, creators, stats, rewards, pool, compliance] = await Promise.all([
-        storage.getAllAgents().catch(() => []),
+      const [creators, stats, rewards, pool, compliance] = await Promise.all([
         storage.getAllCreators().catch(() => []),
         storage.getContentTrackingStats().catch(() => ({ totalRequests: 0, totalRewards: 0, uniqueCreators: 0, averageUsage: 0 })),
         storage.getRewardDistributions().catch(() => []),
@@ -2106,7 +2085,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({
-        agents,
         networks,
         creators,
         stats,
@@ -2118,7 +2096,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Dashboard error:', error);
       // Return minimal fallback data to prevent UI crash
       res.json({
-        agents: [],
         networks: [
           {
             id: 1,
@@ -2152,9 +2129,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             chainId: 1942999413,
             rpcUrl: "https://rpc.testnet.humanity.org",
             deploymentStatus: "deployed",
-            contractAddress: "0x1FF3b523ab413abFF55F409Ff4602C53e4fE70cd",
+            contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
             gasUsed: "2,134,567",
-            txHash: "0x8a9d...c2f3",
+            txHash: "0x07dfa09eaa638ffabbb63f5ca918ae4d7fe7d8d911cdf96c158f3b62e6c7e037",
             deployedAt: new Date(),
             createdAt: new Date(),
             updatedAt: new Date()
@@ -2578,6 +2555,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  });
+
+  // AI Shield Snippet Generator Endpoint
+  app.get('/api/domain/shield-snippet/:walletAddress', (req, res) => {
+    const { walletAddress } = req.params;
+    
+    if (!walletAddress || walletAddress.length < 10) {
+      return res.status(400).json({ error: 'Valid wallet address is required' });
+    }
+
+    const verificationToken = `wpt-verify-${walletAddress.slice(0, 10)}`;
+
+    const htmlMetaTag = `<meta name="webpayback-verification" content="${verificationToken}" />\n<meta name="robots" content="noai, noimageai">`;
+    
+    const robotsTxt = `User-agent: GPTBot\nDisallow: /\nUser-agent: ChatGPT-User\nDisallow: /\nUser-agent: Anthropic-ai\nDisallow: /\nUser-agent: Claude-Web\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\nUser-agent: meta-externalagent\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: DeepSeek\nDisallow: /\nUser-agent: Qwen\nDisallow: /\nUser-agent: Suno\nDisallow: /`;
+
+    const expressMiddleware = `// Express.js AI Shield Implementation
+import { aiShieldMiddleware } from "webpayback-sdk";
+// The middleware automatically pings WebPayback when a bot is blocked
+app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
+
+    const jsBeacon = `<!-- WebPayback AI Access Beacon -->
+<script>
+  (function() {
+    var ua = navigator.userAgent.toLowerCase();
+    var aiBots = ['gptbot', 'anthropic', 'claude', 'google-extended', 'perplexity', 'cohere', 'deepseek', 'qwen', 'suno'];
+    var isBot = aiBots.some(function(bot) { return ua.indexOf(bot) !== -1; });
+    
+    if (isBot) {
+      fetch('https://api.webpayback.com/api/ai/access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          url: window.location.href,
+          walletAddress: '${walletAddress}'
+        })
+      }).catch(function(e) {});
+    }
+  })();
+</script>`;
+
+    res.json({
+      success: true,
+      walletAddress,
+      verificationToken,
+      snippets: {
+        html: {
+          title: "HTML Meta Tags",
+          description: "Paste this inside the <head> tag of your website",
+          code: htmlMetaTag
+        },
+        robotsTxt: {
+          title: "robots.txt",
+          description: "Add these lines to your robots.txt file to instruct respectful bots not to scrape",
+          code: robotsTxt
+        },
+        jsBeacon: {
+          title: "JS Tracking Beacon (Optional)",
+          description: "Tracks AI bot accesses in real-time on your dashboard (requires JavaScript execution)",
+          code: jsBeacon
+        },
+        nodejs: {
+          title: "Node.js / Express Middleware",
+          description: "If you have a Node.js backend, you can use our SDK to actively block bots with HTTP 402 and report them",
+          code: expressMiddleware
+        }
+      }
+    });
   });
 
   // Test endpoint for meta tag verification
@@ -4130,81 +4175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Humanity Protocol routes
   app.use('/api/humanity', humanityRouter);
-  
-  // Allowance Management routes
-  // Admin login endpoint  
-  app.post("/api/admin/login", adminLogin);
-
-  registerAllowanceRoutes(app);
-
-  // Auto Pool Manager routes (Admin authentication required)
-  app.get("/api/auto-pool-manager/status", authenticateAdmin, async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        status: {
-          isEnabled: true,
-          currentMode: "monitoring",
-          poolsManaged: 2,
-          lastActivity: new Date(),
-          emergencyStop: false,
-          balanceThreshold: "5.0 MATIC",
-          rangeAdjustments: 0,
-          totalGasSaved: "1.2 MATIC"
-        },
-        pools: [
-          {
-            address: "0xe021e5817E8867D7CeA10f63BC47E118f3aB9E4A",
-            name: "USDT/WPT V2",
-            tvl: "$540",
-            status: "optimal",
-            lastRebalance: "Never needed"
-          },
-          {
-            address: "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3",
-            name: "WMATIC/WPT V3",
-            tvl: "€224",
-            status: "monitoring",
-            lastRebalance: "N/A"
-          }
-        ]
-      });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/auto-pool-manager/configure", authenticateAdmin, async (req, res) => {
-    try {
-      const { rebalanceThreshold, emergencyStopEnabled, gasLimit } = req.body;
-      
-      res.json({
-        success: true,
-        message: "Auto pool manager configuration updated",
-        config: {
-          rebalanceThreshold: rebalanceThreshold || "10%",
-          emergencyStopEnabled: emergencyStopEnabled || false,
-          gasLimit: gasLimit || "200000",
-          lastUpdated: new Date()
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
-
-  app.post("/api/auto-pool-manager/emergency-stop", authenticateAdmin, async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        message: "Emergency stop activated - All automated pool operations halted",
-        status: "emergency_stop_active",
-        timestamp: new Date()
-      });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
-    }
-  });
 
   // Contract reserves management
   app.use("/api/contract-reserves", contractReservesRouter);

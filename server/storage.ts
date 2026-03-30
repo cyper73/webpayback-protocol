@@ -1,11 +1,10 @@
 import { 
-  users, creators, blockchainNetworks, aiAgents, agentCommunications, 
+  users, creators, blockchainNetworks, 
   contentTracking, rewardDistributions, poolManagement, complianceRecords,
   fraudDetectionRules, fraudDetectionAlerts, creatorReputationScores, accessPatterns, referralRewards, domainVerifications,
   channelContentMappings, rewardPoolLimits, poolDrainProtection, rewardPoolSecurity,
   type User, type InsertUser, type Creator, type InsertCreator,
-  type BlockchainNetwork, type InsertBlockchainNetwork, type AiAgent, type InsertAiAgent,
-  type AgentCommunication, type InsertAgentCommunication, type ContentTracking, type InsertContentTracking,
+  type BlockchainNetwork, type InsertBlockchainNetwork, type ContentTracking, type InsertContentTracking,
   type RewardDistribution, type InsertRewardDistribution, type PoolManagement, type InsertPoolManagement,
   type ComplianceRecord, type InsertComplianceRecord,
   type FraudDetectionRule, type InsertFraudDetectionRule, type FraudDetectionAlert, type InsertFraudDetectionAlert,
@@ -24,17 +23,6 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(insertUser: InsertUser): Promise<User>;
-  
-  // Agent methods
-  getAllAgents(): Promise<AiAgent[]>;
-  getAgent(id: number): Promise<AiAgent | undefined>;
-  getAgentByName(name: string): Promise<AiAgent | undefined>;
-  createAgent(insertAgent: InsertAiAgent): Promise<AiAgent>;
-  updateAgent(id: number, updates: Partial<AiAgent>): Promise<void>;
-  
-  // Agent communication methods
-  getAgentCommunications(): Promise<AgentCommunication[]>;
-  createAgentCommunication(insertComm: InsertAgentCommunication): Promise<AgentCommunication>;
   
   // Blockchain network methods
   getAllBlockchainNetworks(): Promise<BlockchainNetwork[]>;
@@ -141,46 +129,6 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
-  }
-
-  // Agent methods
-  async getAllAgents(): Promise<AiAgent[]> {
-    return await db.select().from(aiAgents);
-  }
-
-  async getAgent(id: number): Promise<AiAgent | undefined> {
-    const [agent] = await db.select().from(aiAgents).where(eq(aiAgents.id, id));
-    return agent || undefined;
-  }
-
-  async getAgentByName(name: string): Promise<AiAgent | undefined> {
-    const [agent] = await db.select().from(aiAgents).where(eq(aiAgents.name, name));
-    return agent || undefined;
-  }
-
-  async createAgent(insertAgent: InsertAiAgent): Promise<AiAgent> {
-    const [agent] = await db
-      .insert(aiAgents)
-      .values(insertAgent)
-      .returning();
-    return agent;
-  }
-
-  async updateAgent(id: number, updates: Partial<AiAgent>): Promise<void> {
-    await db.update(aiAgents).set(updates).where(eq(aiAgents.id, id));
-  }
-
-  // Agent communication methods
-  async getAgentCommunications(): Promise<AgentCommunication[]> {
-    return await db.select().from(agentCommunications);
-  }
-
-  async createAgentCommunication(insertComm: InsertAgentCommunication): Promise<AgentCommunication> {
-    const [comm] = await db
-      .insert(agentCommunications)
-      .values(insertComm)
-      .returning();
-    return comm;
   }
 
   // Blockchain network methods

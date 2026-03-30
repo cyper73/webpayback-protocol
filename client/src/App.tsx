@@ -21,9 +21,6 @@ import Login from "@/pages/Login";
 import PoolHealthDashboard from "@/pages/PoolHealthDashboard";
 import AntiDumpSlippageDashboard from "@/pages/AntiDumpSlippageDashboard";
 import ContractReserves from "@/pages/ContractReserves";
-import AdminLogin from "@/pages/AdminLogin";
-import AllowanceAdmin from "@/pages/admin/AllowanceAdmin";
-import AutoPoolAdmin from "@/pages/admin/AutoPoolAdmin";
 import CreatorPage from "@/pages/CreatorPage";
 import ProtectedCreatorPortal from "@/components/auth/ProtectedCreatorPortal";
 import ProtectedNFTModule from "@/components/auth/ProtectedNFTModule";
@@ -44,9 +41,6 @@ function Router() {
       <Route path="/pool-health" component={PoolHealthDashboard} />
       <Route path="/anti-dump" component={AntiDumpSlippageDashboard} />
       <Route path="/contract-reserves" component={ContractReserves} />
-      <Route path="/admin" component={AdminLogin} />
-      <Route path="/admin/allowance" component={AllowanceAdmin} />
-      <Route path="/admin/auto-pool" component={AutoPoolAdmin} />
       <Route path="/pool-debug" component={PoolDebugger} />
       <Route path="/citations" component={ProtectedRewardsModule} />
       <Route path="/citations/:walletAddress" component={CitationsByWallet} />
@@ -69,7 +63,7 @@ function App() {
         appearance: {
           theme: 'dark',
           accentColor: '#10b981', // Emerald green to match WebPayback
-          logo: 'https://i.imgur.com/your-logo.png', // You can update this later
+          logo: '/logo.png', 
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
