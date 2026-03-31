@@ -46,63 +46,6 @@ interface NetworkStatus {
 }
 
 export default function TokenInfo() {
-  const { data: tokenInfo } = useQuery<TokenInfo>({
-    queryKey: ["/api/web3/token-info"],
-    refetchInterval: 30000
-  });
-
-  const { data: poolInfo } = useQuery<PoolInfo>({
-    queryKey: ["/api/web3/pool-info?type=wmatic"],
-    refetchInterval: 30000
-  });
-
-  const { data: networkStatus } = useQuery<NetworkStatus>({
-    queryKey: ["/api/web3/network-status"],
-    refetchInterval: 30000
-  });
-
-  const formatNumber = (value: string, decimals: number = 18) => {
-    // If value is null, undefined, or empty, return default
-    if (!value || value === "0") return "$0";
-    
-    // Check if value already contains currency symbols or is pre-formatted
-    if (value && (value.includes('$') || value.includes(',') || value.includes('.'))) {
-      return value; // Return as-is if already formatted from real data
-    }
-    
-    // Only apply decimal conversion for raw wei values (very large numbers)
-    if (value.length > 10) {
-      const num = parseFloat(value) / Math.pow(10, decimals);
-      return `$${num.toLocaleString()}`;
-    }
-    
-    // For smaller numbers, treat as already formatted
-    return value;
-  };
-
-  const formatPrice = (value: string) => {
-    return parseFloat(value).toFixed(6);
-  };
-
-  // Show empty state instead of loading to prevent refresh issues
-  if (!tokenInfo || !poolInfo || !networkStatus) {
-    return (
-      <div className="space-y-6">
-        <Card className="border-gray-500/20 bg-gray-900/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-gray-400" />
-              Loading Network Status...
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-gray-400">Connecting to blockchain...</div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Network Status */}
@@ -113,23 +56,21 @@ export default function TokenInfo() {
             Network Status
           </CardTitle>
           <CardDescription>
-            Connected to {networkStatus.networkName} (Chain ID: {networkStatus.chainId})
+            Target Network: Humanity Protocol Testnet
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Current Block</p>
-              <p className="text-lg font-semibold">{networkStatus.blockHeight.toLocaleString()}</p>
+              <p className="text-sm text-gray-500">Status</p>
+              <p className="text-lg font-semibold text-amber-400">Awaiting Deployment (Phase 2)</p>
             </div>
-            <Badge variant="secondary" className="bg-green-500/20 text-green-400">
-              {networkStatus.isConnected ? "Connected" : "Disconnected"}
+            <Badge variant="secondary" className="bg-amber-500/20 text-amber-400">
+              Pending
             </Badge>
           </div>
         </CardContent>
       </Card>
-
-
 
       {/* Token Information */}
       <Card className="border-blue-500/20 bg-blue-900/5">
@@ -139,7 +80,7 @@ export default function TokenInfo() {
             WPT Token Information
           </CardTitle>
           <CardDescription>
-            Real token deployed on Polygon blockchain
+            To be deployed on Humanity Protocol
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -148,20 +89,12 @@ export default function TokenInfo() {
               <div className="flex-1 min-w-0 mr-4">
                 <p className="text-sm text-gray-500 mb-2">Contract Address</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono truncate">{tokenInfo.address.slice(0, 8)}...{tokenInfo.address.slice(-6)}</p>
-                  <a 
-                    href={`${networkStatus.explorerUrl}/token/${tokenInfo.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 flex-shrink-0"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  <p className="text-sm font-mono truncate">Pending Deployment...</p>
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
                 <p className="text-sm text-gray-500 mb-2">Symbol</p>
-                <p className="text-lg font-semibold">{tokenInfo.symbol}</p>
+                <p className="text-lg font-semibold">WPT</p>
               </div>
             </div>
 
@@ -170,70 +103,11 @@ export default function TokenInfo() {
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0 mr-4">
                 <p className="text-sm text-gray-500 mb-2">Total Supply</p>
-                <p className="text-lg font-semibold break-words">{formatNumber(tokenInfo.totalSupply)} WPT</p>
+                <p className="text-lg font-semibold break-words">10,000,000 WPT</p>
               </div>
               <div className="text-right flex-shrink-0">
                 <p className="text-sm text-gray-500 mb-2">Decimals</p>
-                <p className="text-lg font-semibold">{tokenInfo.decimals}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pool Information */}
-      <Card className="border-purple-500/20 bg-purple-900/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-purple-400" />
-            WMATIC/WPT Liquidity Pool
-            <Badge variant="outline" className="ml-auto">
-              WMATIC/WPT Pool
-            </Badge>
-          </CardTitle>
-          <CardDescription>
-            <span>Live WMATIC/WPT pool data from Polygon DEX</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0 mr-4">
-                <p className="text-sm text-gray-500 mb-2">Pool Address</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono break-all">{poolInfo.poolAddress}</p>
-                  <a 
-                    href={`${networkStatus.explorerUrl}/address/${poolInfo.poolAddress}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-purple-400 hover:text-purple-300 flex-shrink-0"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm text-gray-500 mb-2">Current Price</p>
-                <p className="text-lg font-semibold">{formatPrice(poolInfo.price)} USDT</p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex-1 min-w-0 mr-4">
-                  <p className="text-sm text-gray-500 mb-2">Liquidity</p>
-                  <p className="text-lg font-semibold break-words">{poolInfo.totalValueLocked || formatNumber(poolInfo.liquidity) + ' WPT'}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm text-gray-500 mb-2">24h Fees</p>
-                  <p className="text-lg font-semibold">{formatNumber(poolInfo.fees24h)}</p>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-500 mb-2">24h Volume</p>
-                <p className="text-lg font-semibold">{formatNumber(poolInfo.volume24h)}</p>
+                <p className="text-lg font-semibold">18</p>
               </div>
             </div>
           </div>
@@ -246,9 +120,10 @@ export default function TokenInfo() {
           <div className="flex items-start gap-3">
             <div className="h-2 w-2 bg-amber-400 rounded-full mt-2 shrink-0"></div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-amber-400">Real Blockchain Integration</p>
+              <p className="text-sm font-medium text-amber-400">Phase 2: On-Chain Migration</p>
               <p className="text-sm text-gray-400 mt-1 break-words">
-                This is connected to your actual WPT token on Polygon. All reward distributions will be processed through the real smart contract.
+                The protocol is currently operating in Phase 1 (mocking and interface design).
+                In Phase 2, WPT will be minted directly on Humanity Protocol's chain.
               </p>
             </div>
           </div>

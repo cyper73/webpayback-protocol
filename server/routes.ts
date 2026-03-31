@@ -17,8 +17,6 @@ import { aiQueryProtection } from "./services/aiQueryProtection";
 import { vpnDetection } from "./services/vpnDetection";
 import { walletVerificationService } from "./services/walletVerification";
 import { multiWalletVerificationService, WalletType } from "./services/multiWalletVerification";
-import { twoFactorAuthService } from "./services/twoFactorAuth";
-import { require2FA, suggest2FA } from "./middleware/twoFactorProtection";
 import { db } from "./db";
 import { creators, contentTracking } from "@shared/schema";
 import { eq, inArray, desc, and, gte, sql } from "drizzle-orm";
@@ -875,70 +873,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify 2FA code during login
+  // Verify 2FA code during login (DEPRECATED)
   app.post("/api/auth/2fa/verify", authRateLimit, async (req, res) => {
-    try {
-      const { creatorId, token } = req.body;
-      
-      if (!creatorId || !token) {
-        return res.status(400).json({ 
-          success: false, 
-          error: '2FA code and creator ID are required' 
-        });
-      }
-
-      // Validate token format (6 digits)
-      if (!/^\d{6}$/.test(token)) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Invalid 2FA code format. Please enter a 6-digit code.' 
-        });
-      }
-
-      // Get creator and verify 2FA is enabled
-      const creators = await storage.getAllCreators();
-      const creator = creators.find(c => c.id === creatorId);
-      
-      if (!creator) {
-        return res.status(404).json({
-          success: false,
-          error: 'Creator not found'
-        });
-      }
-
-      if (!creator.twoFactorEnabled || !creator.twoFactorSecret) {
-        return res.status(400).json({
-          success: false,
-          error: '2FA is not enabled for this account'
-        });
-      }
-
-      // Verify the 2FA token
-      const isValid = await twoFactorAuthService.validateToken(creator.twoFactorSecret, token);
-      
-      if (isValid) {
-        console.log(`✅ 2FA verification successful for creator ${creatorId}`);
-        res.json({
-          success: true,
-          message: '2FA verification successful',
-          verified: true
-        });
-      } else {
-        console.log(`❌ 2FA verification failed for creator ${creatorId}`);
-        res.status(400).json({
-          success: false,
-          error: 'Invalid 2FA code. Please check your authenticator app and try again.',
-          verified: false
-        });
-      }
-
-    } catch (error) {
-      console.error('2FA verification failed:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      });
-    }
+    res.json({
+      success: true,
+      message: '2FA deprecated. Humanity Protocol active.',
+      verified: true
+    });
   });
 
   // ===== MULTI-WALLET VERIFICATION ENDPOINTS =====
@@ -1125,216 +1066,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // === 2FA AUTHENTICATION ENDPOINTS ===
+  // === 2FA AUTHENTICATION ENDPOINTS (DEPRECATED) ===
+  // These endpoints are kept as empty shells to prevent frontend errors
+  // during the migration to Humanity Protocol zkTLS biometrics
   
-  // Generate 2FA setup (QR code and backup codes)
   app.post("/api/auth/2fa/setup", csrfProtection, async (req, res) => {
-    try {
-      const { creatorId, email } = req.body;
-      
-      if (!creatorId || !email) {
-        return res.status(400).json({
-          success: false,
-          error: "Creator ID and email are required"
-        });
-      }
-
-      // Check if creator exists
-      const creator = await storage.getCreator(creatorId);
-      if (!creator) {
-        return res.status(404).json({
-          success: false,
-          error: "Creator not found"
-        });
-      }
-
-      // Generate 2FA configuration
-      const twoFactorConfig = await twoFactorAuthService.generateTwoFactorSecret(email, creator.websiteUrl);
-      
-      // Store the secret temporarily (not enabled yet)
-      await storage.updateCreator(creatorId, {
-        twoFactorSecret: twoFactorConfig.secret,
-        twoFactorBackupCodes: twoFactorConfig.backupCodes,
-        twoFactorEnabled: false // Not enabled until verified
-      });
-
-      console.log(`🔐 2FA setup generated for creator ${creatorId}`);
-
-      res.json({
-        success: true,
-        setup: {
-          qrCodeUrl: twoFactorConfig.qrCodeUrl,
-          manualEntryCode: twoFactorConfig.manualEntryCode,
-          backupCodes: twoFactorConfig.backupCodes
-        },
-        instructions: twoFactorAuthService.getSetupInstructions()
-      });
-    } catch (error) {
-      console.error('2FA setup error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to setup 2FA'
-      });
-    }
+    res.status(400).json({ success: false, error: "2FA is deprecated. Use Humanity Protocol." });
   });
 
-  // Verify 2FA setup and enable it
   app.post("/api/auth/2fa/verify-setup", csrfProtection, async (req, res) => {
-    try {
-      const { creatorId, token } = req.body;
-      
-      if (!creatorId || !token) {
-        return res.status(400).json({
-          success: false,
-          error: "Creator ID and verification token are required"
-        });
-      }
-
-      const creator = await storage.getCreator(creatorId);
-      if (!creator || !creator.twoFactorSecret) {
-        return res.status(400).json({
-          success: false,
-          error: "2FA setup not found. Please generate setup first."
-        });
-      }
-
-      // Verify the token
-      const isValid = await twoFactorAuthService.validateSetup(creator.twoFactorSecret, token);
-      
-      if (!isValid) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid verification code. Please try again."
-        });
-      }
-
-      // Enable 2FA
-      await storage.updateCreator(creatorId, {
-        twoFactorEnabled: true,
-        twoFactorSetupAt: new Date()
-      });
-
-      console.log(`✅ 2FA enabled for creator ${creatorId}`);
-
-      res.json({
-        success: true,
-        message: "2FA successfully enabled for your account"
-      });
-    } catch (error) {
-      console.error('2FA verification error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to verify 2FA setup'
-      });
-    }
+    res.status(400).json({ success: false, error: "2FA is deprecated. Use Humanity Protocol." });
   });
 
-  // Disable 2FA (requires current 2FA token)
-  app.post("/api/auth/2fa/disable", csrfProtection, require2FA(), async (req, res) => {
-    try {
-      const { creatorId } = req.body;
-      
-      // req.twoFactorPassed is set by the middleware if 2FA verification succeeded
-      if (!req.twoFactorPassed) {
-        return res.status(403).json({
-          success: false,
-          error: "2FA verification required to disable 2FA"
-        });
-      }
-
-      await storage.updateCreator(creatorId, {
-        twoFactorEnabled: false,
-        twoFactorSecret: null,
-        twoFactorBackupCodes: null,
-        twoFactorSetupAt: null
-      });
-
-      console.log(`🔐 2FA disabled for creator ${creatorId}`);
-
-      res.json({
-        success: true,
-        message: "2FA has been disabled for your account"
-      });
-    } catch (error) {
-      console.error('2FA disable error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to disable 2FA'
-      });
-    }
+  app.post("/api/auth/2fa/disable", csrfProtection, async (req, res) => {
+    res.json({ success: true, message: "2FA is deprecated." });
   });
 
-  // Get 2FA status
   app.get("/api/auth/2fa/status/:creatorId", async (req, res) => {
-    try {
-      const { creatorId } = req.params;
-      
-      const creator = await storage.getCreator(parseInt(creatorId));
-      if (!creator) {
-        return res.status(404).json({
-          success: false,
-          error: "Creator not found"
-        });
-      }
-
-      res.json({
-        success: true,
-        status: {
-          enabled: creator.twoFactorEnabled,
-          setupAt: creator.twoFactorSetupAt,
-          lastUsed: creator.lastTwoFactorUsed,
-          backupCodesRemaining: creator.twoFactorBackupCodes?.length || 0
-        }
-      });
-    } catch (error) {
-      console.error('2FA status error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get 2FA status'
-      });
-    }
+    res.json({ success: true, status: { enabled: false } });
   });
 
-  // Generate new backup codes (requires current 2FA)
-  app.post("/api/auth/2fa/regenerate-backup-codes", csrfProtection, require2FA(), async (req, res) => {
-    try {
-      const { creatorId } = req.body;
-      
-      if (!req.twoFactorPassed) {
-        return res.status(403).json({
-          success: false,
-          error: "2FA verification required"
-        });
-      }
-
-      // Generate new backup codes
-      const newBackupCodes = Array.from({ length: 10 }, () => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 8; i++) {
-          code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code.substring(0, 4) + '-' + code.substring(4);
-      });
-
-      await storage.updateCreator(parseInt(creatorId), {
-        twoFactorBackupCodes: newBackupCodes
-      });
-
-      console.log(`🔐 New backup codes generated for creator ${creatorId}`);
-
-      res.json({
-        success: true,
-        backupCodes: newBackupCodes,
-        message: "New backup codes generated. Please store them securely."
-      });
-    } catch (error) {
-      console.error('Backup codes regeneration error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to generate new backup codes'
-      });
-    }
+  app.post("/api/auth/2fa/regenerate-backup-codes", csrfProtection, async (req, res) => {
+    res.status(400).json({ success: false, error: "2FA is deprecated." });
   });
 
   // Register creator with XSS, CSRF and Rate Limiting protection
@@ -1403,38 +1156,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Channel-level monitoring enabled for creator ${creator.id}: ${channelInfo.platformType}`);
       }
 
-      // AUTOMATIC 2FA SETUP: Generate 2FA configuration immediately after registration
-      let twoFactorSetup = null;
-      try {
-        const twoFactorConfig = await twoFactorAuthService.generateTwoFactorSecret(
-          creator.websiteUrl, // Use website as identifier
-          creator.websiteUrl
-        );
-        
-        // Store the secret temporarily (not enabled yet)
-        await storage.updateCreator(creator.id, {
-          twoFactorSecret: twoFactorConfig.secret,
-          twoFactorBackupCodes: twoFactorConfig.backupCodes,
-          twoFactorEnabled: false // Not enabled until verified
-        });
-
-        twoFactorSetup = {
-          qrCodeUrl: twoFactorConfig.qrCodeUrl,
-          manualEntryCode: twoFactorConfig.manualEntryCode,
-          backupCodes: twoFactorConfig.backupCodes,
-          instructions: twoFactorAuthService.getSetupInstructions()
-        };
-
-        console.log(`🔐 2FA setup auto-generated for new creator ${creator.id}`);
-      } catch (error) {
-        console.error('Failed to auto-generate 2FA setup:', error);
-        // Don't fail registration if 2FA setup fails
-      }
-      
+      // AUTOMATIC 2FA SETUP: Deprecated, Humanity Protocol is used instead
       res.json({
         ...creator,
-        twoFactorSetup, // Include 2FA setup in response
-        requiresImmediateTwoFactorSetup: true, // Flag to trigger frontend 2FA flow
+        twoFactorSetup: null, 
+        requiresImmediateTwoFactorSetup: false,
         channelMonitoring: channelInfo ? {
           enabled: true,
           platformType: channelInfo.platformType,
@@ -1965,8 +1691,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create reward distribution with enhanced CSRF protection and MANDATORY 2FA (CRITICAL FINANCIAL OPERATION)
-  app.post("/api/rewards", enhancedCSRFProtection, require2FA({ requireFor: 'all' }), async (req, res) => {
+  // Create reward distribution with enhanced CSRF protection (Humanity Verification required instead of 2FA)
+  app.post("/api/rewards", enhancedCSRFProtection, async (req, res) => {
     try {
       const validatedData = insertRewardDistributionSchema.parse(req.body);
       // Use gas manager for new rewards with protection

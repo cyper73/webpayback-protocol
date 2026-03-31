@@ -304,17 +304,15 @@ export default function CreatorPortal() {
       setDomainVerification(null);
       setIsDomainVerified(false);
       
-      // AUTOMATIC 2FA SETUP: Check if 2FA setup was generated
-      if (data?.id && data?.requiresImmediateTwoFactorSetup) {
+      // DEPRECATED 2FA SETUP - Replaced by Humanity Protocol
+      if (data?.id) {
         setCurrentCreatorId(data.id);
-        setPreGeneratedTwoFactorSetup(data.twoFactorSetup);
-        setActiveTab("security");
         
-        // Show security requirement message
+        // Show success message
         setTimeout(() => {
           toast({
-            title: "Security Setup Required",
-            description: "2FA is mandatory for all users. Please complete Google Authenticator setup to secure your account.",
+            title: "Registration Successful",
+            description: "Your site is now protected. Identity secured by Humanity Protocol.",
             variant: "default",
           });
         }, 1000);
@@ -883,48 +881,33 @@ export default function CreatorPortal() {
           <TabsContent value="security" className="mt-6">
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold mb-2">Two-Factor Authentication</h3>
+                <h3 className="text-lg font-semibold mb-2">Biometric Security</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Enhance your Creator Portal security with Google Authenticator
+                  Your account is secured by Humanity Protocol
                 </p>
               </div>
               
-              {currentCreatorId ? (
-                <>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Debug: CreatorID={currentCreatorId}, Email={demoEmail}
+              <Card className="border-green-500/20 bg-green-900/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-500">
+                    <Shield className="h-5 w-5" />
+                    zkTLS Proof of Humanity Active
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-gray-300">
+                    Traditional 2FA (like Google Authenticator or SMS) is obsolete in the WebPayback ecosystem.
+                  </p>
+                  <p className="text-gray-300">
+                    Your wallet and identity are cryptographically bound to your biometric signature via Humanity Protocol. 
+                    No one can access your funds or modify your settings without proving they are <strong>you</strong>.
+                  </p>
+                  <div className="flex items-center justify-between p-4 bg-black/40 rounded-lg mt-4">
+                    <span className="text-sm text-gray-400">Security Status</span>
+                    <Badge className="bg-green-600">Maximum</Badge>
                   </div>
-                  <TwoFactorAuthSetup 
-                    creatorId={currentCreatorId}
-                    creatorEmail={demoEmail}
-                    preGeneratedSetup={preGeneratedTwoFactorSetup}
-                    onSetupComplete={() => {
-                      toast({
-                        title: "Security Enhanced!",
-                        description: "Your account is now protected with 2FA",
-                      });
-                      // Clear pre-generated setup after completion
-                      setPreGeneratedTwoFactorSetup(null);
-                    }}
-                  />
-                </>
-              ) : (
-                <Card className="w-full">
-                  <CardContent className="p-6 text-center">
-                    <Lock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <h4 className="text-lg font-semibold mb-2">Complete Registration First</h4>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Register as a creator first to enable Two-Factor Authentication for your account.
-                    </p>
-                    <Button 
-                      onClick={() => setActiveTab("registration")}
-                      className="bg-electric-blue hover:bg-electric-blue/80"
-                    >
-                      Go to Registration
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           

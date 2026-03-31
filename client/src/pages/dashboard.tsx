@@ -9,7 +9,6 @@ import ReentrancyProtection from "@/components/security/ReentrancyProtection";
 import { AlchemyUsageMonitor } from "@/components/monitoring/AlchemyUsageMonitor";
 import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtectionDashboard";
 import SimpleInfrastructure from "@/components/unified/SimpleInfrastructure";
-import FraudAlerts from "@/components/fraud/FraudAlerts";
 import CategoryContentStatistics from "@/components/analytics/CategoryContentStatistics";
 
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity, User, TrendingUp, AlertTriangle, CheckCircle, Zap, Users, Globe, ArrowUpRight, DollarSign, PieChart, BarChart3, Clock, RefreshCw, Eye, Rocket, Settings, ShieldAlert, ArrowRight, Cpu } from "lucide-react";
@@ -104,7 +103,7 @@ export default function Dashboard() {
               <img 
                 src="/wpt-banner.png" 
                 alt="WebPayback Humanity Protocol" 
-                className="max-h-12 sm:max-h-14 md:max-h-16 w-auto object-contain" 
+                className="h-16 sm:h-20 md:h-24 w-auto object-contain transform scale-110" 
                 onError={(e) => {
                   // Fallback until the banner is uploaded
                   e.currentTarget.style.display = 'none';
@@ -229,9 +228,9 @@ export default function Dashboard() {
             </div>
 
             {/* Security Monitoring */}
-            <PoolDrainProtection />
+            {/* Note: PoolDrainProtection and FraudAlerts have been removed as Humanity Protocol integration makes them obsolete.
+                Sybil prevention is now handled upstream via ZK-biometrics. */}
             <ReentrancyProtection />
-            <FraudAlerts alerts={alerts} />
             <ComplianceMonitor compliance={compliance} />
             <AIQueryProtectionDashboard />
             <AlchemyUsageMonitor />

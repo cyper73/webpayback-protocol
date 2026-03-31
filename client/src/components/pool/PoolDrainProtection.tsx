@@ -237,42 +237,12 @@ export default function PoolDrainProtection() {
         </Card>
       )}
 
-      {/* Security Events */}
-      {securityEvents?.events && securityEvents.events.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Activity className="h-4 w-4 text-purple-500" />
-              <span>Recent Security Events</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {securityEvents.events.slice(0, 5).map((event) => (
-                <div key={event.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <Badge className={getAlertColor(event.alertLevel)}>
-                        {event.alertLevel.toUpperCase()}
-                      </Badge>
-                      <span className="text-sm font-medium">{event.suspiciousActivity}</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Wallet: {event.walletAddress.slice(0, 6)}...{event.walletAddress.slice(-4)}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Risk Score: {event.riskScore}% • Action: {event.actionTaken}
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(event.createdAt).toLocaleTimeString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Security Events - DEPRECATED WITH HUMANITY-FIRST ARCHITECTURE */}
+      {/* 
+        This section is hidden because the Humanity-First flow prevents non-verified 
+        bots/sybils from creating a wallet entirely. 
+        Pool Drain Protection is now handled upstream by Humanity Protocol biometric verification.
+      */}
 
       {/* Protection Testing */}
       <Card>

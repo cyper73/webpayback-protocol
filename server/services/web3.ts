@@ -50,7 +50,17 @@ interface RewardDistributionResult {
 }
 
 class Web3Service {
-  private currentNetwork = POLYGON_CONFIG; // Default to Polygon
+  private currentNetwork = POLYGON_CONFIG; // Will be migrated to Humanity Protocol
+  provider: any;
+  DEX_FACTORY: string;
+  DEX_ROUTER: string;
+
+  constructor() {
+    this.provider = new ethers.providers.JsonRpcProvider(process.env.HUMANITY_RPC || "https://rpc.testnet.humanity.org/");
+    // Will be updated when deployed on Humanity DEX
+    this.DEX_FACTORY = "0x...";
+    this.DEX_ROUTER = "0x...";
+  }
   
   // Switch network configuration
   switchNetwork(networkName: 'polygon' | 'ethereum') {

@@ -268,10 +268,10 @@ export default function GettingStarted() {
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-3 gap-4">
-            <Link href="/creators">
-              <Button className="w-full h-12 flex items-center gap-2" variant="default">
-                <Globe className="h-4 w-4" />
-                Register as Creator
+            <Link href="/login">
+              <Button className="w-full h-12 flex items-center gap-2 bg-electric-blue hover:bg-electric-blue/80 text-white" variant="default">
+                <Shield className="h-4 w-4" />
+                Verify Humanity & Register
               </Button>
             </Link>
             

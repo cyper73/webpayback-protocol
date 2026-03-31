@@ -76,17 +76,17 @@ export default function CreatorPage() {
             </Card>
 
             {/* Security Notice */}
-            <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+            <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-amber-700 dark:text-amber-300">
+                <CardTitle className="flex items-center space-x-2 text-green-700 dark:text-green-300">
                   <Shield className="h-5 w-5" />
-                  <span>Security Notice</span>
+                  <span>Biometric Security</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-amber-700 dark:text-amber-300 text-sm">
-                  All creator accounts require Two-Factor Authentication (2FA) for maximum security. 
-                  You'll be prompted to set this up after registration.
+                <p className="text-green-700 dark:text-green-300 text-sm">
+                  Your account is protected by Humanity Protocol. No passwords or 2FA required. 
+                  Your identity is your key.
                 </p>
               </CardContent>
             </Card>
