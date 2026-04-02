@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'BladeRunner';
+  src: url('/fonts/BladeRunner.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -224,7 +231,11 @@
   width: 100%;
 }
 
-.dashboard-section {
+.font-bladerunner {
+    font-family: 'BladeRunner', 'Orbitron', sans-serif;
+  }
+  
+  .dashboard-section {
   width: 100%;
   min-height: fit-content;
   position: relative;

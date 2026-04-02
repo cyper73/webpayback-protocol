@@ -98,24 +98,20 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Center Section: Banner Logo */}
-            <div className="flex items-center justify-center flex-[2] px-4">
-              <img 
-                src="/wpt-banner.png" 
-                alt="WebPayback Humanity Protocol" 
-                className="h-16 sm:h-20 md:h-24 w-auto object-contain transform scale-110" 
-                onError={(e) => {
-                  // Fallback until the banner is uploaded
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement?.classList.add('fallback-active');
-                }}
-              />
-              <span className="hidden fallback-text text-xs sm:text-sm md:text-lg font-bold gradient-text tracking-widest whitespace-nowrap">
-                WEBPAYBACK HUMANITY PROTOCOL
-              </span>
-              <style dangerouslySetInnerHTML={{__html: `
-                .fallback-active .fallback-text { display: block !important; }
-              `}} />
+            {/* Center Section: Typography Logo */}
+            <div className="flex items-center justify-center flex-[2] px-2 sm:px-4 whitespace-nowrap overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 select-none">
+                <span className="text-xl sm:text-2xl font-normal tracking-[0.1em] text-electric-blue font-bladerunner drop-shadow-[0_0_15px_rgba(0,240,255,0.8)] mt-1">
+                  webpayback
+                </span>
+                <span className="hidden sm:inline-block text-gray-600 font-light text-xl">×</span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
+                  <span className="text-xs sm:text-lg font-light tracking-[0.3em] text-gray-300">
+                    HUMANITY <span className="font-bold text-white">PROTOCOL</span>
+                  </span>
+                </div>
+              </div>
             </div>
             
             {/* Right Section */}
