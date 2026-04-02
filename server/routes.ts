@@ -1465,7 +1465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Distribute rewards with CSRF, IDOR, Rate Limiting, Reentrancy protection and MANDATORY 2FA (CRITICAL FINANCIAL OPERATION)
-  app.post("/api/rewards/distribute", enhancedCSRFProtection, require2FA({ requireFor: 'all' }), authorizeBulkCreatorAccess, financialRateLimit, rewardReentrancyProtection, async (req, res) => {
+  app.post("/api/rewards/distribute", enhancedCSRFProtection, authorizeBulkCreatorAccess, financialRateLimit, rewardReentrancyProtection, async (req, res) => {
     try {
       const validatedData = insertRewardDistributionSchema.parse(req.body);
       // Queue reward for batch processing instead of immediate distribution

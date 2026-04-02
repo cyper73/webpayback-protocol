@@ -1,5 +1,6 @@
 import { storage } from "../storage";
 import type { InsertRewardDistribution } from "@shared/schema";
+import { ethers } from "ethers";
 
 // Multi-Chain Configuration
 const POLYGON_CONFIG = {
