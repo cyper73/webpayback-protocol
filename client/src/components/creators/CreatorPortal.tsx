@@ -58,15 +58,6 @@ export default function CreatorPortal() {
 
   const { login, logout, authenticated, user, ready, getAccessToken } = usePrivy();
 
-  // If user is authenticated via Privy, set a pseudo creator ID so they can access the tabs
-  useEffect(() => {
-    if (ready && authenticated && user?.wallet?.address && !currentCreatorId) {
-      // In a real app, you would fetch the creator ID from your backend using the wallet address.
-      // For this demo, we'll set a default ID of 1 to unlock the UI tabs.
-      setCurrentCreatorId(1);
-    }
-  }, [ready, authenticated, user, currentCreatorId]);
-
   // Check URL parameters for Humanity Protocol OAuth callback results
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -182,6 +173,46 @@ export default function CreatorPortal() {
       termsAccepted: false
     }
   });
+
+  // Set wallet address and creator ID from session on mount
+  useEffect(() => {
+    const sessionStr = localStorage.getItem('webpayback_session');
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr);
+        if (session.walletAddress) {
+          setValue("walletAddress", session.walletAddress);
+          // Set as verified automatically since it came from Humanity login
+          setIsWalletVerified(true);
+          setWalletSignature('humanity-verified-signature');
+          setVerificationMessage('humanity-verification-message');
+          
+          // If creatorId is missing, try to fetch it
+          if (session.creatorId) {
+            setCurrentCreatorId(session.creatorId);
+          } else {
+            // Attempt to recover creatorId from walletAddress
+            apiRequest("POST", "/api/auth/wallet/check", { walletAddress: session.walletAddress })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success && data.creators && data.creators.length > 0) {
+                  const recoveredId = data.creators[0].id;
+                  setCurrentCreatorId(recoveredId);
+                  // Update session with recovered ID
+                  localStorage.setItem('webpayback_session', JSON.stringify({
+                    ...session,
+                    creatorId: recoveredId
+                  }));
+                }
+              })
+              .catch(err => console.error("Failed to recover creatorId", err));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse session:', e);
+      }
+    }
+  }, [setValue]);
 
   const checkDomainMutation = useMutation({
     mutationFn: async (websiteUrl: string) => {

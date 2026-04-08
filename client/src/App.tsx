@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { PrivyProvider } from '@privy-io/react-auth';
+import { HumanityProvider } from '@humanity-org/react-sdk';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -96,13 +97,19 @@ function App() {
         }
       }}
     >
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Router />
-          <Toaster />
-          <CookieConsentBanner />
-        </TooltipProvider>
-      </QueryClientProvider>
+      <HumanityProvider 
+        clientId={import.meta.env.VITE_HUMANITY_CLIENT_ID || 'app_8ba7aeecf21f28ba51601f5073573f0e'} 
+        redirectUri={'http://localhost:5000/login'}
+        environment="sandbox"
+      >
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Router />
+            <Toaster />
+            <CookieConsentBanner />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </HumanityProvider>
     </PrivyProvider>
   );
 }

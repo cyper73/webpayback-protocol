@@ -10,6 +10,8 @@ import { AlchemyUsageMonitor } from "@/components/monitoring/AlchemyUsageMonitor
 import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtectionDashboard";
 import SimpleInfrastructure from "@/components/unified/SimpleInfrastructure";
 import CategoryContentStatistics from "@/components/analytics/CategoryContentStatistics";
+import { useHumanity } from "@humanity-org/react-sdk";
+import { useToast } from "@/hooks/use-toast";
 
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity, User, TrendingUp, AlertTriangle, CheckCircle, Zap, Users, Globe, ArrowUpRight, DollarSign, PieChart, BarChart3, Clock, RefreshCw, Eye, Rocket, Settings, ShieldAlert, ArrowRight, Cpu } from "lucide-react";
 import { Link as RouterLink } from "wouter";
@@ -25,6 +27,27 @@ const isFounderDevice = () => {
 
 export default function Dashboard() {
   const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const { login: humanityLogin } = useHumanity();
+  const { toast } = useToast();
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const handleHumanityLoginClick = async () => {
+    try {
+      setIsConnecting(true);
+      await humanityLogin({
+        mode: 'redirect',
+        scopes: ['openid']
+      });
+    } catch (error: any) {
+      console.error("Login initialization failed:", error);
+      toast({
+        title: "Connection Error",
+        description: error.message || "Failed to connect to Humanity Protocol.",
+        variant: "destructive"
+      });
+      setIsConnecting(false);
+    }
+  };
   
   // Disable auto-refresh when user is interacting
   useEffect(() => {
@@ -115,12 +138,14 @@ export default function Dashboard() {
             </div>
             
             {/* Right Section */}
-            <div className="flex items-center justify-end flex-1 min-w-0">
-              <div className="flex items-center space-x-2 bg-glass-dark px-2 py-1 rounded-lg whitespace-nowrap">
+            <div className="flex items-center justify-end flex-1 min-w-0 gap-3">
+              <div className="hidden sm:flex items-center space-x-2 bg-glass-dark px-2 py-1 rounded-lg whitespace-nowrap">
                 <Coins className="text-amber-400 w-4 h-4 flex-shrink-0" />
-                <span className="font-mono text-xs hidden sm:inline-block">WPT Live</span>
-                <span className="font-mono text-xs sm:hidden">Live</span>
+                <span className="font-mono text-xs">WPT Live</span>
               </div>
+              <Button size="sm" variant="outline" className="bg-electric-blue/10 border-electric-blue/30 text-electric-blue hover:bg-electric-blue hover:text-white" onClick={handleHumanityLoginClick} disabled={isConnecting}>
+                {isConnecting ? "Connecting..." : "Login"} <ArrowUpRight className="ml-1 w-3 h-3" />
+              </Button>
             </div>
           </div>
         </div>
@@ -177,10 +202,8 @@ export default function Dashboard() {
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Button size="lg" className="bg-electric-blue hover:bg-electric-blue/80 text-white rounded-full px-8 text-lg font-medium shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:scale-105" asChild>
-                <RouterLink href="/login">
-                  Verify Humanity & Register <ArrowUpRight className="ml-2 h-5 w-5" />
-                </RouterLink>
+              <Button size="lg" className="bg-electric-blue hover:bg-electric-blue/80 text-white rounded-full px-8 text-lg font-medium shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:scale-105" onClick={handleHumanityLoginClick} disabled={isConnecting}>
+                {isConnecting ? "Connecting..." : "Verify Humanity & Register"} <ArrowUpRight className="ml-2 h-5 w-5" />
               </Button>
               <Button size="lg" variant="outline" className="border-gray-700 hover:bg-gray-800 text-gray-300 rounded-full px-8 text-lg" asChild>
                 <RouterLink href="/getting-started">

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Fingerprint, CheckCircle2, AlertCircle, ShieldAlert, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { HumanityConnect, HumanityProfile, useHumanity } from '@humanity-org/react-sdk';
 
 interface HumanityStatusProps {
   creatorId: number;
@@ -13,10 +13,11 @@ interface HumanityStatusProps {
 export function HumanityStatus({ creatorId }: HumanityStatusProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isVerifying, setIsVerifying] = useState(false);
+  const { isAuthenticated, user, getAccessToken } = useHumanity();
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  // Fetch current humanity status
-  const { data: status, isLoading, isError } = useQuery({
+  // Fetch current backend humanity status
+  const { data: status, isLoading, refetch } = useQuery({
     queryKey: ['humanity-status', creatorId],
     queryFn: async () => {
       const res = await fetch(`/api/humanity/status/${creatorId}`);
@@ -26,42 +27,35 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
     enabled: !!creatorId,
   });
 
-  // Mutation to trigger verification redirect
-  const verifyMutation = useMutation({
-    mutationFn: async () => {
-      setIsVerifying(true);
-      const res = await fetch(`/api/humanity/auth-url/${creatorId}`);
-      if (!res.ok) {
-        throw new Error('Unable to connect to Humanity Protocol');
+  // Sync token to backend if authenticated on frontend but not in backend
+  useEffect(() => {
+    const syncToken = async () => {
+      if (isAuthenticated && status && !status.isVerified && !isSyncing) {
+        setIsSyncing(true);
+        try {
+          const accessToken = await getAccessToken();
+          if (accessToken) {
+            const res = await fetch('/api/humanity/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ accessToken, userId: creatorId })
+            });
+            if (res.ok) {
+              toast({ title: "Humanity Verified", description: "Your humanity status has been synced." });
+              refetch();
+            }
+          }
+        } catch (error) {
+          console.error("Failed to sync token:", error);
+        } finally {
+          setIsSyncing(false);
+        }
       }
-      return res.json();
-    },
-    onSuccess: (data) => {
-      // In a real app with PKCE, we would store data.codeVerifier in localStorage here
-      if (data.codeVerifier) {
-        localStorage.setItem('humanity_verifier', data.codeVerifier);
-      }
-      
-      // Redirect the user to the Humanity Protocol authorization page
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Connection Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      setIsVerifying(false);
-    }
-  });
+    };
+    syncToken();
+  }, [isAuthenticated, status, creatorId, getAccessToken, refetch, isSyncing, toast]);
 
-  const handleVerify = () => {
-    verifyMutation.mutate();
-  };
-
-  if (isLoading) {
+  if (isLoading || isSyncing) {
     return (
       <Card className="border-gray-800 bg-black/40">
         <CardContent className="p-6 flex items-center justify-center">
@@ -103,6 +97,9 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
       <CardContent>
         {isVerified ? (
           <div className="space-y-4">
+            <div className="mb-4">
+              <HumanityProfile variant="card" showFields={['name', 'humanity_score']} showAvatar={true} showBadges={true} />
+            </div>
             <div className="grid grid-cols-2 gap-4 mt-2">
               <div className="bg-black/40 rounded-lg p-3 border border-gray-800">
                 <p className="text-xs text-gray-400 mb-1">Humanity Score</p>
@@ -139,23 +136,14 @@ export function HumanityStatus({ creatorId }: HumanityStatusProps) {
               </div>
             </div>
             
-            <Button 
-              onClick={handleVerify} 
-              disabled={isVerifying}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white"
-            >
-              {isVerifying ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connecting to Oracle...
-                </>
-              ) : (
-                <>
-                  <Fingerprint className="mr-2 h-4 w-4" />
-                  Start Humanity Verification
-                </>
-              )}
-            </Button>
+            <div className="w-full flex justify-center">
+              <HumanityConnect 
+                mode="redirect" 
+                scopes={['openid']}
+                label="Start Humanity Verification"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white"
+              />
+            </div>
           </div>
         )}
       </CardContent>

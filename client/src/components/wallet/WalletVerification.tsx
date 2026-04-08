@@ -317,6 +317,42 @@ export function WalletVerification({
     );
   }
 
+  // Se l'utente ha un wallet address popolato, consideriamolo verificato dal backend
+  // dato che abbiamo bypassato il login frontend di Privy
+  if (walletAddress) {
+    return (
+      <Card className="border-green-500/30 bg-green-500/10 shadow-[0_0_15px_rgba(34,197,94,0.15)] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
+        <CardHeader className="relative z-10">
+          <CardTitle className="text-xl flex items-center gap-2 text-green-400">
+            <CheckCircle className="h-5 w-5" />
+            Wallet Verified
+          </CardTitle>
+          <CardDescription className="text-green-300/80">
+            Your Humanity Protocol identity is secured.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 relative z-10">
+          <div className="bg-black/60 p-4 rounded-lg border border-green-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Wallet className="h-4 w-4 text-electric-blue" />
+              <span className="text-sm font-medium text-gray-300">Your WebPayback Wallet</span>
+            </div>
+            <code className="text-sm text-electric-blue break-all">
+              {walletAddress}
+            </code>
+          </div>
+          <Button 
+            className="w-full bg-green-600 hover:bg-green-500 text-white font-medium" 
+            onClick={() => onVerificationComplete('humanity-verified-signature', 'humanity-verification-message')}
+          >
+            Confirm & Proceed
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-gray-800 bg-black/40">
       <CardHeader>

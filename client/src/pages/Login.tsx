@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Wallet, Shield, CheckCircle, Mail, LogOut, Loader2 } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useToast } from '@/hooks/use-toast';
+import { HumanityConnect, useHumanity } from "@humanity-org/react-sdk";
 
 interface LoginSession {
   walletAddress: string;
@@ -14,90 +15,120 @@ interface LoginSession {
 export default function Login() {
   const { login, logout, authenticated, user, ready } = usePrivy();
   const { toast } = useToast();
+  const { isAuthenticated: isHumanityAuthenticated, getAccessToken, user: humanityUser, login: humanityLogin } = useHumanity();
   const [loginSession, setLoginSession] = useState<LoginSession | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  // Handle Humanity Protocol callback redirect
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const code = searchParams.get('humanity_code');
-    const mockSuccess = searchParams.get('humanity_success');
-    const error = searchParams.get('humanity_error');
-
-    if (error) {
+  const handleHumanityLoginClick = async () => {
+    try {
+      setIsConnecting(true);
+      toast({ title: "Connecting", description: "Initiating Humanity SDK..." });
+      
+      // Add a race condition to prevent humanityLogin from hanging indefinitely
+      await Promise.race([
+        humanityLogin({
+          mode: 'redirect',
+          scopes: ['openid']
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Humanity SDK login timeout")), 10000))
+      ]);
+      
+      toast({ title: "Redirecting", description: "You should be redirected shortly..." });
+    } catch (error: any) {
+      console.error("Login initialization failed:", error);
       toast({
-        title: "Verification Failed",
-        description: "There was an error with Humanity Protocol verification.",
+        title: "Connection Error",
+        description: error.message || "Failed to connect to Humanity Protocol.",
         variant: "destructive"
       });
-      // Clean up URL
-      window.history.replaceState({}, document.title, '/login');
-      return;
+      setIsConnecting(false);
     }
+  };
 
-    const completeLogin = async () => {
-      try {
+  // Monitor Humanity SDK authentication state to sync with backend and complete login
+  useEffect(() => {
+    const syncHumanityLogin = async () => {
+      // If Humanity SDK says we are authenticated, but we haven't synced yet
+      if (isHumanityAuthenticated && !loginSession && !isConnecting) {
         setIsConnecting(true);
-        // Get code verifier that was potentially stored before redirecting
-        // Or in mock mode, it doesn't matter
+        toast({ title: "Sync Started", description: "Authenticating with backend..." });
         
-        const response = await fetch('/api/humanity/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            code: code || 'mock_code', 
-            codeVerifier: 'mock_verifier' // In a real PKCE flow we'd get this from localStorage
-          })
-        });
+        try {
+          // Promise.race to prevent getting stuck on getAccessToken
+          const accessToken = await Promise.race([
+            getAccessToken(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting access token from Humanity SDK")), 15000))
+          ]) as string;
+          
+          if (!accessToken) throw new Error("No access token found from Humanity SDK");
 
-        const data = await response.json();
-        
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Login failed');
+          toast({ title: "Token Obtained", description: "Finalizing session..." });
+
+          // Call backend to complete the login/registration process
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+          
+          const response = await fetch('/api/humanity/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              accessToken,
+              humanityId: humanityUser?.id 
+            }),
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+
+          const data = await response.json();
+          
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || data.error || 'Login failed on backend');
+          }
+
+          // We got a successful login with a wallet created by backend
+          const session = {
+            creatorId: data.creator.id,
+            walletAddress: data.creator.walletAddress,
+            loginTime: new Date().toISOString()
+          };
+          
+          setLoginSession(session);
+          localStorage.setItem('webpayback_session', JSON.stringify({
+            ...session,
+            isAuthenticated: true,
+            token: data.sessionToken
+          }));
+
+          window.dispatchEvent(new CustomEvent('webpayback-login', {
+            detail: session
+          }));
+
+          toast({
+            title: "Humanity Verified",
+            description: "Wallet automatically generated and assigned.",
+          });
+
+          // Redirect to Creator Portal
+          setTimeout(() => {
+            window.location.href = '/creators';
+          }, 1000);
+
+        } catch (err: any) {
+          console.error("Error during Humanity sync:", err);
+          toast({
+            title: "Login Sync Error",
+            description: err.message || "Failed to complete login with backend.",
+            variant: "destructive"
+          });
+        } finally {
+          setIsConnecting(false);
         }
-
-        // We got a successful login with a wallet created by backend
-        const session = {
-          walletAddress: data.creator.walletAddress,
-          loginTime: new Date().toISOString()
-        };
-        
-        setLoginSession(session);
-        localStorage.setItem('webpayback_session', JSON.stringify({
-          ...session,
-          isAuthenticated: true,
-          token: data.sessionToken
-        }));
-
-        window.dispatchEvent(new CustomEvent('webpayback-login', {
-          detail: session
-        }));
-
-        toast({
-          title: "Humanity Verified",
-          description: "Wallet automatically generated and assigned.",
-        });
-
-        // Redirect to Creator Portal
-        setTimeout(() => {
-          window.location.href = '/creators';
-        }, 1500);
-
-      } catch (err: any) {
-        toast({
-          title: "Login Error",
-          description: err.message,
-          variant: "destructive"
-        });
-      } finally {
-        setIsConnecting(false);
-        window.history.replaceState({}, document.title, '/login');
       }
     };
 
-    if (code || mockSuccess === 'true') {
-      completeLogin();
-    }
-  }, []);
+    syncHumanityLogin();
+  }, [isHumanityAuthenticated, loginSession, isConnecting, getAccessToken, humanityUser, toast]);
 
   // Sync Privy state with local session state
   useEffect(() => {
@@ -120,45 +151,32 @@ export default function Login() {
         detail: session
       }));
       
-    } else if (ready && !authenticated) {
-      setLoginSession(null);
-      localStorage.removeItem('webpayback_session');
-      window.dispatchEvent(new CustomEvent('webpayback-logout'));
-    }
+    } 
+    // We removed the 'else if (ready && !authenticated)' block here
+    // because it was aggressively deleting the Humanity session we just created!
   }, [ready, authenticated, user]);
 
-  const [isConnecting, setIsConnecting] = useState(false);
-
-  const handleHumanityLogin = async () => {
-    try {
-      setIsConnecting(true);
-      // In a real implementation this would fetch the auth URL from backend
-      // and redirect to Humanity Protocol OAuth flow
-      const res = await fetch('/api/humanity/auth-url/login');
-      if (!res.ok) throw new Error('Failed to get Humanity Protocol URL');
-      const data = await res.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('Invalid URL returned');
-      }
-    } catch (error) {
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to Humanity Protocol. Please try again.",
-        variant: "destructive"
-      });
-      setIsConnecting(false);
-    }
-  };
-
   const handleLogout = async () => {
-    await logout();
+    try {
+      await logout();
+    } catch (e) {
+      console.log('Privy logout skipped or failed', e);
+    }
+    
+    // Manual cleanup since we removed the aggressive auto-cleanup
+    setLoginSession(null);
+    localStorage.removeItem('webpayback_session');
+    window.dispatchEvent(new CustomEvent('webpayback-logout'));
+    
     toast({
       title: "Logout successful",
       description: "You have been securely logged out."
     });
+    
+    // Redirect to home
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1000);
   };
 
   if (!ready) {
@@ -271,18 +289,21 @@ export default function Login() {
                 We use Humanity Protocol to ensure you are a real person. 
                 A secure wallet will be created automatically for you.
               </p>
-              <Button 
-                onClick={handleHumanityLogin}
-                disabled={isConnecting}
-                className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.5)]"
-              >
-                {isConnecting ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <Shield className="mr-2 h-5 w-5" />
-                )}
-                {isConnecting ? "Connecting..." : "Verify & Sign In"}
-              </Button>
+              
+              <div className="w-full flex justify-center">
+                <Button 
+                  onClick={handleHumanityLoginClick}
+                  disabled={isConnecting}
+                  className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] flex items-center justify-center gap-2"
+                >
+                  {isConnecting ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <Shield className="mr-2 h-5 w-5" />
+                  )}
+                  {isConnecting ? "Connecting..." : "Verify & Sign In"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
