@@ -13,7 +13,7 @@ import { insertCreatorSchema, contentCategoryEnum, type InsertCreator } from "@s
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock, Coins, Info } from "lucide-react";
+import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock, Coins, Info, HelpCircle } from "lucide-react";
 import { sanitizeUrl, sanitizeWalletAddress, sanitizeToastContent, validateDomain, sanitizeContentCategory } from "@/lib/security";
 import { WalletVerification } from "@/components/wallet/WalletVerification";
 import TwoFactorAuthSetup from "@/components/security/TwoFactorAuthSetup";
@@ -814,6 +814,9 @@ export default function CreatorPortal() {
                             </Button>
                           </div>
                           <p className="text-xs text-gray-400">Add to your website's <code className="bg-black/50 px-1 rounded">&lt;head&gt;</code></p>
+                          <a href="#" onClick={(e) => { e.preventDefault(); toast({ title: "Help Center", description: "Opening CMS Integration Guide for WordPress, Wix, etc."}); }} className="text-xs text-electric-blue hover:text-electric-blue/80 hover:underline flex items-center gap-1 w-fit transition-colors">
+                            <HelpCircle className="w-3 h-3" /> How to do this on WordPress/Wix?
+                          </a>
                           <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-electric-blue overflow-x-auto whitespace-pre-wrap break-all">
                             <code>{`<meta name="webpayback-verification" content="wpt-verify-${watch("walletAddress")?.slice(0, 10)}" />\n<meta name="robots" content="noai, noimageai">`}</code>
                           </pre>
@@ -839,7 +842,7 @@ export default function CreatorPortal() {
                       {/* Right Column: Robots.txt */}
                       <div className="space-y-2 border-t md:border-t-0 md:border-l border-gray-800 md:pl-6 pt-4 md:pt-0">
                         <div className="flex items-center justify-between">
-                          <h5 className="text-sm font-semibold text-white">2. robots.txt Rules</h5>
+                          <h5 className="text-sm font-semibold text-white">2. robots.txt Rules <span className="text-xs text-yellow-400 font-normal ml-2">(Websites Only)</span></h5>
                           <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => {
                             navigator.clipboard.writeText(`User-agent: GPTBot\nDisallow: /\nUser-agent: ChatGPT-User\nDisallow: /\nUser-agent: Anthropic-ai\nDisallow: /\nUser-agent: Claude-Web\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\nUser-agent: meta-externalagent\nDisallow: /\nUser-agent: OAI-SearchBot\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: Cohere-ai\nDisallow: /\nUser-agent: grok\nDisallow: /\nUser-agent: bingbot\nDisallow: /\nUser-agent: Copilot\nDisallow: /\nUser-agent: Mistral\nDisallow: /\nUser-agent: AlephAlpha\nDisallow: /\nUser-agent: DeepSeek\nDisallow: /\nUser-agent: Qwen\nDisallow: /\nUser-agent: Baiduspider\nDisallow: /\nUser-agent: YisouSpider\nDisallow: /\nUser-agent: Bytespider\nDisallow: /\nUser-agent: Sogou web spider\nDisallow: /\nUser-agent: Suno\nDisallow: /\nUser-agent: Udio\nDisallow: /\nUser-agent: ElevenLabs\nDisallow: /`);
                             toast({ title: "Copied to clipboard!" });
@@ -848,8 +851,12 @@ export default function CreatorPortal() {
                           </Button>
                         </div>
                         <div className="text-xs text-gray-400 space-y-1">
-                          <p>Create a file named exactly <code className="bg-black/50 px-1 rounded text-electric-blue">robots.txt</code> and place it in the <strong>root folder</strong> of your website.</p>
+                          <p className="text-yellow-400 font-medium">⚠️ Skip this step if you are verifying a YouTube channel or Social Media profile.</p>
+                          <p>Create a file named exactly <code className="bg-black/50 px-1 rounded text-electric-blue">robots.txt</code> and place it in the <strong>root folder</strong> of your independent website.</p>
                           <p>It must be accessible at: <code className="text-gray-300">https://your-domain.com/robots.txt</code></p>
+                          <a href="#" onClick={(e) => { e.preventDefault(); toast({ title: "Help Center", description: "Opening robots.txt guide for WordPress, Wix, etc."}); }} className="text-electric-blue hover:text-electric-blue/80 hover:underline flex items-center gap-1 pt-1 w-fit transition-colors">
+                            <HelpCircle className="w-3 h-3" /> How to edit robots.txt on WordPress/Wix?
+                          </a>
                         </div>
                         <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-green-400 overflow-y-auto max-h-[250px] mt-2">
                           <code>{`User-agent: GPTBot\nDisallow: /\nUser-agent: ChatGPT-User\nDisallow: /\nUser-agent: Anthropic-ai\nDisallow: /\nUser-agent: Claude-Web\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\nUser-agent: meta-externalagent\nDisallow: /\nUser-agent: OAI-SearchBot\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: Cohere-ai\nDisallow: /\nUser-agent: grok\nDisallow: /\nUser-agent: bingbot\nDisallow: /\nUser-agent: Copilot\nDisallow: /\nUser-agent: Mistral\nDisallow: /\nUser-agent: AlephAlpha\nDisallow: /\nUser-agent: DeepSeek\nDisallow: /\nUser-agent: Qwen\nDisallow: /\nUser-agent: Baiduspider\nDisallow: /\nUser-agent: YisouSpider\nDisallow: /\nUser-agent: Bytespider\nDisallow: /\nUser-agent: Sogou web spider\nDisallow: /\nUser-agent: Suno\nDisallow: /\nUser-agent: Udio\nDisallow: /\nUser-agent: ElevenLabs\nDisallow: /`}</code>
