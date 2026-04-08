@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { insertCreatorSchema, contentCategoryEnum, type InsertCreator } from "@s
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock, Coins } from "lucide-react";
+import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock, Coins, Info } from "lucide-react";
 import { sanitizeUrl, sanitizeWalletAddress, sanitizeToastContent, validateDomain, sanitizeContentCategory } from "@/lib/security";
 import { WalletVerification } from "@/components/wallet/WalletVerification";
 import TwoFactorAuthSetup from "@/components/security/TwoFactorAuthSetup";
@@ -31,8 +31,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { HumanityConnect, useHumanity } from "@humanity-org/react-sdk";
 
 const formSchema = insertCreatorSchema.extend({
+  websiteUrl: z.string().optional().or(z.literal("")),
   termsAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the terms and conditions"
   }),
@@ -55,8 +57,10 @@ export default function CreatorPortal() {
   const [activeTab, setActiveTab] = useState("registration");
   const [currentCreatorId, setCurrentCreatorId] = useState<number | null>(null);
   const [preGeneratedTwoFactorSetup, setPreGeneratedTwoFactorSetup] = useState<any>(null);
+  const [isLinkingSocials, setIsLinkingSocials] = useState(false);
 
   const { login, logout, authenticated, user, ready, getAccessToken } = usePrivy();
+  const { login: humanityLogin, isAuthenticated: isHumanityAuthenticated } = useHumanity();
 
   // Check URL parameters for Humanity Protocol OAuth callback results
   useEffect(() => {
@@ -567,8 +571,8 @@ export default function CreatorPortal() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Always check domain before registration
-    if (!domainVerification) {
+    // Always check domain before registration, IF a domain is provided
+    if (data.websiteUrl && !domainVerification) {
       setIsCheckingDomain(true);
       try {
         const response = await apiRequest("POST", "/api/domain/chainlink/check", { websiteUrl: data.websiteUrl });
@@ -615,7 +619,7 @@ export default function CreatorPortal() {
     }
     
     // If domain verification is required but not completed, block registration
-    if (domainVerification?.requiresManualReview) {
+    if (data.websiteUrl && domainVerification?.requiresManualReview) {
       toast({
         title: "Domain Verification Required",
         description: "Please complete manual domain verification before registration.",
@@ -626,7 +630,7 @@ export default function CreatorPortal() {
     }
     
     // If meta tag verification is required but not completed, block registration
-    if (domainVerification?.requiresMetaTag && !isDomainVerified) {
+    if (data.websiteUrl && domainVerification?.requiresMetaTag && !isDomainVerified) {
       toast({
         title: "Meta Tag Verification Required",
         description: "Please complete meta tag verification before registration.",
@@ -717,13 +721,22 @@ export default function CreatorPortal() {
                 <div className="text-sm text-yellow-300">
                   <p className="font-semibold mb-1">Important: Social Accounts vs Independent Domains</p>
                   <ul className="space-y-1 text-xs">
-                    <li>• <strong>Social Media (YouTube, Instagram, etc):</strong> Leave this empty. You will verify these automatically via Humanity Protocol in the next step.</li>
-                    <li>• <strong>Independent Websites/Blogs:</strong> Enter your custom domain here to receive the AI-Shield meta tag for scraping protection.</li>
-                    <li className="mt-2 text-white font-medium">⚠️ Step 1: Copy and paste this meta tag into the <code className="bg-black/50 px-1 py-0.5 rounded text-electric-blue">&lt;head&gt;</code> section of your website before clicking "Check Domain":</li>
-                    <li className="mt-1">
-                      <code className="block bg-black/60 p-2 rounded border border-gray-700 text-electric-blue break-all">
-                        &lt;meta name="webpayback-verification" content="wpt-verify-{watch("walletAddress") ? watch("walletAddress").slice(0, 10) : 'your-wallet'}" /&gt;
-                      </code>
+                    <li>• <strong>Social Media (Google/YouTube, Facebook/Instagram, X, LinkedIn, Discord, Telegram, GitHub):</strong> Leave this empty. You will verify these automatically via Humanity Protocol in the next step.</li>
+                    <li>• <strong>Independent Websites/Blogs (or unsupported platforms):</strong> Enter your custom domain/URL here to receive the AI-Shield meta tag. <em>(Tip: This is the perfect fallback to protect your content if Humanity Protocol hasn't added your specific platform yet!)</em></li>
+                    <li className="mt-2 text-white font-medium">⚠️ Step 1: Copy and paste this code to verify ownership before clicking "Check Domain":</li>
+                    <li className="mt-1 space-y-2">
+                      <div>
+                        <span className="text-gray-400 font-semibold">For Websites:</span> Paste into the <code className="bg-black/50 px-1 py-0.5 rounded text-electric-blue">&lt;head&gt;</code> section
+                        <code className="block bg-black/60 p-2 rounded border border-gray-700 text-electric-blue break-all mt-1">
+                          &lt;meta name="webpayback-verification" content="wpt-verify-{watch("walletAddress") ? watch("walletAddress").slice(0, 10) : 'your-wallet'}" /&gt;
+                        </code>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 font-semibold">For Socials/YouTube:</span> Paste this text in a public post or your channel "About" section
+                        <code className="block bg-black/60 p-2 rounded border border-gray-700 text-green-400 break-all mt-1">
+                          webpayback-verify-{watch("walletAddress") ? watch("walletAddress").slice(0, 10) : 'your-wallet'}
+                        </code>
+                      </div>
                     </li>
                   </ul>
                 </div>
@@ -769,7 +782,7 @@ export default function CreatorPortal() {
                       Generate Snippets
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px] bg-deep-space border-gray-800 text-white">
+                  <DialogContent className="max-w-[90vw] md:max-w-[800px] lg:max-w-[900px] bg-deep-space border-gray-800 text-white max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2 text-xl">
                         <Shield className="w-5 h-5 text-electric-blue" />
@@ -787,26 +800,44 @@ export default function CreatorPortal() {
                       </p>
                     </div>
 
-                    <div className="space-y-6 py-4">
-                      {/* Meta Tags */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h5 className="text-sm font-semibold text-white">1. HTML Meta Tags</h5>
-                          <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => {
-                            navigator.clipboard.writeText(`<meta name="webpayback-verification" content="wpt-verify-${watch("walletAddress")?.slice(0, 10)}" />\n<meta name="robots" content="noai, noimageai">`);
-                            toast({ title: "Copied to clipboard!" });
-                          }}>
-                            <Copy className="w-3 h-3 mr-1" /> Copy
-                          </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                      {/* Left Column: Meta Tags / Social Snippets */}
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h5 className="text-sm font-semibold text-white">1A. For Websites: HTML Meta Tags</h5>
+                            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => {
+                              navigator.clipboard.writeText(`<meta name="webpayback-verification" content="wpt-verify-${watch("walletAddress")?.slice(0, 10)}" />\n<meta name="robots" content="noai, noimageai">`);
+                              toast({ title: "Copied to clipboard!" });
+                            }}>
+                              <Copy className="w-3 h-3 mr-1" /> Copy
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-400">Add to your website's <code className="bg-black/50 px-1 rounded">&lt;head&gt;</code></p>
+                          <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-electric-blue overflow-x-auto whitespace-pre-wrap break-all">
+                            <code>{`<meta name="webpayback-verification" content="wpt-verify-${watch("walletAddress")?.slice(0, 10)}" />\n<meta name="robots" content="noai, noimageai">`}</code>
+                          </pre>
                         </div>
-                        <p className="text-xs text-gray-400">Add to your website's <code className="bg-black/50 px-1 rounded">&lt;head&gt;</code></p>
-                        <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-electric-blue overflow-x-auto">
-                          <code>{`<meta name="webpayback-verification" content="wpt-verify-${watch("walletAddress")?.slice(0, 10)}" />\n<meta name="robots" content="noai, noimageai">`}</code>
-                        </pre>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h5 className="text-sm font-semibold text-white">1B. For Socials/YouTube: Text Snippet</h5>
+                            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => {
+                              navigator.clipboard.writeText(`webpayback-verify-${watch("walletAddress")?.slice(0, 10)}`);
+                              toast({ title: "Copied to clipboard!" });
+                            }}>
+                              <Copy className="w-3 h-3 mr-1" /> Copy
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-400">Paste this in a public post or your channel's "About" section if your platform is not yet supported by Humanity Protocol.</p>
+                          <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-green-400 overflow-x-auto">
+                            <code>{`webpayback-verify-${watch("walletAddress")?.slice(0, 10)}`}</code>
+                          </pre>
+                        </div>
                       </div>
 
-                      {/* Robots.txt */}
-                      <div className="space-y-2">
+                      {/* Right Column: Robots.txt */}
+                      <div className="space-y-2 border-t md:border-t-0 md:border-l border-gray-800 md:pl-6 pt-4 md:pt-0">
                         <div className="flex items-center justify-between">
                           <h5 className="text-sm font-semibold text-white">2. robots.txt Rules</h5>
                           <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => {
@@ -820,7 +851,7 @@ export default function CreatorPortal() {
                           <p>Create a file named exactly <code className="bg-black/50 px-1 rounded text-electric-blue">robots.txt</code> and place it in the <strong>root folder</strong> of your website.</p>
                           <p>It must be accessible at: <code className="text-gray-300">https://your-domain.com/robots.txt</code></p>
                         </div>
-                        <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-green-400 overflow-x-auto max-h-32 mt-2">
+                        <pre className="bg-black/60 p-3 rounded-lg border border-gray-800 text-xs text-green-400 overflow-y-auto max-h-[250px] mt-2">
                           <code>{`User-agent: GPTBot\nDisallow: /\nUser-agent: ChatGPT-User\nDisallow: /\nUser-agent: Anthropic-ai\nDisallow: /\nUser-agent: Claude-Web\nDisallow: /\nUser-agent: Google-Extended\nDisallow: /\nUser-agent: CCBot\nDisallow: /\nUser-agent: meta-externalagent\nDisallow: /\nUser-agent: OAI-SearchBot\nDisallow: /\nUser-agent: PerplexityBot\nDisallow: /\nUser-agent: Cohere-ai\nDisallow: /\nUser-agent: grok\nDisallow: /\nUser-agent: bingbot\nDisallow: /\nUser-agent: Copilot\nDisallow: /\nUser-agent: Mistral\nDisallow: /\nUser-agent: AlephAlpha\nDisallow: /\nUser-agent: DeepSeek\nDisallow: /\nUser-agent: Qwen\nDisallow: /\nUser-agent: Baiduspider\nDisallow: /\nUser-agent: YisouSpider\nDisallow: /\nUser-agent: Bytespider\nDisallow: /\nUser-agent: Sogou web spider\nDisallow: /\nUser-agent: Suno\nDisallow: /\nUser-agent: Udio\nDisallow: /\nUser-agent: ElevenLabs\nDisallow: /`}</code>
                         </pre>
                       </div>
@@ -832,26 +863,80 @@ export default function CreatorPortal() {
           </div>
 
           {/* WALLET CRYPTOGRAPHIC VERIFICATION */}
-          <WalletVerification
-            walletAddress={watch("walletAddress")}
-            onVerificationComplete={(signature, message) => {
-              setWalletSignature(signature);
-              setVerificationMessage(message);
-              setIsWalletVerified(true);
-              setValue("walletSignature", signature);
-              setValue("verificationMessage", message);
-              toast({
-                title: "Wallet Verified",
-                description: "Your wallet ownership has been cryptographically verified",
-              });
-            }}
-            onWalletChange={(address) => {
-              setValue("walletAddress", address);
-              setIsWalletVerified(false);
-              setWalletSignature("");
-              setVerificationMessage("");
-            }}
-          />
+          {!currentCreatorId ? (
+            <WalletVerification
+              walletAddress={watch("walletAddress")}
+              onVerificationComplete={(signature, message) => {
+                setWalletSignature(signature);
+                setVerificationMessage(message);
+                setIsWalletVerified(true);
+                setValue("walletSignature", signature);
+                setValue("verificationMessage", message);
+                toast({
+                  title: "Wallet Verified",
+                  description: "Your wallet ownership has been cryptographically verified",
+                });
+              }}
+              onWalletChange={(address) => {
+                setValue("walletAddress", address);
+                setIsWalletVerified(false);
+                setWalletSignature("");
+                setVerificationMessage("");
+              }}
+            />
+          ) : (
+            <Card className="border-electric-blue/30 bg-electric-blue/5">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-electric-blue" />
+                  Social Media Verification
+                </CardTitle>
+                <CardDescription>
+                  Your identity is verified. You can now link your social accounts (Google/YouTube, Facebook/Instagram, X, LinkedIn, GitHub, Discord, Telegram) to your Humanity ID.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-3 text-sm text-blue-200">
+                  <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-blue-300 mb-1">Before you click:</p>
+                    <p>Make sure you have already connected your social media accounts (Google/YouTube, Facebook/Instagram, X, LinkedIn, Discord, Telegram, GitHub) inside the <strong>Humanity Protocol App</strong>. Clicking this button will securely sync those verified platforms to your WebPayback profile.</p>
+                  </div>
+                </div>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  className="w-full border-electric-blue text-electric-blue hover:bg-electric-blue/10"
+                  disabled={isLinkingSocials}
+                  onClick={async () => {
+                    setIsLinkingSocials(true);
+                    toast({
+                      title: "Social Link Initiated",
+                      description: "Opening Humanity Protocol to link your social accounts..."
+                    });
+                    
+                    try {
+                      await humanityLogin({
+                        mode: 'redirect',
+                        scopes: ['openid']
+                      });
+                    } catch (error: any) {
+                      console.error("Social link failed:", error);
+                      toast({
+                        title: "Connection Error",
+                        description: error.message || "Failed to connect to Humanity Protocol.",
+                        variant: "destructive"
+                      });
+                      setIsLinkingSocials(false);
+                    }
+                  }}
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  {isLinkingSocials ? "Connecting..." : "Link Social Accounts via Humanity"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
           
           <div>
             <Label htmlFor="contentCategory" className="block text-sm font-medium mb-2">
