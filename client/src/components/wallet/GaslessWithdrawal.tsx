@@ -8,7 +8,6 @@ import { Alert } from '@/components/ui/alert';
 import { Wallet, ArrowRight, Zap, Loader2, Info, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePrivy } from '@privy-io/react-auth';
-// Import the paymaster client logic
 import { getPaymasterAndData } from '@/lib/paymaster';
 
 interface GaslessWithdrawalProps {
@@ -16,7 +15,7 @@ interface GaslessWithdrawalProps {
 }
 
 export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
-  const { user, authenticated } = usePrivy();
+  const { user, authenticated, login } = usePrivy();
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
@@ -35,8 +34,8 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
     
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
       toast({
-        title: "Importo non valido",
-        description: "Inserisci un importo maggiore di zero.",
+        title: "Invalid Amount",
+        description: "Please enter an amount greater than zero.",
         variant: "destructive"
       });
       return;
@@ -44,8 +43,8 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
 
     if (numAmount > availableBalance) {
       toast({
-        title: "Fondi insufficienti",
-        description: "Non hai abbastanza WPT-HUMAN nel tuo saldo.",
+        title: "Insufficient Funds",
+        description: "You do not have enough WPT-HUMAN in your balance.",
         variant: "destructive"
       });
       return;
@@ -53,8 +52,8 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
 
     if (numAmount <= paymasterFee) {
       toast({
-        title: "Importo troppo basso",
-        description: `L'importo deve essere maggiore della commissione di rete (${paymasterFee} WPT-HUMAN).`,
+        title: "Amount Too Low",
+        description: `Amount must be greater than the network fee (${paymasterFee} WPT-HUMAN).`,
         variant: "destructive"
       });
       return;
@@ -64,8 +63,8 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
     setWithdrawalSuccess(false);
 
     try {
-      // INTERAZIONE CON PIMLICO PAYMASTER (ERC-4337)
-      // 1. Prepariamo un mock UserOperation per dimostrare il flusso
+      // INTERACTION WITH PIMLICO PAYMASTER (ERC-4337)
+      // 1. Prepare a mock UserOperation to demonstrate the flow
       const mockUserOp = {
         sender: user?.wallet?.address || '0x0000000000000000000000000000000000000000',
         nonce: "0x0",
@@ -80,32 +79,32 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
         signature: "0x"
       };
 
-      // 2. Chiamiamo Pimlico per sponsorizzare la transazione
+      // 2. Call Pimlico to sponsor the transaction
       try {
         toast({
-          title: "Richiesta Paymaster",
-          description: "Contattando Pimlico per la sponsorizzazione del Gas...",
+          title: "Paymaster Request",
+          description: "Contacting Pimlico for Gas sponsorship...",
         });
         
-        // La chiamata reale al Paymaster di Pimlico (potrebbe fallire se l'API key è nuova o senza fondi,
-        // quindi facciamo un try/catch per mostrare comunque il successo UI)
+        // The real call to Pimlico Paymaster (might fail if the API key is new or without funds,
+        // so we use try/catch to still show UI success)
         await getPaymasterAndData(mockUserOp);
         
       } catch (pimlicoError) {
-        console.warn("Pimlico integration active, ma simulata per mancanza fondi reali sull'API key:", pimlicoError);
-        // Fallback per mostrare la UI funzionante anche se il paymaster non ha fondi
+        console.warn("Pimlico integration active, but simulated due to missing real funds on API key:", pimlicoError);
+        // Fallback to show working UI even if paymaster lacks funds
         await new Promise(resolve => setTimeout(resolve, 1500)); 
       }
       
-      // 3. Simuliamo l'invio al bundler
+      // 3. Simulate sending to bundler
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
       
       setWithdrawalSuccess(true);
       setAmount('');
       
       toast({
-        title: "Prelievo Gasless Completato!",
-        description: `${numAmount - paymasterFee} WPT-HUMAN inviati. Gas pagato da WebPayback (tramite Pimlico)!`,
+        title: "Gasless Withdrawal Complete!",
+        description: `${numAmount - paymasterFee} WPT-HUMAN sent. Gas paid by WebPayback (via Pimlico)!`,
         variant: "default"
       });
 
@@ -121,11 +120,11 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
     }
   };
 
-  if (!authenticated) {
+  if (!creatorId) {
     return (
       <Alert className="bg-amber-500/10 border-amber-500/30 text-amber-200">
         <Info className="h-4 w-4 text-amber-500" />
-        Autenticati con Privy per gestire il tuo wallet e i prelievi.
+        Authenticate to manage your wallet and withdrawals.
       </Alert>
     );
   }
@@ -139,34 +138,49 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <Wallet className="h-5 w-5 text-electric-blue" />
-            Prelievo Gasless
+            Gasless Withdrawal
           </CardTitle>
           <Badge className="bg-electric-blue/20 text-electric-blue border-electric-blue/50">
-            ERC-4337 Attivo
+            ERC-4337 Active
           </Badge>
         </div>
         <CardDescription>
-          Preleva i tuoi WPT-HUMAN direttamente sul tuo wallet. Non hai bisogno di $tHP per pagare le commissioni, ci pensa il nostro Paymaster.
+          Withdraw your WPT-HUMAN directly to your wallet. You don't need $tHP to pay network fees, our Paymaster covers it.
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-6">
         {/* Balance Display */}
         <div className="bg-gradient-to-r from-electric-blue/10 to-transparent p-6 rounded-xl border border-electric-blue/20">
-          <p className="text-sm text-gray-400 mb-1">Saldo Disponibile</p>
-          <div className="flex items-end gap-2">
-            <span className="text-4xl font-bold text-white">{availableBalance.toLocaleString()}</span>
-            <span className="text-lg text-electric-blue font-medium mb-1">WPT-HUMAN</span>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Available Balance</p>
+              <div className="flex items-end gap-2">
+                <span className="text-4xl font-bold text-white">{availableBalance.toLocaleString()}</span>
+                <span className="text-lg text-electric-blue font-medium mb-1">WPT-HUMAN</span>
+              </div>
+            </div>
+            
+            {(!authenticated || !user?.wallet) && (
+              <Button 
+                onClick={login}
+                variant="outline" 
+                className="bg-electric-blue/20 border-electric-blue text-electric-blue hover:bg-electric-blue hover:text-white"
+              >
+                Create your Wallet
+              </Button>
+            )}
           </div>
-          <p className="text-xs text-gray-500 mt-2 font-mono">
-            Wallet: {user?.wallet?.address || 'Non connesso'}
+          
+          <p className="text-xs text-gray-500 mt-4 font-mono">
+            Wallet: {user?.wallet?.address || 'Not connected'}
           </p>
         </div>
 
         {/* Withdrawal Form */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="amount">Importo da prelevare</Label>
+            <Label htmlFor="amount">Amount to withdraw</Label>
             <div className="relative">
               <Input
                 id="amount"
@@ -189,21 +203,21 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
           {/* Fee Breakdown */}
           <div className="bg-black/60 rounded-lg p-4 border border-gray-800 space-y-2 text-sm">
             <div className="flex justify-between text-gray-400">
-              <span>Importo Richiesto:</span>
+              <span>Requested Amount:</span>
               <span>{numAmount > 0 ? numAmount.toFixed(2) : '0.00'} WPT-HUMAN</span>
             </div>
             <div className="flex justify-between items-center text-amber-400/80">
               <span className="flex items-center gap-1">
-                <Zap className="h-3 w-3" /> Commissione Paymaster:
+                <Zap className="h-3 w-3" /> Paymaster Fee:
               </span>
               <span>- {paymasterFee.toFixed(2)} WPT-HUMAN</span>
             </div>
             <div className="flex justify-between text-gray-500 text-xs pl-4 border-l border-gray-800 ml-1">
-              <span>(Gas di rete sponsorizzato)</span>
+              <span>(Sponsored network gas)</span>
               <span>0.00 $tHP</span>
             </div>
             <div className="pt-2 mt-2 border-t border-gray-800 flex justify-between font-medium text-white">
-              <span>Riceverai:</span>
+              <span>You will receive:</span>
               <span className="text-green-400">{netAmount > 0 ? netAmount.toFixed(2) : '0.00'} WPT-HUMAN</span>
             </div>
           </div>
@@ -212,7 +226,7 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
         {withdrawalSuccess && (
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-center gap-3 text-green-400">
             <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-            <p className="text-sm">Transazione completata con successo! I token sono nel tuo wallet.</p>
+            <p className="text-sm">Transaction completed successfully! Tokens are in your wallet.</p>
           </div>
         )}
       </CardContent>
@@ -226,11 +240,11 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
           {isWithdrawing ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Sponsorizzazione e Trasferimento...
+              Sponsoring & Transferring...
             </>
           ) : (
             <>
-              Preleva Ora <ArrowRight className="ml-2 h-5 w-5" />
+              Withdraw Now <ArrowRight className="ml-2 h-5 w-5" />
             </>
           )}
         </Button>

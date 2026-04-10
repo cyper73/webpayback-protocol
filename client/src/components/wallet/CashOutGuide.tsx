@@ -15,10 +15,10 @@ export function CashOutGuide() {
             <Lightbulb className="h-6 w-6 text-electric-blue" />
           </div>
           <div>
-            <CardTitle className="text-xl text-white">Guida al Prelievo (Cash-Out)</CardTitle>
+            <CardTitle className="text-xl text-white">Withdrawal Guide (Cash-Out)</CardTitle>
             <CardDescription className="text-gray-400 mt-1">
-              I tuoi WPT-HUMAN sono token reali sulla blockchain. Tu ne hai il pieno controllo.
-              Ecco 3 modi semplici per utilizzarli nel mondo reale, senza intermediari centralizzati da parte nostra.
+              Your WPT-HUMAN are real tokens on the blockchain. You have full control over them.
+              Here are 3 simple ways to use them in the real world, with no centralized middlemen on our end.
             </CardDescription>
           </div>
         </div>
@@ -33,13 +33,13 @@ export function CashOutGuide() {
               <ShoppingBag className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h4 className="text-lg font-semibold text-white mb-1">Spesa Immediata (Gift Card)</h4>
+              <h4 className="text-lg font-semibold text-white mb-1">Instant Spending (Gift Cards)</h4>
               <p className="text-sm text-gray-400 mb-3">
-                Il metodo più veloce. Scambia i tuoi token per buoni Amazon, Netflix, o ricariche telefoniche usando piattaforme esterne che non richiedono registrazioni complesse.
+                The fastest method. Exchange your tokens for Amazon, Netflix, or mobile top-up gift cards using external platforms that require no complex registration.
               </p>
               <Button variant="outline" size="sm" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300" asChild>
                 <a href="https://www.bitrefill.com/" target="_blank" rel="noopener noreferrer">
-                  Visita Bitrefill <ExternalLink className="h-3 w-3 ml-2" />
+                  Visit Bitrefill <ExternalLink className="h-3 w-3 ml-2" />
                 </a>
               </Button>
             </div>
@@ -53,13 +53,13 @@ export function CashOutGuide() {
               <CreditCard className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h4 className="text-lg font-semibold text-white mb-1">Spesa Quotidiana (Carte di Debito)</h4>
+              <h4 className="text-lg font-semibold text-white mb-1">Daily Spending (Crypto Debit Cards)</h4>
               <p className="text-sm text-gray-400 mb-3">
-                Invia i tuoi token al tuo exchange preferito e usa la loro carta di debito Visa/Mastercard per pagare il caffè o la spesa direttamente in crypto.
+                Send your tokens to your favorite exchange and use their Visa/Mastercard debit card to pay for coffee or groceries directly in crypto.
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300" asChild>
-                  <a href="https://www.binance.com/it/cards" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.binance.com/en/cards" target="_blank" rel="noopener noreferrer">
                     Binance Card <ExternalLink className="h-3 w-3 ml-2" />
                   </a>
                 </Button>
@@ -75,13 +75,13 @@ export function CashOutGuide() {
               <Landmark className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h4 className="text-lg font-semibold text-white mb-1">Prelievo Bancario (Exchange)</h4>
+              <h4 className="text-lg font-semibold text-white mb-1">Bank Transfer (Exchanges)</h4>
               <p className="text-sm text-gray-400 mb-3">
-                La via classica. Trasferisci i token al tuo account su un grande exchange, convertili in Euro (EUR) e richiedi un bonifico SEPA verso la tua banca.
+                The traditional route. Transfer your tokens to your account on a major exchange, convert them to USD/EUR, and request a bank transfer to your local bank.
               </p>
               <Button variant="outline" size="sm" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300" asChild>
                 <a href="https://www.coinbase.com/" target="_blank" rel="noopener noreferrer">
-                  Visita Coinbase <ExternalLink className="h-3 w-3 ml-2" />
+                  Visit Coinbase <ExternalLink className="h-3 w-3 ml-2" />
                 </a>
               </Button>
             </div>
