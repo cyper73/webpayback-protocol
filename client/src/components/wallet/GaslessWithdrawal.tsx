@@ -30,6 +30,16 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
   };
 
   const handleWithdraw = async () => {
+    // 1. Check if user actually has a wallet connected before doing anything
+    if (!authenticated || !user?.wallet?.address) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please click 'Create your Wallet' or connect an existing wallet to withdraw funds.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const numAmount = parseFloat(amount);
     
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
