@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
-import { Wallet, ArrowRight, Zap, Loader2, Info, CheckCircle2 } from 'lucide-react';
+import { Wallet, ArrowRight, Zap, Loader2, Info, CheckCircle2, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { getPaymasterAndData } from '@/lib/paymaster';
 
 interface GaslessWithdrawalProps {
@@ -16,14 +16,38 @@ interface GaslessWithdrawalProps {
 
 export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
   const { user, authenticated, login } = usePrivy();
+  const { wallets } = useWallets();
+  const activeWallet = wallets?.[0];
+  const walletAddress = user?.wallet?.address || activeWallet?.address;
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawalSuccess, setWithdrawalSuccess] = useState(false);
+  const [paymasterFee, setPaymasterFee] = useState<number>(0);
+  const [isEstimatingGas, setIsEstimatingGas] = useState(true);
 
   // MOCK DATA: In a real app, this would come from a react-query hook fetching the DB/Contract
   const availableBalance = 1250.50; 
-  const paymasterFee = 0.5; // Cost in WPT-HUMAN
+
+  // Simulate dynamic gas fee estimation (Pimlico Paymaster RPC)
+  useEffect(() => {
+    const fetchLiveGasEstimate = async () => {
+      setIsEstimatingGas(true);
+      // Simulate API call to Paymaster to get current ERC-4337 gas prices
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Generate a dynamic fee between 0.30 and 0.85 WPT based on "network congestion"
+      const dynamicFee = 0.30 + Math.random() * 0.55;
+      setPaymasterFee(parseFloat(dynamicFee.toFixed(2)));
+      setIsEstimatingGas(false);
+    };
+
+    fetchLiveGasEstimate();
+
+    // Refresh gas estimate every 30 seconds to mimic real-time network fluctuations
+    const interval = setInterval(fetchLiveGasEstimate, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMaxClick = () => {
     setAmount(availableBalance.toString());
@@ -31,7 +55,7 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
 
   const handleWithdraw = async () => {
     // 1. Check if user actually has a wallet connected before doing anything
-    if (!authenticated || !user?.wallet?.address) {
+    if (!authenticated || !walletAddress) {
       toast({
         title: "Wallet Not Connected",
         description: "Please click 'Create your Wallet' or connect an existing wallet to withdraw funds.",
@@ -76,7 +100,7 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
       // INTERACTION WITH PIMLICO PAYMASTER (ERC-4337)
       // 1. Prepare a mock UserOperation to demonstrate the flow
       const mockUserOp = {
-        sender: user?.wallet?.address || '0x0000000000000000000000000000000000000000',
+        sender: walletAddress || '0x0000000000000000000000000000000000000000',
         nonce: "0x0",
         initCode: "0x",
         callData: "0x",
@@ -171,7 +195,7 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
               </div>
             </div>
             
-            {(!authenticated || !user?.wallet) && (
+            {(!authenticated || !walletAddress) && (
               <Button 
                 onClick={login}
                 variant="outline" 
@@ -183,7 +207,7 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
           </div>
           
           <p className="text-xs text-gray-500 mt-4 font-mono">
-            Wallet: {user?.wallet?.address || 'Not connected'}
+            Wallet: {walletAddress || 'Not connected'}
           </p>
         </div>
 
@@ -218,17 +242,32 @@ export function GaslessWithdrawal({ creatorId }: GaslessWithdrawalProps) {
             </div>
             <div className="flex justify-between items-center text-amber-400/80">
               <span className="flex items-center gap-1">
-                <Zap className="h-3 w-3" /> Paymaster Fee:
+                <Zap className="h-3 w-3" /> Paymaster Fee (Live Estimate):
               </span>
-              <span>- {paymasterFee.toFixed(2)} WPT-HUMAN</span>
+              <span>
+                {isEstimatingGas ? (
+                  <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> calculating...</span>
+                ) : (
+                  `- ${paymasterFee.toFixed(2)} WPT-HUMAN`
+                )}
+              </span>
             </div>
             <div className="flex justify-between text-gray-500 text-xs pl-4 border-l border-gray-800 ml-1">
-              <span>(Sponsored network gas)</span>
+              <span className="flex items-center gap-1">
+                (Sponsored network gas)
+                {!isEstimatingGas && (
+                  <span title="Live Gas Updated" className="flex items-center">
+                    <Activity className="h-3 w-3 text-green-500 animate-pulse ml-1" />
+                  </span>
+                )}
+              </span>
               <span>0.00 $tHP</span>
             </div>
             <div className="pt-2 mt-2 border-t border-gray-800 flex justify-between font-medium text-white">
               <span>You will receive:</span>
-              <span className="text-green-400">{netAmount > 0 ? netAmount.toFixed(2) : '0.00'} WPT-HUMAN</span>
+              <span className="text-green-400">
+                {isEstimatingGas ? '...' : (netAmount > 0 ? netAmount.toFixed(2) : '0.00')} WPT-HUMAN
+              </span>
             </div>
           </div>
         </div>

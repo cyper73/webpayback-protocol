@@ -21,7 +21,6 @@ import Login from "@/pages/Login";
 
 import PoolHealthDashboard from "@/pages/PoolHealthDashboard";
 import AntiDumpSlippageDashboard from "@/pages/AntiDumpSlippageDashboard";
-import ContractReserves from "@/pages/ContractReserves";
 import CreatorPage from "@/pages/CreatorPage";
 import ProtectedCreatorPortal from "@/components/auth/ProtectedCreatorPortal";
 import ProtectedNFTModule from "@/components/auth/ProtectedNFTModule";
@@ -41,7 +40,7 @@ function Router() {
 
       <Route path="/pool-health" component={PoolHealthDashboard} />
       <Route path="/anti-dump" component={AntiDumpSlippageDashboard} />
-      <Route path="/contract-reserves" component={ContractReserves} />
+      <Route path="/certificate/:address?" component={ContentCertificatePage} />
       <Route path="/pool-debug" component={PoolDebugger} />
       <Route path="/citations" component={ProtectedRewardsModule} />
       <Route path="/citations/:walletAddress" component={CitationsByWallet} />
@@ -60,7 +59,7 @@ function App() {
     <PrivyProvider
       appId={privyAppId}
       config={{
-        loginMethods: ['email', 'wallet', 'google', 'apple'],
+        loginMethods: ['email', 'wallet'],
         appearance: {
           theme: 'dark',
           accentColor: '#10b981', // Emerald green to match WebPayback

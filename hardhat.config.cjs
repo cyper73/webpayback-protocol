@@ -32,24 +32,12 @@ module.exports = {
     humanityMock: {
       url: "http://127.0.0.1:8545", // Rete locale per i test falliti
       chainId: 31337
-    },
-    polygon: {
-      url: "https://polygon-rpc.com/",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 30000000000, // 30 gwei
-      gas: 2100000
-    },
-    mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com/",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 30000000000,
-      gas: 2100000
     }
   },
   etherscan: {
     apiKey: {
-      polygon: process.env.POLYGONSCAN_API_KEY || "", // [REDACTED_FOR_GITHUB_SECURITY]
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "" // [REDACTED_FOR_GITHUB_SECURITY]
+      humanityTestnet: process.env.HUMANITY_API_KEY || "", 
+      humanityMainnet: process.env.HUMANITY_API_KEY || ""
     }
   },
   paths: {

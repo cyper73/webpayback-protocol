@@ -3,12 +3,12 @@ import type { InsertRewardDistribution } from "@shared/schema";
 import { ethers } from "ethers";
 
 // Multi-Chain Configuration
-const POLYGON_CONFIG = {
-  chainId: 137,
-  rpcUrl: "https://polygon-rpc.com/",
-  explorerUrl: "https://polygonscan.com",
-  tokenAddress: "0x9408f17a8B4666f8cb8231BA213DE04137dc3825", // WPT V2 token (optimized)
-  poolAddress: "0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3", // V3 pool CORRETTA POL/WPT V2
+const HUMANITY_CONFIG = {
+  chainId: 1942999413,
+  rpcUrl: "https://rpc.testnet.humanity.org/",
+  explorerUrl: "https://explorer.testnet.humanity.org/",
+  tokenAddress: "0x0000000000000000000000000000000000000000", // WPT token on Humanity
+  poolAddress: "0x0000000000000000000000000000000000000000", // Humanity pool
   symbol: "WPT",
   decimals: 18
 };
@@ -51,7 +51,7 @@ interface RewardDistributionResult {
 }
 
 class Web3Service {
-  private currentNetwork = POLYGON_CONFIG; // Will be migrated to Humanity Protocol
+  private currentNetwork = HUMANITY_CONFIG; // Migrated to Humanity Protocol
   provider: any;
   DEX_FACTORY: string;
   DEX_ROUTER: string;
@@ -65,7 +65,7 @@ class Web3Service {
   
   // Switch network configuration
   switchNetwork(networkName: 'polygon' | 'ethereum') {
-    this.currentNetwork = networkName === 'ethereum' ? ETHEREUM_CONFIG : POLYGON_CONFIG;
+    this.currentNetwork = networkName === 'ethereum' ? ETHEREUM_CONFIG : HUMANITY_CONFIG;
   }
   
   get tokenAddress() { return this.currentNetwork.tokenAddress; }
@@ -81,8 +81,8 @@ class Web3Service {
       // For now, we'll return real data about your token
       return {
         address: this.tokenAddress,
-        symbol: POLYGON_CONFIG.symbol,
-        decimals: POLYGON_CONFIG.decimals,
+        symbol: this.currentNetwork.symbol,
+        decimals: this.currentNetwork.decimals,
         totalSupply: "10000000000000000000000000", // 10M tokens (real deployment)
         poolAddress: this.poolAddress,
         poolLiquidity: "500000000000000000000000" // 500K tokens in pool (example)
@@ -129,7 +129,12 @@ class Web3Service {
     try {
       // Get authentic pool data from realPoolDataService (refreshed every 12h)
       const { realPoolDataService } = await import('./realPoolDataService');
-      const realPoolData = await realPoolDataService.getPoolData(poolType);
+      const allPoolData = await realPoolDataService.getPoolData();
+      const realPoolData = poolType === 'usdt' ? allPoolData.usdt : allPoolData.wmatic;
+
+      if (!realPoolData) {
+        throw new Error("Pool data not available");
+      }
 
       // Pool-specific configuration
       const poolConfig = poolType === 'usdt' ? {
@@ -249,10 +254,10 @@ class Web3Service {
   // Get network status and connection info
   async getNetworkStatus() {
     return {
-      chainId: POLYGON_CONFIG.chainId,
-      networkName: "Polygon",
+      chainId: HUMANITY_CONFIG.chainId,
+      networkName: "Humanity Testnet",
       rpcUrl: this.rpcUrl,
-      explorerUrl: POLYGON_CONFIG.explorerUrl,
+      explorerUrl: HUMANITY_CONFIG.explorerUrl,
       tokenAddress: this.tokenAddress,
       poolAddress: this.poolAddress,
       isConnected: true,

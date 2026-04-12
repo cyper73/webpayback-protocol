@@ -68,7 +68,7 @@ export class ContentCertificateNftService {
 
       // Mock NFT minting (in production, use actual NFT contract)
       const mockTokenId = `WPT-CERT-${Date.now()}-${params.creatorId}`;
-      const mockContractAddress = "0x9408f17a8B4666f8cb8231BA213DE04137dc3825"; // WPT contract for demo
+      const mockContractAddress = "0x0000000000000000000000000000000000000000"; // Humanity Protocol NFT contract for demo
       const mockTxHash = `0x${crypto.randomBytes(32).toString('hex')}`;
 
       // Store certificate in database
@@ -81,7 +81,7 @@ export class ContentCertificateNftService {
         nftContractAddress: mockContractAddress,
         mintTransactionHash: mockTxHash,
         royaltyPercentage: (params.royaltyPercentage || 10).toString(),
-        blockchainNetwork: "polygon"
+        blockchainNetwork: "humanity"
       }).returning();
 
       console.log(`✅ Content Certificate NFT minted: ${mockTokenId}`);

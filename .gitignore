@@ -98,6 +98,9 @@ jspm_packages/
 
 # Hardhat files
 cache/
+
+# Documentazione Deprecazione Token Vecchio
+OLD_TOKEN_DEPRECATION_GUIDE.md
 artifacts/
 
 # Blockchain and crypto files
@@ -163,6 +166,20 @@ HUMANITY_INTERVIEW_PREP.md
 PRESENTATION_SCRIPT.md
 PRESENTATION_SCRIPT.MD
 CLAUDE.md
+REWARD_REDUCTION_IMPLEMENTATION.md
+SUSTAINABLE_REWARD_STRATEGY.md
+TOKEN_DISTRIBUTION_STATISTICS_REPORT.md
+webpayback_domain_integration.md
+ZK_PROOF_OF_DEFENSE.md
+CASE_STUDY_WEBPAYBACK.md
 # Interview Notes
 INTERVIEW_NOTES.md
 INTERVIEW_NOTES_EN.md
+
+# Contributing guidelines
+contributing.md
+CONTRIBUTING.md
+
+# Security incident reports
+MALICIOUS_WALLET_BLOCK.md
+WALLET_SECURITY_SYSTEM.md

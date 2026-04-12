@@ -261,12 +261,16 @@ export class PoolHealthRewardScaler {
       const { realPoolDataService } = await import('./realPoolDataService');
       
       // Get authentic TVL from both pools
-      const usdtPoolData = await realPoolDataService.getPoolBalance('0xe021e5817E8867D7CeA10f63BC47E118f3aB9E4A'); // USDT/WPT V2
-      const wmaticPoolData = await realPoolDataService.getPoolBalance('0x572a5E8cbfCe8026550f1e2B369c2Bdbcf6634c3'); // WMATIC/WPT V3
+      const poolData = await realPoolDataService.getPoolData();
+      
+      const parseTvl = (tvlStr?: string) => {
+        if (!tvlStr) return 0;
+        return parseFloat(tvlStr.replace(/[^0-9.-]+/g,"")) || 0;
+      };
       
       return {
-        usdtTvl: usdtPoolData.totalTvlUsd || 539.92,    // Fallback to current authentic value
-        wmaticTvl: wmaticPoolData.totalTvlUsd || 257.45  // Convert WMATIC TVL to USD equivalent
+        usdtTvl: parseTvl(poolData.usdt?.totalValueLocked) || 539.92,
+        wmaticTvl: parseTvl(poolData.wmatic?.totalValueLocked) || 257.45
       };
     } catch (error) {
       console.warn('Failed to fetch authentic pool data, using fallback:', error);

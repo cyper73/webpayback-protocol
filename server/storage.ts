@@ -15,7 +15,7 @@ import {
   type RewardPoolSecurity, type InsertRewardPoolSecurity
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 
 // IStorage interface
 export interface IStorage {
@@ -165,28 +165,28 @@ export class DatabaseStorage implements IStorage {
 
   async createCreator(insertCreator: InsertCreator): Promise<Creator> {
     // Check wallet address registration limit (max 15 registrations per wallet)
-    const existingCreators = await this.getCreatorsByWalletAddress(insertCreator.walletAddress);
+    const existingCreators = await this.getCreatorsByWalletAddress((insertCreator as any).walletAddress);
     if (existingCreators.length >= 15) {
       throw new Error(`Maximum registration limit reached for this wallet address (15/15). Please use a different wallet address.`);
     }
 
     // Generate referral code if not provided
-    const referralCode = insertCreator.referralCode || await this.generateReferralCode();
+    const referralCode = (insertCreator as any).referralCode || await this.generateReferralCode();
     
     // Check if this is an early adopter (first 100 creators)
     const creatorCount = await db.select().from(creators);
     const isEarlyAdopter = creatorCount.length < 100;
     const earlyAdopterRank = isEarlyAdopter ? creatorCount.length + 1 : null;
     
-    const [creator] = await db
+    const [creator] = (await db
       .insert(creators)
       .values({
         ...insertCreator,
         referralCode,
         isEarlyAdopter,
         earlyAdopterRank,
-      })
-      .returning();
+      } as any)
+      .returning()) as any;
     return creator;
   }
 
@@ -215,7 +215,7 @@ export class DatabaseStorage implements IStorage {
 
   async generateReferralCode(): Promise<string> {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code;
+    let code = '';
     let exists = true;
     
     while (exists) {
@@ -416,10 +416,12 @@ export class DatabaseStorage implements IStorage {
 
   async getAccessPatternByHashes(creatorId: number, domainHash: string, ipHash: string, aiType: string): Promise<AccessPattern | undefined> {
     const [pattern] = await db.select().from(accessPatterns)
-      .where(eq(accessPatterns.creatorId, creatorId))
-      .where(eq(accessPatterns.domainHash, domainHash))
-      .where(eq(accessPatterns.ipHash, ipHash))
-      .where(eq(accessPatterns.aiType, aiType));
+      .where(and(
+        eq(accessPatterns.creatorId, creatorId),
+        eq(accessPatterns.domainHash, domainHash),
+        eq(accessPatterns.ipHash, ipHash),
+        eq(accessPatterns.aiType, aiType)
+      ));
     return pattern || undefined;
   }
 
@@ -429,8 +431,10 @@ export class DatabaseStorage implements IStorage {
 
   async getCreatorRewardsFromDate(creatorId: number, fromDate: Date): Promise<RewardDistribution[]> {
     return await db.select().from(rewardDistributions)
-      .where(eq(rewardDistributions.creatorId, creatorId))
-      .where(eq(rewardDistributions.createdAt, fromDate));
+      .where(and(
+        eq(rewardDistributions.creatorId, creatorId),
+        gte(rewardDistributions.createdAt, fromDate)
+      ));
   }
 
   async getCreator(creatorId: number): Promise<Creator | undefined> {
@@ -477,7 +481,7 @@ export class DatabaseStorage implements IStorage {
   async updateDomainVerification(id: number, updates: Partial<DomainVerification>): Promise<void> {
     await db
       .update(domainVerifications)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updates)
       .where(eq(domainVerifications.id, id));
   }
 
@@ -501,8 +505,10 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(channelContentMappings)
-      .where(eq(channelContentMappings.creatorId, creatorId))
-      .where(eq(channelContentMappings.isActive, true));
+      .where(and(
+        eq(channelContentMappings.creatorId, creatorId),
+        eq(channelContentMappings.isActive, true)
+      ));
   }
 
   async updateChannelContentMapping(id: number, updates: Partial<ChannelContentMapping>): Promise<boolean> {
@@ -535,9 +541,11 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(rewardPoolLimits)
-      .where(eq(rewardPoolLimits.walletAddress, walletAddress))
-      .where(eq(rewardPoolLimits.timeframeType, timeframeType))
-      .where(eq(rewardPoolLimits.isActive, true));
+      .where(and(
+        eq(rewardPoolLimits.walletAddress, walletAddress),
+        eq(rewardPoolLimits.timeframeType, timeframeType),
+        eq(rewardPoolLimits.isActive, true)
+      ));
   }
 
   async updateRewardPoolLimits(id: number, updates: Partial<RewardPoolLimits>): Promise<void> {
@@ -563,7 +571,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(poolDrainProtection)
-      .where(eq(poolDrainProtection.protectionType, protectionType));
+      .where(eq(poolDrainProtection.timeframe, protectionType));
   }
 
   async updatePoolDrainProtection(id: number, updates: Partial<PoolDrainProtection>): Promise<void> {

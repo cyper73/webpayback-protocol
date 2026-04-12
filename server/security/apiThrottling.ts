@@ -131,7 +131,6 @@ function getServiceIdentifier(req: Request): string {
   const path = req.path;
   
   if (path.includes('/api/reentrancy/alchemy/')) return 'alchemy';
-  if (path.includes('/api/cultural/')) return 'qloo';
   if (path.includes('/api/web3/')) return 'blockchain';
   if (path.includes('/api/pool/')) return 'pool-monitoring';
   

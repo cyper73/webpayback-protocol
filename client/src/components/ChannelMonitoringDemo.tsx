@@ -33,20 +33,14 @@ export default function ChannelMonitoringDemo() {
     setIsLoading(true);
     try {
       // Test channel detection
-      const detectionResult = await apiRequest('/api/channel/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: testUrl })
-      });
+      const detectionRes = await apiRequest('POST', '/api/channel/check', { url: testUrl });
+      const detectionResult = await detectionRes.json();
       
       setTestResults(detectionResult);
       
       // Extract channel info
-      const infoResult = await apiRequest('/api/channel/extract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: testUrl })
-      });
+      const infoRes = await apiRequest('POST', '/api/channel/extract', { url: testUrl });
+      const infoResult = await infoRes.json();
       
       setExtractedInfo(infoResult);
     } catch (error) {

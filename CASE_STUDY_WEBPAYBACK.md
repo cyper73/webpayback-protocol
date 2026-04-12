@@ -14,11 +14,11 @@ To understand the paradigm shift WebPayback introduces, especially for literary 
 
 While OpenTimestamps provides a fundamental service—creating an immutable mathematical proof that a document existed at a specific point in time (the *Proof of Existence*)—it represents a **passive, historical record**. It acts as a digital notary public: excellent for winning a court case after the theft has occurred, but completely inert against the theft itself.
 
-WebPayback, combined with Humanity Protocol and our ZK-Mining architecture, transforms this passive notary into an **active, monetized defense grid**:
+WebPayback, combined with Humanity Protocol and our P2P Guardian architecture (powered by Tether's Holepunch SDK), transforms this passive notary into an **active, monetized defense grid**:
 
 1. **From Static Record to Active Shield:** OpenTimestamps proves you wrote a poem on a Tuesday. WebPayback's SDK actively *detects and blocks* the AI bot attempting to scrape that poem on a Wednesday, returning an undeniable `402 Payment Required` legal notice.
 2. **From Human-to-Human to Human-to-Machine Enforcement:** A timestamp is useful only if a human judge reads it. WebPayback speaks the language of machines (HTTP Headers, JSON, API responses) forcing AI logging systems to acknowledge the copyright barrier automatically without human intervention.
-3. **From Sunk Cost to Revenue Stream:** Notarizing a document is an expense (or at best, free). With WebPayback's ZK-Mining, the very act of a bot attempting to read your timestamped poem triggers a Guardian node to generate a ZK-Proof, *minting tokens directly into your wallet*. The defense itself becomes the revenue model.
+3. **From Sunk Cost to Revenue Stream:** Notarizing a document is an expense. With WebPayback, the very act of a bot attempting to read your timestamped poem triggers a lightweight P2P connection (via Tether's SDK) to a powerful Guardian node. The Guardian computes the cryptographic proof of the intrusion, *minting tokens directly into both your wallets*. The defense itself becomes the revenue model.
 4. **The Anchor of Humanity:** A standard timestamp proves a *file* existed, but not *who* created it (a bot could timestamp AI-generated garbage). By anchoring the process to Humanity Protocol, WebPayback guarantees the data is 100% human-authored, solving the "Model Collapse" problem for AI companies and making the data infinitely more valuable to them.
 
 In philosophical terms: OpenTimestamps is the *Archivio di Stato* (State Archive) where you store the deed to your land. WebPayback is the electrified fence, the toll booth, and the automated bank that pays you every time someone tries to cross your border.
@@ -49,7 +49,7 @@ WebPayback introduces a server-side enforcement layer. When an AI bot attempts t
     "content_type": "literary_works"
   },
   "license_acquisition_url": "https://api.webpayback.com/licensing/hmty_1a2b3c4d5e",
-  "required_payment_token": "WPT (or zkH)"
+  "required_payment_token": "WPT"
 }
 ```
 This forces AI data engineers to read the payload in their error logs, transforming a scraping block into a direct B2B licensing opportunity.
@@ -94,21 +94,21 @@ During the Phase 1 Grant, the WebPayback team successfully integrated the Humani
 
 ---
 
-### 5. Future Roadmap (Phase 2 - On-Chain Tokenomics & ZK-Mining)
+### 5. Future Roadmap (Phase 2 - On-Chain Tokenomics & P2P Compute Delegation)
 
 To solve the three critical "cold start" problems of the ecosystem:
 1. Humanity Protocol cannot infinitely subsidize the ecosystem with free $H.
 2. AI companies may take months to begin paying for consistent data licenses.
 3. Creators require immediate gratification to justify installing the SDK.
 
-WebPayback employs a revolutionary **Dual-Layer Promissory Economy**, fusing the concepts of "Minting" and "Mining" through Zero-Knowledge technology (Proof-of-Useful-Work):
+WebPayback employs a revolutionary **Dual-Layer Promissory Economy**, fusing the concepts of "Minting" and "Mining" through a P2P compute-delegation architecture (Proof-of-Useful-Work):
 
-1. **The Sword & Shield (ZK-Proof Mining):** When a creator's SDK blocks an AI bot, this is not just a passive event. A decentralized network of "Guardians" computes a cryptographic Zero-Knowledge Proof (ZK-Proof) verifying that a specific bot attempted to scrape a Humanity-verified creator's content. This computational effort is real, useful work—replacing the energy waste of traditional mining with the active defense of copyright.
-2. **The Promissory Note (Minting the Reward):** Upon verifying this ZK-Proof of Defense, the Smart Contract instantly *mints* a low-gas L2 token (e.g., **WPT** or **zkH**) directly to the creator and the Guardian node. This provides the immediate gratification necessary for mass adoption, bypassing bureaucratic middlemen (like traditional copyright agencies that collect millions but pay pennies) and routing value directly to the human creator.
+1. **The Sword & Shield (P2P Guardian Network):** A standard creator (e.g., a blogger with a laptop) does not have the GPU power to compute heavy cryptography when an AI bot attacks. WebPayback solves this hardware bottleneck using **Tether's P2P SDK (Holepunch / Pear Keet)**. When the creator's lightweight SDK intercepts a bot, it opens a direct, serverless P2P tunnel to a decentralized network of "Guardians" (heavy nodes). The Guardian computes the cryptographic proof verifying the intrusion on the creator's behalf. This computational effort is real, useful work—replacing the energy waste of traditional mining with the active defense of copyright.
+2. **The Promissory Note (Minting the Reward):** Upon verifying this P2P-delegated Proof of Defense, the Smart Contract instantly *mints* a low-gas L2 token (e.g., **WPT**) and splits the reward: 70% to the creator (for the data) and 30% to the Guardian node (for providing the compute power). This provides the immediate gratification necessary for mass adoption, bypassing bureaucratic middlemen and routing value directly to the network participants.
 3. **The Treasury & The Trust Pact:** When AI companies inevitably need to purchase legal data API licenses, they pay in L1 **$H tokens**. These funds are deposited into the WebPayback Treasury. *Crucially, Humanity Protocol is not asked to guarantee the creators' payments out of its own pocket.* The liquidity that backs the minted L2 tokens comes directly from the AI companies buying the licenses. The JSON payload actively routes the AI companies to pay for the specific `humanity_id` they attempted to scrape.
 4. **The Alchemical Swap (Settlement):** Creators can burn their mintable L2 tokens to claim real, liquid **$H tokens** from the Treasury. 
 
-This architecture allows the ecosystem to bootstrap itself through utilitarian ZK-mining, creating a self-sustaining cycle where cryptographic defense literally mints the promissory value that is later backed by corporate AI capital.
+This architecture allows the ecosystem to bootstrap itself through utilitarian P2P-mining, creating a self-sustaining cycle where cryptographic defense literally mints the promissory value that is later backed by corporate AI capital.
 
 ### 6. Conclusion
 By combining the WebPayback HTTP 402 AI-Shield with Humanity Protocol's robust identity verification, we are building the first legally compliant, Sybil-resistant data marketplace for the AI era. Humanity Protocol is not just a login button; it is the fundamental layer of trust that makes the WebPayback economy viable.

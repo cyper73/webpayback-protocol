@@ -46,128 +46,128 @@
 
 ---
 
-### 💰 **PERCHÉ INVESTIRE CONVIENE**
+### 💰 **WHY INVESTING PAYS OFF**
 
-#### 🎯 **MATEMATICA SEMPLICE:**
+#### 🎯 **SIMPLE MATH:**
 
-**SCENARIO A - Senza Investimento:**
-- Ricevi 10 WPT/mese gratuiti
-- Valore attuale: €0,016 × 10 = €0,16/mese
-- Guadagno annuo: ~€2
+**SCENARIO A - Without Investment:**
+- Receive 10 free WPT/month
+- Current value: €0.016 × 10 = €0.16/month
+- Annual profit: ~€2
 
-**SCENARIO B - Con Investimento €100:**
-- Compri ~62.500 WPT (prezzo attuale)
-- Ricevi 50 WPT/mese (bonus investitore x5)
-- Se il prezzo WPT raddoppia: I tuoi token valgono €200
-- Guadagno rewards: €1,6/mese × 24 mesi = €38
-- **ROI totale: €238 da investimento €100 = +138%**
+**SCENARIO B - With €100 Investment:**
+- Buy ~62,500 WPT (current price)
+- Receive 50 WPT/month (investor bonus x5)
+- If WPT price doubles: Your tokens are worth €200
+- Rewards profit: €1.6/month × 24 months = €38
+- **Total ROI: €238 from €100 investment = +138%**
 
-#### 🚀 **SCENARIO C - Crescita Esplosiva:**
-- 1.000 creator investono €100 ciascuno
-- Pool totale: €100.000 + €538 iniziali
-- Prezzo WPT aumenta 100x
-- I tuoi €100 iniziali valgono **€10.000**
-- **ROI: 10.000% in 12-24 mesi**
+#### 🚀 **SCENARIO C - Explosive Growth:**
+- 1,000 creators invest €100 each
+- Total pool: €100,000 + initial €538
+- WPT price increases 100x
+- Your initial €100 is worth **€10,000**
+- **ROI: 10,000% in 12-24 months**
 
 ---
 
-### 🔥 **INCENTIVI ESCLUSIVI PER INVESTITORI**
+### 🔥 **EXCLUSIVE INVESTOR INCENTIVES**
 
-#### 🌟 **LIVELLI VIP (Attivazione: 1.000 Creator)**
+#### 🌟 **VIP LEVELS (Activation: 1,000 Creators)**
 
-**🥉 BRONZE (€50-199 investiti)**
-- Rewards x2
-- Accesso Content Certificate Priority
-- Badge esclusivo Creator Profile
+**🥉 BRONZE (€50-199 invested)**
+- 2x Rewards
+- Priority Content Certificate Access
+- Exclusive Creator Profile Badge
 
-**🥈 SILVER (€200-499 investiti)**  
-- Rewards x3
-- Early access nuove funzioni
+**🥈 SILVER (€200-499 invested)**  
+- 3x Rewards
+- Early access to new features
 - Governance voting power
-- NFT Certificate gratuiti (valore €25 ciascuno)
+- Free NFT Certificates (€25 value each)
 
-**🥇 GOLD (€500+ investiti)**
-- Rewards x5
-- Revenue sharing dal protocollo
-- Direct line con il team
+**🥇 GOLD (€500+ invested)**
+- 5x Rewards
+- Protocol revenue sharing
+- Direct line with the team
 - Co-marketing opportunities
 - Exclusive beta testing
 
-#### 🎁 **BONUS LANCIO:**
-- **Primi 100 investitori**: Bonus WPT +25%
-- **Early Adopters**: Rate rewards doppio per 6 mesi
-- **Referral Multiplier**: Porta un amico investitore = Bonus €25 in WPT
+#### 🎁 **LAUNCH BONUSES:**
+- **First 100 investors**: +25% WPT Bonus
+- **Early Adopters**: Double rewards rate for 6 months
+- **Referral Multiplier**: Bring an investor friend = €25 bonus in WPT
 
 ---
 
-### 🎯 **TIMING STRATEGICO**
+### 🎯 **STRATEGIC TIMING**
 
-#### ⏰ **FINESTRA DI OPPORTUNITÀ:**
-- **OGGI**: WPT costa €0,0016 (prezzo di fondazione)
-- **1.000 creator**: Prezzo stimato €0,016 (+900%)
-- **5.000 creator**: Prezzo stimato €0,16 (+10.000%)
-- **10.000 creator**: Prezzo stimato €1,6 (+100.000%)
+#### ⏰ **WINDOW OF OPPORTUNITY:**
+- **TODAY**: WPT costs €0.0016 (foundation price)
+- **1,000 creators**: Estimated price €0.016 (+900%)
+- **5,000 creators**: Estimated price €0.16 (+10,000%)
+- **10,000 creators**: Estimated price €1.6 (+100,000%)
 
-#### 📈 **PRIMA MUOVI, PIÙ GUADAGNI:**
-Chi investe oggi ottiene WPT al prezzo più basso di sempre. Ogni settimana che passa il prezzo può solo salire con l'arrivo di nuovi creator.
+#### 📈 **FIRST MOVER ADVANTAGE:**
+Those who invest today get WPT at the lowest price ever. Every passing week the price can only go up as new creators arrive.
 
 ---
 
-### 🛡️ **SICUREZZA E TRASPARENZA**
+### 🛡️ **SECURITY AND TRANSPARENCY**
 
-#### ✅ **GARANZIE TECNICHE:**
-- **Smart Contract verificato** su PolygonScan
-- **Liquidità bloccata** in pool Uniswap V2
-- **Zero rug-pull possibili** - pool decentralizzata
-- **Monitoring 24/7** con security alerts
+#### ✅ **TECHNICAL GUARANTEES:**
+- **Verified Smart Contract** on PolygonScan
+- **Locked Liquidity** in Uniswap V2 pool
+- **Zero rug-pull possibility** - decentralized pool
+- **24/7 Monitoring** with security alerts
 
-#### 📊 **TRASPARENZA TOTALE:**
-- Balance pool visibili in tempo reale
-- Tutte le transazioni pubbliche su blockchain
-- Dashboard analytics completo
-- Report mensili alla comunità
+#### 📊 **TOTAL TRANSPARENCY:**
+- Pool balances visible in real-time
+- All transactions public on the blockchain
+- Complete analytics dashboard
+- Monthly community reports
 
 ---
 
 ### 🚀 **CALL TO ACTION**
 
-#### 🎯 **PER CREATOR VISIONARI:**
+#### 🎯 **FOR VISIONARY CREATORS:**
 
-**Non sei solo un creator. Sei un INVESTITORE nel futuro dei creator.**
+**You are not just a creator. You are an INVESTOR in the future of creators.**
 
-Ogni euro che investi oggi in WPT è un euro che lavora per te 24/7, crescendo con ogni nuovo creator che si unisce all'ecosistema.
+Every euro you invest today in WPT is a euro working for you 24/7, growing with every new creator who joins the ecosystem.
 
-#### 💫 **LA SCELTA È SEMPLICE:**
+#### 💫 **THE CHOICE IS SIMPLE:**
 
-**🔴 ASPETTI** → Altri investono prima → Prezzo sale → Tu paghi di più
-**🟢 AGISCI OGGI** → Ottieni prezzo minimo → Altri arrivano dopo → I tuoi token esplodono di valore
-
----
-
-### 📞 **INIZIA SUBITO**
-
-1. **Registrati** come Creator su webpayback.com
-2. **Connetti** il tuo wallet MetaMask
-3. **Compra WPT** dalla pool USDT/WPT
-4. **Attiva** i bonus investitore automaticamente
-5. **Guarda** i tuoi guadagni crescere ogni giorno
+**🔴 YOU WAIT** → Others invest first → Price goes up → You pay more
+**🟢 YOU ACT TODAY** → You get the minimum price → Others arrive later → Your tokens explode in value
 
 ---
 
-### 🏆 **IL FUTURO È ADESSO**
+### 📞 **START RIGHT NOW**
 
-**WebPayback Protocol** non è solo una piattaforma - è il **primo ecosistema creator completamente autosufficiente** della storia.
-
-Ogni creator che investe rende l'ecosistema più forte. Ogni token acquistato fa salire il valore per tutti. Ogni nuovo utente moltiplica il potenziale di guadagno.
-
-**Non stai comprando token. Stai comprando una quota del futuro dei creator.**
+1. **Register** as a Creator on webpayback.com
+2. **Connect** your MetaMask wallet
+3. **Buy WPT** from the USDT/WPT pool
+4. **Activate** investor bonuses automatically
+5. **Watch** your earnings grow every day
 
 ---
 
-*🔥 Manifesto attivazione programmata: 1.000 creator registrati*
-*📅 Data ultima modifica: 28 Luglio 2025*
+### 🏆 **THE FUTURE IS NOW**
+
+**WebPayback Protocol** is not just a platform - it is the **first completely self-sustaining creator ecosystem** in history.
+
+Every creator who invests makes the ecosystem stronger. Every token purchased raises the value for everyone. Every new user multiplies the earning potential.
+
+**You are not buying tokens. You are buying a share in the future of creators.**
+
+---
+
+*🔥 Scheduled manifesto activation: 1,000 registered creators*
+*📅 Last updated: July 28, 2025*
 *🌐 WebPayback Protocol - webpayback.com*
 
 ---
 
-**💎 "Il miglior momento per investire in WPT era ieri. Il secondo miglior momento è oggi."**
+**💎 "The best time to invest in WPT was yesterday. The second best time is today."**

@@ -1,29 +1,29 @@
-# 🧬 WebPayback & Humanity Protocol: Piano di Integrazione
+# 🧬 WebPayback & Humanity Protocol: Integration Plan
 
-Questo documento traccia il cammino rigoroso e certosino per integrare il **Proof-of-Humanity** nel WebPayback Protocol V2, trasformando la presenza umana in un asset verificabile e premiato.
+This document outlines the rigorous and meticulous path to integrate the **Proof-of-Humanity** into the WebPayback Protocol V2, transforming human presence into a verifiable and rewarded asset.
 
-Il percorso è diviso in due fasi: **Fase 1 (Simulazione e Interfaccia)** e **Fase 2 (Integrazione Profonda On-Chain e API)**.
+The journey is divided into three phases: **Phase 1 (Simulation and Interface)**, **Phase 2 (Deep On-Chain and API Integration)**, and **Phase 3 (Official Grant Milestones)**.
 
 ---
 
-## 🛠️ FASE 1: La Via dello Sviluppo (Mocking & Dashboard)
-*Obiettivo: Costruire l'architettura logica, le interfacce utente e i calcoli matematici utilizzando un simulatore locale, garantendo un'esperienza utente perfetta prima di toccare i server esterni.*
+## 🛠️ PHASE 1: The Development Path (Mocking & Dashboard)
+*Objective: Build the logical architecture, user interfaces, and mathematical calculations using a local simulator, ensuring a flawless user experience before touching external servers.*
 
-### 1. Preparazione dell'Ambiente (Completato)
-- [x] Unire i file `WPTHumanRewards.sol` e `humanityProtocol.ts` dal vecchio progetto `essentials`.
-- [x] Aggiornare lo schema del Database per includere `isHumanityVerified` e `humanityScore`.
-- [x] Configurare `.env` con le variabili Sandbox e impostare `MOCK_HUMANITY=true`.
-- [x] Creare le rotte backend (`/api/humanity/...`).
+### 1. Environment Preparation (Completed)
+- [x] Merge `WPTHumanRewards.sol` and `humanityProtocol.ts` files from the old `essentials` project.
+- [x] Update Database schema to include `isHumanityVerified` and `humanityScore`.
+- [x] Configure `.env` with Sandbox variables and set `MOCK_HUMANITY=true`.
+- [x] Create backend routes (`/api/humanity/...`).
 
-### 2. Sviluppo Frontend (La Dashboard Umana)
-- [x] **Componente `HumanityStatus`**: Creare un badge UI (es. in `CreatorPortal.tsx`) che mostra se l'utente è verificato o meno (Grigio = Non verificato, Verde/Oro = Verificato con Score).
-- [x] **Pannello di Verifica**: Aggiungere una sezione dove l'utente non verificato può cliccare un pulsante "Verifica la tua Umanità" (che per ora chiamerà l'API mock).
-- [x] **Visualizzazione Moltiplicatori**: Aggiornare la UI delle ricompense per mostrare chiaramente il moltiplicatore attivo (es. "Base Reward: 10 WPT | Humanity Bonus (x2.0): +10 WPT").
+### 2. Frontend Development (The Human Dashboard)
+- [x] **`HumanityStatus` Component**: Create a UI badge (e.g., in `CreatorPortal.tsx`) that shows whether the user is verified or not (Gray = Unverified, Green/Gold = Verified with Score).
+- [x] **Verification Panel**: Add a section where unverified users can click a "Verify your Humanity" button (which for now calls the mock API).
+- [x] **Multipliers Display**: Update the rewards UI to clearly show the active multiplier (e.g., "Base Reward: 10 WPT | Humanity Bonus (x2.0): +10 WPT").
 
-### 3. Logica di Calcolo e Test (Mock)
-- [x] **Integrazione React Query**: Creare gli hooks nel frontend per chiamare `/api/humanity/status/:id` e `/api/humanity/verify`.
-- [x] **Simulazione di Verifica**: Cliccando "Verifica", il backend mock deve assegnare uno score (es. 85) e aggiornare il database.
-- [x] **Ricalcolo Rewards**: Verificare che, una volta verificato, il sistema di distribuzione (simulato) calcoli correttamente il bonus in base alla tabella:
+### 3. Calculation Logic and Testing (Mock)
+- [x] **React Query Integration**: Create frontend hooks to call `/api/humanity/status/:id` and `/api/humanity/verify`.
+- [x] **Verification Simulation**: By clicking "Verify", the mock backend must assign a score (e.g., 85) and update the database.
+- [x] **Rewards Recalculation**: Verify that, once verified, the (simulated) distribution system correctly calculates the bonus based on the table:
     - Score 0-74: 1.25x
     - Score 75-84: 1.50x
     - Score 85-94: 1.75x
@@ -31,33 +31,66 @@ Il percorso è diviso in due fasi: **Fase 1 (Simulazione e Interfaccia)** e **Fa
 
 ---
 
-## 🔗 FASE 2: L'Integrazione Profonda (SDK & Smart Contracts)
-*Obiettivo: Abbandonare le illusioni del mock e connettersi ai veri Oracoli (Humanity API v2) e agli Smart Contract su blockchain.*
+## 🔗 PHASE 2: Deep Integration (SDK & Smart Contracts)
+*Objective: Abandon the illusions of the mock and connect to the real Oracles (Humanity API v2) and Smart Contracts on the blockchain.*
 
-### 1. Transizione verso l'SDK e Migrazione di Rete (La Grande Purificazione)
-- [x] **Configurazione Privy (Completato):** Il sistema di login ora genera wallet nativi direttamente sulla **Testnet di Humanity Protocol** (Chain ID: 1942999413), abbandonando Polygon.
-- [x] **Purificazione Smart Contract (Completato):** Il contratto `WPTHumanRewards.sol` è stato epurato da ogni riferimento al vecchio token WPT di Polygon. Ora è un token nativo e indipendente, pronto per essere l'unico centro di valore.
-- [x] Ricercare ed installare l'SDK ufficiale di Humanity Protocol (`@humanity-org/connect-sdk`).
-- [x] Implementare il flusso **OAuth 2.1 (PKCE) / Client Credentials** richiesto dall'API v2 per ottenere il `Bearer Token`.
+### 1. Transition to the SDK and Network Migration (The Great Purification)
+- [x] **Privy Configuration (Completed):** The login system now generates native wallets directly on the **Humanity Protocol Testnet** (Chain ID: 1942999413), abandoning Polygon.
+- [x] **Smart Contract Purification (Completed):** The `WPTHumanRewards.sol` contract has been purged of all references to the old Polygon WPT token. It is now a native and independent token, ready to be the sole center of value.
+- [x] Research and install the official Humanity Protocol SDK (`@humanity-org/connect-sdk`).
+- [x] Implement the **OAuth 2.1 (PKCE) / Client Credentials** flow required by the v2 API to obtain the `Bearer Token`.
 
-### 2. Riscrivere il Servizio (`humanityProtocol.ts`)
-- [x] Sostituire la logica di fallback attuale con chiamate SDK ufficiali (`buildAuthUrl`, `exchangeCodeForToken`).
-- [ ] Rimuovere o bypassare il blocco `MOCK_HUMANITY` (Rimane in sospeso per i test UI locali).
-- [x] Gestire correttamente gli errori API reali (Rate limits, token scaduti, ecc.).
+### 2. Rewrite the Service (`humanityProtocol.ts`)
+- [x] Replace current fallback logic with official SDK calls (`buildAuthUrl`, `exchangeCodeForToken`).
+- [ ] Remove or bypass the `MOCK_HUMANITY` block (Pending for local UI testing).
+- [x] Properly handle real API errors (Rate limits, expired tokens, etc.).
 
-### 3. Integrazione On-Chain (Smart Contracts)
-- [ ] Dispiegare il nuovo e purificato `WPTHumanRewards.sol` sulla Testnet di Humanity Protocol.
-- [ ] Assicurarsi che l'interfaccia `IHumanityProtocol` punti all'indirizzo corretto del verificatore zkTLS di Humanity sulla loro rete.
-- [ ] Eseguire la **Token Migration (Airdrop):** Utilizzare la funzione `airdropToVerifiedUsers` per rimborsare gli utenti che possedevano il vecchio WPT su Polygon.
+### 3. On-Chain Integration (Smart Contracts)
+- [ ] Deploy the new and purified `WPTHumanRewards.sol` on the Humanity Protocol Testnet.
+- [ ] Ensure the `IHumanityProtocol` interface points to the correct Humanity zkTLS verifier address on their network.
+- [ ] Execute **Token Migration (Airdrop):** Use the `airdropToVerifiedUsers` function to refund users who held the old WPT on Polygon.
 
 ### 4. Wallet Abstraction & Gasless UX (ERC-4337)
-- [x] **Integrazione Privy (Completato)**: Sostituito MetaMask con login Email/Social ed Embedded Wallets per azzerare l'attrito cognitivo.
-- [x] **Implementazione Token Paymaster (Simulato)**: Configurato Pimlico (`viem`, `permissionless`) per la rete Humanity per sponsorizzare il gas in $tHP e detrarre il costo equivalente direttamente dal saldo **WPT-HUMAN** dell'utente.
-- [x] **Educazione Decentralizzata (Off-Ramp)**: Implementata una guida UX per permettere all'utente di spendere i token tramite Bitrefill o Coinbase, eliminando la necessità di Stripe e pesanti procedure KYC aziendali.
+- [x] **Privy Integration (Completed)**: Replaced MetaMask with Email/Social login and Embedded Wallets to eliminate cognitive friction.
+- [x] **Paymaster Token Implementation (Simulated)**: Configured Pimlico (`viem`, `permissionless`) for the Humanity network to sponsor gas in $tHP and deduct the equivalent cost directly from the user's **WPT-HUMAN** balance.
+- [x] **Decentralized Education (Off-Ramp)**: Implemented a UX guide to allow users to spend tokens via Bitrefill or Coinbase, eliminating the need for Stripe and heavy corporate KYC procedures.
 
-### 5. Il Grande Collaudo (Testnet)
-- [ ] Eseguire il processo di verifica completo: L'utente effettua la scansione biometrica (tramite app esterna o widget Humanity), il nostro backend rileva il cambiamento di stato via API, e lo Smart Contract permette il minting potenziato.
-- [ ] Audit finale delle logiche anti-whale e anti-bot incluse nel contratto `WPTHumanRewards`.
+### 5. The Great Collaudo (Testnet)
+- [ ] Execute the complete verification process: The user performs the biometric scan (via external app or Humanity widget), our backend detects the state change via API, and the Smart Contract allows enhanced minting.
+- [ ] Final audit of anti-whale and anti-bot logic included in the `WPTHumanRewards` contract.
 
 ---
-*Compilato il 21 Marzo 2026. La precisione è l'unica via verso l'immortalità digitale.*
+
+## 🏆 PHASE 3: Official Grant Milestones (Operational Plan)
+*Objective: Meet the metrics required by the grant and proceed with implementation and testing based on agreements with Rob.*
+
+### Milestone 1 — Setup & Initial Validation
+- [x] **Developer Portal set up**: Configuration of the developer portal.
+- [x] **Tenant created**: Creation of the tenant.
+- [x] **SDK integrated**: Integration of the Humanity Protocol SDK.
+- [ ] **Demo call**: Demonstration call with Rob and an engineer to validate the work.
+> *Note: No payment tied to this milestone, serves as a setup check.*
+
+### Milestone 2 — Authentication & Functional Tests
+- [ ] **Credential scope implemented**: Correct implementation of credential scopes.
+- [ ] **OAuth flow working end-to-end**: OAuth authentication flow working from start to finish.
+- [ ] **Functional test**: Functional tests completed.
+- [ ] **Sign-off**: Final approval.
+> *Note: Payment 2 ($920) upon sign-off.*
+
+### Milestone 3 — Full Staging & Case Study
+- [ ] **Full staging integration**: Complete integration in the staging environment.
+- [ ] **User onboarding tested end-to-end**: Complete testing of user onboarding.
+- [ ] **Case study submitted**: Creation and submission of the official case study.
+- [ ] **Review session**: Final review session.
+- [ ] **Sign-off**: Final approval.
+> *Note: Payment 3 ($690) upon sign-off.*
+
+---
+
+## 📝 Important Notes (To Remember)
+- **Privy / Google Cloud Configuration**: Remember to correctly configure Google Cloud Platform (GCP) credentials and APIs if you decide to use social/Google login via Privy in a production environment.
+- **Gas Fee / Pimlico**: When the token is officially online (mainnet/live), remember to finish and thoroughly test the gas fee implementation via Pimlico (Paymaster), removing the current mocks and ensuring that transaction costs (ERC-4337) are deducted correctly.
+
+---
+*Compiled on March 21, 2026. Precision is the only path to digital immortality.*

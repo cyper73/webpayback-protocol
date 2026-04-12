@@ -176,296 +176,246 @@ export function ContentCertificateManager({ creatorId }: ContentCertificateManag
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Shield className="h-8 w-8 text-blue-500" />
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-electric-blue/10 rounded-xl border border-electric-blue/30 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+          <Shield className="h-8 w-8 text-electric-blue" />
+        </div>
         <div>
-          <h2 className="text-2xl font-bold">Content Certificate NFTs</h2>
-          <p className="text-muted-foreground">
-            Protect your content against Google AI Overview scraping and earn WPT rewards
+          <h2 className="text-3xl font-bold text-white">Content Certificate NFTs</h2>
+          <p className="text-gray-400 mt-1">
+            Protect your content against AI Overview scraping and earn WPT rewards
           </p>
         </div>
       </div>
 
       {/* Detection Stats */}
       {detectionStats && (
-        <Card>
+        <Card className="border-neon-green/30 bg-black/40 shadow-[0_0_20px_rgba(57,255,20,0.1)] backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-neon-green text-xl">
+              <TrendingUp className="h-6 w-6" />
               Detection Statistics
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {detectionStats.recentDetections}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-900/60 p-4 rounded-xl border border-gray-800">
+                <p className="text-sm font-medium text-gray-400 mb-1">Recent AI Detections</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-white">{detectionStats.recentDetections}</span>
+                  <span className="text-xs text-neon-green bg-neon-green/10 px-2 py-1 rounded-full">+12%</span>
                 </div>
-                <div className="text-sm text-muted-foreground">Recent Detections</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {detectionStats.totalRewardsPaid.toFixed(4)} WPT
+              <div className="bg-gray-900/60 p-4 rounded-xl border border-gray-800">
+                <p className="text-sm font-medium text-gray-400 mb-1">Total Rewards Generated</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-electric-blue">{detectionStats.totalRewardsPaid}</span>
+                  <span className="text-xs text-electric-blue">WPT</span>
                 </div>
-                <div className="text-sm text-muted-foreground">Total Rewards Paid</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {detectionStats.averageConfidence.toFixed(1)}%
+              <div className="bg-gray-900/60 p-4 rounded-xl border border-gray-800">
+                <p className="text-sm font-medium text-gray-400 mb-1">Average Confidence</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-white">{(detectionStats.averageConfidence * 100).toFixed(1)}%</span>
+                  <div className="w-16 h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-neon-green" style={{ width: `${detectionStats.averageConfidence * 100}%` }}></div>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Average Confidence</div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Mint New Certificate */}
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Minting Form */}
+        <Card className="border-electric-blue/30 bg-black/40 shadow-xl backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Mint Content Certificate
+            <CardTitle className="flex items-center gap-2 text-electric-blue text-xl">
+              <FileText className="h-6 w-6" />
+              Mint New Certificate
             </CardTitle>
-            <CardDescription>
-              Create an NFT certificate to protect your content and earn rewards when AI systems use it
+            <CardDescription className="text-gray-400">
+              Create an immutable blockchain record of your content
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="contentUrl">Content URL *</Label>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="contentUrl" className="text-gray-300 flex items-center gap-2">
+                Content URL <span className="text-xs text-gray-500 font-normal">(Optional for social media)</span>
+              </Label>
               <Input
                 id="contentUrl"
-                placeholder="https://example.com/my-article"
+                placeholder="https://x.com/your-tweet-url or https://yoursite.com/article"
                 value={contentUrl}
                 onChange={(e) => setContentUrl(e.target.value)}
+                className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-600 focus-visible:ring-electric-blue"
               />
             </div>
-
-            <div>
-              <Label htmlFor="contentTitle">Content Title *</Label>
+            
+            <div className="space-y-3">
+              <Label htmlFor="contentTitle" className="text-gray-300">Content Title</Label>
               <Input
                 id="contentTitle"
-                placeholder="My Amazing Article"
+                placeholder="e.g. My Thread on AI or Article Title"
                 value={contentTitle}
                 onChange={(e) => setContentTitle(e.target.value)}
+                className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-600 focus-visible:ring-electric-blue"
               />
             </div>
 
-            <div>
-              <Label htmlFor="contentText">Content Text * (min 50 characters)</Label>
-              <Textarea
-                id="contentText"
-                placeholder="Paste your full article content here for fingerprinting..."
-                rows={4}
-                value={contentText}
-                onChange={(e) => setContentText(e.target.value)}
-              />
-              <div className="text-sm text-muted-foreground mt-1">
-                {contentText.length}/50 characters minimum
+            <div className="space-y-3">
+              <Label htmlFor="contentText" className="text-gray-300 flex items-center gap-2">
+                Original Content Text <Badge className="bg-electric-blue/20 text-electric-blue border-electric-blue/30 text-[10px] py-0 px-2">Core Fingerprint</Badge>
+              </Label>
+              <div className="relative">
+                <Textarea
+                  id="contentText"
+                  placeholder="Paste the EXACT full text of your tweet, thread, or article here...&#10;&#10;This text will be converted into a cryptographic SHA-256 fingerprint that proves you wrote it."
+                  className="min-h-[160px] bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-600 focus-visible:ring-electric-blue resize-y"
+                  value={contentText}
+                  onChange={(e) => setContentText(e.target.value)}
+                />
               </div>
+              <p className="text-xs text-gray-500 flex items-start gap-2">
+                <Shield className="h-4 w-4 text-electric-blue shrink-0" />
+                Your raw text is hashed locally on your device. We NEVER store or read your original text. Only the unhackable SHA-256 fingerprint is sent to the blockchain.
+              </p>
             </div>
 
-            <div>
-              <Label htmlFor="royalty">Royalty Percentage</Label>
+            <div className="space-y-3">
+              <Label htmlFor="royalty" className="text-gray-300">Royalty Percentage (%)</Label>
               <Input
                 id="royalty"
                 type="number"
                 min="0"
-                max="50"
+                max="100"
                 value={royaltyPercentage}
                 onChange={(e) => setRoyaltyPercentage(Number(e.target.value))}
+                className="bg-gray-900/80 border-gray-700 text-white focus-visible:ring-electric-blue w-32"
               />
-              <div className="text-sm text-muted-foreground mt-1">
-                Percentage of WPT rewards you'll earn from detections
-              </div>
             </div>
 
             <Button 
-              onClick={handleMintCertificate} 
+              onClick={handleMintCertificate}
               disabled={mintCertificate.isPending}
-              className="w-full"
+              className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white shadow-[0_0_15px_rgba(0,240,255,0.3)] h-12"
             >
-              {mintCertificate.isPending ? "Minting..." : "Mint Certificate NFT"}
+              {mintCertificate.isPending ? "Minting to Blockchain..." : "Mint Content Certificate NFT"}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Test Detection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Test AI Overview Detection
-            </CardTitle>
-            <CardDescription>
-              Test how our system detects content usage in Google AI Overview
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="testQuery">Search Query</Label>
-              <Input
-                id="testQuery"
-                placeholder="what is blockchain technology"
-                value={testQuery}
-                onChange={(e) => setTestQuery(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="testAiOverview">AI Overview Text</Label>
-              <Textarea
-                id="testAiOverview"
-                placeholder="Paste the Google AI Overview text here..."
-                rows={4}
-                value={testAiOverview}
-                onChange={(e) => setTestAiOverview(e.target.value)}
-              />
-            </div>
-
-            <Button 
-              onClick={handleTestDetection} 
-              disabled={testDetection.isPending}
-              className="w-full"
-              variant="outline"
-            >
-              {testDetection.isPending ? "Testing..." : "Test Detection"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Your Certificates */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Content Certificates</CardTitle>
-          <CardDescription>
-            All your minted content certificates and their performance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {certificatesLoading ? (
-            <div className="text-center py-8">Loading certificates...</div>
-          ) : certificates?.certificates.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No certificates minted yet. Create your first one above!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {certificates?.certificates.map((cert) => (
-                <div key={cert.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold">{cert.contentTitle}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <ExternalLink className="h-3 w-3" />
-                        <a 
-                          href={cert.contentUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                        >
-                          {cert.contentUrl}
-                        </a>
-                      </div>
-                    </div>
-                    <Badge variant={cert.isActive ? "default" : "secondary"}>
-                      {cert.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Detections</div>
-                      <div className="font-semibold">{cert.totalDetectedUses}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">WPT Earned</div>
-                      <div className="font-semibold">{parseFloat(cert.totalWptEarned).toFixed(4)}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Royalty</div>
-                      <div className="font-semibold">{parseFloat(cert.royaltyPercentage)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Network</div>
-                      <div className="font-semibold capitalize">{cert.blockchainNetwork}</div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">NFT Token ID:</span>
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {cert.nftTokenId}
-                        </code>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard(cert.nftTokenId)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Contract:</span>
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {cert.nftContractAddress.slice(0, 8)}...{cert.nftContractAddress.slice(-6)}
-                        </code>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard(cert.nftContractAddress)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+        <div className="space-y-8">
+          {/* Test Detection Area */}
+          <Card className="border-purple-500/30 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-400 text-xl">
+                <Zap className="h-6 w-6" />
+                Test AI Detection
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Simulate an AI Overview scraping your content
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-amber-500/10 p-4 rounded-xl border border-amber-500/20 flex gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+                <div className="text-sm text-amber-200">
+                  <strong>Sandbox Mode:</strong> Use this to test how WebPayback detects your content in Google AI Overviews.
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Info Alert */}
-      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100">
-                How Anti-AI Scraping Works
-              </h4>
-              <div className="text-sm text-blue-700 dark:text-blue-200 mt-2 space-y-2">
-                <p>
-                  <strong>1. Content Fingerprinting:</strong> We create a unique SHA-256 hash of your content
-                </p>
-                <p>
-                  <strong>2. Google AI Overview Monitoring:</strong> Our system scans AI overviews for matching content
-                </p>
-                <p>
-                  <strong>3. Automatic WPT Rewards:</strong> When we detect unauthorized use, you automatically earn WPT tokens
-                </p>
-                <p>
-                  <strong>4. Legal Protection:</strong> Your NFT certificate serves as blockchain proof of ownership
-                </p>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
+              <div className="space-y-3">
+                <Label htmlFor="testQuery" className="text-gray-300">Search Query</Label>
+                <Input
+                  id="testQuery"
+                  placeholder="e.g., How does WebPayback work?"
+                  value={testQuery}
+                  onChange={(e) => setTestQuery(e.target.value)}
+                  className="bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-600 focus-visible:ring-purple-400"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="testOverview" className="text-gray-300">AI Overview Result</Label>
+                <Textarea
+                  id="testOverview"
+                  placeholder="Paste the generated AI overview text here..."
+                  className="min-h-[100px] bg-gray-900/80 border-gray-700 text-white placeholder:text-gray-600 focus-visible:ring-purple-400"
+                  value={testAiOverview}
+                  onChange={(e) => setTestAiOverview(e.target.value)}
+                />
+              </div>
+
+              <Button 
+                onClick={handleTestDetection}
+                disabled={testDetection.isPending}
+                variant="outline"
+                className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/20 hover:text-white"
+              >
+                {testDetection.isPending ? "Analyzing..." : "Run Detection Test"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Your Certificates */}
+          <Card className="border-gray-800 bg-black/40 shadow-xl backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-white text-xl">Your Protected Content</CardTitle>
+              <CardDescription className="text-gray-400">
+                {certificates?.totalCertificates || 0} certificates minted
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {certificatesLoading ? (
+                <div className="flex justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-electric-blue"></div>
+                </div>
+              ) : certificates?.certificates && certificates.certificates.length > 0 ? (
+                <div className="space-y-4">
+                  {certificates.certificates.map((cert) => (
+                    <div key={cert.id} className="p-5 border border-gray-800 bg-gray-900/40 rounded-xl hover:border-gray-700 transition-colors">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-bold text-white">{cert.contentTitle}</h4>
+                        <Badge variant="outline" className="bg-electric-blue/10 text-electric-blue border-electric-blue/30">
+                          Active
+                        </Badge>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-400">
+                        <div className="flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4 text-gray-500" />
+                          <a href={cert.contentUrl} target="_blank" rel="noreferrer" className="hover:text-electric-blue transition-colors truncate max-w-[250px]">
+                            {cert.contentUrl}
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-gray-500" />
+                          <span className="truncate">Hash: {cert.contentHash?.substring(0, 16) || 'Pending'}...</span>
+                        </div>
+                        {cert.tokenId && (
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-gray-500" />
+                            <span>Token ID: {cert.tokenId}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-8 border border-dashed border-gray-800 rounded-xl bg-gray-900/20 text-gray-500">
+                  <FileText className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                  <p>No content certificates minted yet.</p>
+                  <p className="text-sm mt-1">Mint your first certificate to start earning rewards.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

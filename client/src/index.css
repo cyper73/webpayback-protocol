@@ -25,7 +25,7 @@
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 190 100% 50%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%; /* Bright red for dark mode */
     --destructive-foreground: 210 40% 98%;
     --border: 190 100% 50%; /* Make default borders electric blue */
     --input: 240 6% 20%;
@@ -70,7 +70,7 @@
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 190 100% 50%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%; /* Bright red for dark mode */
     --destructive-foreground: 210 40% 98%;
     --border: 190 100% 50%;
     --input: 240 6% 20%;

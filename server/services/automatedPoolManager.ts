@@ -46,15 +46,15 @@ class AutomatedPoolManager {
     this.signer = new ethers.Wallet(process.env.PRIVATE_KEY!, this.provider); // [REDACTED_FOR_GITHUB_SECURITY]
     
     this.automationConfig = {
-      enabled: true,
+      enabled: false, // Disabled due to migration
       rebalanceThreshold: 0.15, // 15%
       maxDailySpend: 50, // $50 per day
       maxTransactionSize: 20, // $20 per transaction
-      emergencyStop: false,
+      emergencyStop: true, // Force emergency stop to prevent old pool calls
       notifications: true
     };
     
-    this.startAutomation();
+    // this.startAutomation(); // Deprecated for old Uniswap pools
   }
 
   private async startAutomation() {

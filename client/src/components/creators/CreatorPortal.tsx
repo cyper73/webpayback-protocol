@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/dialog";
 import { HumanityConnect, useHumanity } from "@humanity-org/react-sdk";
 
+import ChannelMonitoringDemo from "@/components/ChannelMonitoringDemo";
+
 const formSchema = insertCreatorSchema.extend({
   websiteUrl: z.string().optional().or(z.literal("")),
   termsAccepted: z.boolean().refine(val => val === true, {
@@ -699,9 +701,9 @@ export default function CreatorPortal() {
               <Shield className="w-5 h-5" />
               <span className="text-xs font-medium">Proof of Humanity</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-lg transition-all">
-              <Lock className="w-5 h-5" />
-              <span className="text-xs font-medium">2FA Security</span>
+            <TabsTrigger value="channels" className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-lg transition-all">
+              <Globe className="w-5 h-5" />
+              <span className="text-xs font-medium">Channel Monitor</span>
             </TabsTrigger>
             <TabsTrigger value="wallet" className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-lg transition-all">
               <Coins className="w-5 h-5" />
@@ -1001,36 +1003,17 @@ export default function CreatorPortal() {
             </form>
           </TabsContent>
           
-          <TabsContent value="security" className="mt-6">
+          <TabsContent value="channels" className="mt-6">
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold mb-2">Biometric Security</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Your account is secured by Humanity Protocol
+                <h3 className="text-lg font-semibold mb-2 text-white">Channel Monitoring Setup</h3>
+                <p className="text-gray-400 text-sm max-w-2xl mx-auto">
+                  Automatically protect all videos in your channel by simply registering a single URL. 
+                  WebPayback will monitor any AI scraping across your entire content library.
                 </p>
               </div>
               
-              <Card className="border-green-500/20 bg-green-900/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-500">
-                    <Shield className="h-5 w-5" />
-                    zkTLS Proof of Humanity Active
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-gray-300">
-                    Traditional 2FA (like Google Authenticator or SMS) is obsolete in the WebPayback ecosystem.
-                  </p>
-                  <p className="text-gray-300">
-                    Your wallet and identity are cryptographically bound to your biometric signature via Humanity Protocol. 
-                    No one can access your funds or modify your settings without proving they are <strong>you</strong>.
-                  </p>
-                  <div className="flex items-center justify-between p-4 bg-black/40 rounded-lg mt-4">
-                    <span className="text-sm text-gray-400">Security Status</span>
-                    <Badge className="bg-green-600">Maximum</Badge>
-                  </div>
-                </CardContent>
-              </Card>
+              <ChannelMonitoringDemo />
             </div>
           </TabsContent>
           
