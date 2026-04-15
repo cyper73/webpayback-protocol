@@ -2398,18 +2398,18 @@ app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
     }
   });
 
-  // Chainlink prices endpoint with fallback data
+  // Chainlink prices endpoint with fallback data (Deprecated token)
   app.get('/api/chainlink/prices', async (req, res) => {
-    console.log('🔗 Fetching Chainlink prices...');
+    // Disabled console log to avoid spamming the terminal since token is deprecated
     
     res.json({
       prices: {
         MATIC_USD: 0.9523,
         ETH_USD: 3241.85,
-        WPT_USD: 0.002234
+        WPT_USD: 0.1117 // Mocked for UI, no real fetch
       },
       timestamp: new Date().toISOString(),
-      source: 'chainlink-fallback'
+      source: 'chainlink-deprecated'
     });
   });
 

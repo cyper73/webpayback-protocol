@@ -4,27 +4,19 @@ import { chainlinkAutomationService } from '../services/chainlinkAutomation';
 
 const router = Router();
 
-// Get latest price data from Chainlink feeds
+// Get latest price data from Chainlink feeds (Disabled for deprecated token)
 router.get('/prices', async (req, res) => {
   try {
-    console.log('🔗 Fetching Chainlink prices...');
-    
-    const [maticPrice, ethPrice, wptValueUSD] = await Promise.all([
-      chainlinkService.getMaticPrice(),
-      chainlinkService.getEthPrice(),
-      chainlinkService.getWPTValueUSD()
-    ]);
-
-    console.log('📊 Chainlink prices fetched successfully:', { maticPrice, ethPrice, wptValueUSD });
-
+    // Disabled console log and actual fetching to avoid spam and unneeded on-chain calls
+    // Returning fixed mock values for the dashboard
     res.json({
       prices: {
-        MATIC_USD: maticPrice,
-        ETH_USD: ethPrice,
-        WPT_USD: wptValueUSD
+        MATIC_USD: 0.9523,
+        ETH_USD: 3000.00,
+        WPT_USD: 0.1117 // Mocked for UI
       },
       timestamp: new Date().toISOString(),
-      source: 'chainlink'
+      source: 'chainlink-deprecated'
     });
   } catch (error) {
     console.error('Error fetching Chainlink prices:', error);
