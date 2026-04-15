@@ -66,7 +66,7 @@ function App() {
           logo: '/logo.png', 
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          createOnLogin: 'users-without-wallets' // Changed to string to match Privy types
         },
         supportedChains: [{
           id: 1942999413, // Humanity Protocol Testnet Chain ID

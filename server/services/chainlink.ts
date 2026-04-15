@@ -31,13 +31,13 @@ class ChainlinkService {
 
     // Initialize price feed contracts
     this.priceFeeds.MATIC_USD = new ethers.Contract(
-      CHAINLINK_FEEDS.MATIC_USD,
+      (CHAINLINK_FEEDS as any).MATIC_USD,
       priceFeedABI,
       this.provider
     );
 
     this.priceFeeds.ETH_USD = new ethers.Contract(
-      CHAINLINK_FEEDS.ETH_USD,
+      (CHAINLINK_FEEDS as any).ETH_USD,
       priceFeedABI,
       this.provider
     );

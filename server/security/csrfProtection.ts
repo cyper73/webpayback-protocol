@@ -74,18 +74,20 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction):
   
   if (!csrfToken) {
     console.log('CSRF: Missing token for', req.method, req.path);
-    return res.status(403).json({ 
+    res.status(403).json({ 
       error: 'CSRF token required',
       code: 'CSRF_TOKEN_MISSING'
     });
+    return;
   }
   
   if (!validateCSRFToken(sessionId, csrfToken)) {
     console.log('CSRF: Invalid token for', req.method, req.path);
-    return res.status(403).json({ 
+    res.status(403).json({
       error: 'Invalid CSRF token',
-      code: 'CSRF_TOKEN_INVALID'
+      code: 'CSRF_INVALID'
     });
+    return;
   }
   
   console.log('CSRF: Valid token for', req.method, req.path);
@@ -115,10 +117,11 @@ export const enhancedCSRFProtection = (req: Request, res: Response, next: NextFu
   
   if (!isOriginValid && (origin || referer)) {
     console.log('CSRF: Invalid origin/referer for financial operation:', origin, referer);
-    return res.status(403).json({ 
+    res.status(403).json({ 
       error: 'Request origin not allowed for financial operations',
       code: 'CSRF_ORIGIN_FORBIDDEN'
     });
+    return;
   }
   
   // Continue with standard CSRF protection

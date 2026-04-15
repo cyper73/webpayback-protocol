@@ -74,14 +74,10 @@ export default function PoolDrainProtection() {
   const testProtection = async (simulationType: string) => {
     setTestLoading(true);
     try {
-      const response = await apiRequest('/api/pool/drain-protection/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          walletAddress: selectedWallet,
-          rewardAmount: 1.0,
-          simulationType
-        })
+      const response = await apiRequest('POST', '/api/pool/drain-protection/test', {
+        walletAddress: selectedWallet,
+        rewardAmount: 1.0,
+        simulationType
       });
 
       if (response.ok) {

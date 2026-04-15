@@ -260,7 +260,7 @@ router.post("/login", async (req, res) => {
     let walletAddress = "";
     try {
         const wallet = await privy.wallets().create({ 
-            chainType: 'ethereum' 
+            chain_type: 'ethereum' 
         });
         walletAddress = wallet.address;
     } catch (e) {

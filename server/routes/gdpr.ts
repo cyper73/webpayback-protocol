@@ -60,11 +60,11 @@ router.get('/data/export/:userId', async (req: Request, res: Response) => {
     const gdprData = {
       exportDate: new Date().toISOString(),
       user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        id: (user as any).id,
+        username: (user as any).username,
+        role: (user as any).role,
+        createdAt: (user as any).createdAt,
+        updatedAt: (user as any).updatedAt
       },
       creators: userCreators.map(creator => ({
         id: creator.id,
@@ -160,7 +160,7 @@ router.post('/consent', csrfProtection, async (req: Request, res: Response) => {
     
     // Store consent preferences (in production: database table)
     const consentRecord = {
-      userId: req.session?.userId || null,
+      userId: (req as any).session?.userId || null,
       dataProcessing: validatedData.dataProcessing,
       marketing: validatedData.marketing,
       analytics: validatedData.analytics,

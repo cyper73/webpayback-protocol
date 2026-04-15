@@ -123,7 +123,7 @@ export class FraudDetectionService {
 
       // Check reputation score
       const reputationScore = await storage.getCreatorReputationScore(creatorId);
-      if (reputationScore && reputationScore.overallScore < this.MIN_REPUTATION_SCORE) {
+      if (reputationScore && (reputationScore.overallScore ?? 0) < this.MIN_REPUTATION_SCORE) {
         reasons.push(`Low reputation score: ${reputationScore.overallScore}`);
         riskScore += 30;
       }
@@ -132,7 +132,7 @@ export class FraudDetectionService {
       const accessPatterns = await storage.getAccessPatterns(creatorId);
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const recentPatterns = accessPatterns.filter(p => new Date(p.createdAt) >= todayStart);
+      const recentPatterns = accessPatterns.filter(p => new Date((p as any).createdAt) >= todayStart);
 
       // Domain concentration check
       const domainHash = this.simpleHash(this.extractDomain(accessEvent.url));
@@ -159,7 +159,7 @@ export class FraudDetectionService {
 
       // Burst detection
       const recentBurst = recentPatterns.filter(p => 
-        new Date(p.createdAt).getTime() > (accessEvent.timestamp.getTime() - this.BURST_TIME_WINDOW * 1000)
+        new Date((p as any).createdAt).getTime() > (accessEvent.timestamp.getTime() - this.BURST_TIME_WINDOW * 1000)
       );
       if (recentBurst.length > this.MAX_BURST_REQUESTS) {
         reasons.push(`Burst detected: ${recentBurst.length} requests in ${this.BURST_TIME_WINDOW}s`);
@@ -211,9 +211,9 @@ export class FraudDetectionService {
       
       if (existing) {
         await storage.updateAccessPattern(existing.id, {
-          accessCount: existing.accessCount + 1,
+          accessCount: (existing.accessCount ?? 0) + 1,
           lastAccess: accessEvent.timestamp
-        });
+        } as any);
       } else {
         await storage.createAccessPattern({
           creatorId,
@@ -223,7 +223,7 @@ export class FraudDetectionService {
           accessCount: 1,
           lastAccess: accessEvent.timestamp,
           userAgent: accessEvent.userAgent
-        });
+        } as any);
       }
     } catch (error) {
       console.error('Error storing access pattern:', error);
@@ -235,8 +235,11 @@ export class FraudDetectionService {
       const existing = await storage.getCreatorReputationScore(creatorId);
       
       if (existing) {
-        const newScore = Math.max(0, existing.overallScore - (riskScore * 0.3));
-        const newFraudCount = riskScore >= 80 ? existing.fraudCount + 1 : existing.fraudCount;
+        const currentScore = existing.overallScore ?? 100;
+        const currentFraudCount = existing.fraudCount ?? 0;
+        
+        const newScore = Math.max(0, currentScore - (riskScore * 0.3));
+        const newFraudCount = riskScore >= 80 ? currentFraudCount + 1 : currentFraudCount;
         const newTrustLevel = this.calculateTrustLevel(newScore, newFraudCount);
         
         await storage.updateCreatorReputationScore(creatorId, {
@@ -244,7 +247,7 @@ export class FraudDetectionService {
           fraudCount: newFraudCount,
           trustLevel: newTrustLevel,
           lastUpdated: new Date()
-        });
+        } as any);
       } else {
         const initialScore = Math.max(0, 100 - (riskScore * 0.3));
         const fraudCount = riskScore >= 80 ? 1 : 0;
@@ -257,7 +260,7 @@ export class FraudDetectionService {
           trustLevel,
           riskFactors: reasons,
           lastUpdated: new Date()
-        });
+        } as any);
       }
     } catch (error) {
       console.error('Error updating creator reputation:', error);
@@ -289,7 +292,7 @@ export class FraudDetectionService {
         reasons,
         recommendedAction,
         status: 'active'
-      });
+      } as any);
     } catch (error) {
       console.error('Error generating fraud alert:', error);
     }

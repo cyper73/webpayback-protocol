@@ -318,14 +318,14 @@ export class FakeCreatorDetectionService {
         creatorId: alert.creatorId,
         suspiciousUrl: alert.suspiciousUrl,
         suspiciousType: alert.suspiciousType,
-        similarityScore: alert.similarityScore,
+        similarityScore: alert.similarityScore.toString(),
         alertLevel: alert.alertLevel,
         actionTaken: alert.actionTaken,
         isResolved: false,
         evidence: alert.evidence,
         createdAt: new Date(),
         updatedAt: new Date()
-      });
+      } as any);
     } catch (error) {
       console.error('Error creating fake creator alert:', error);
     }
@@ -487,4 +487,4 @@ export class FakeCreatorDetectionService {
   }
 }
 
-export const fakeCreatorDetection = FakeCreatorDetectionService.getInstance();
+export const fakeCreatorDetectionService = FakeCreatorDetectionService.getInstance();

@@ -43,27 +43,20 @@ export class AlchemyReentrancyMonitor {
       console.log('🚀 Starting Alchemy real-time reentrancy monitoring...');
       
       // Monitor pending transactions for reentrancy patterns
-      this.alchemyWs = this.alchemy.ws.on("alchemy_pendingTransactions", 
+      this.alchemyWs = (this.alchemy as any).ws.on("alchemy_pendingTransactions", 
         {
-          toAddress: [], // Monitor all addresses initially
-          hashesOnly: false,
+          toAddress: process.env.V2_ROUTER_ADDRESS || "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
         },
-        (tx) => this.analyzePendingTransaction(tx)
+        (tx: any) => this.analyzePendingTransaction(tx)
       );
 
       // Monitor mined transactions for post-analysis
-      this.alchemy.ws.on("alchemy_minedTransactions", 
+      (this.alchemy as any).ws.on(
         {
-          addresses: [
-            {
-              to: "0x0000000000000000000000000000000000000000", // Zero address (common in exploits)
-              from: "0x0000000000000000000000000000000000000000"
-            }
-          ],
-          includeRemoved: true,
-          hashesOnly: false,
+          method: "alchemy_minedTransactions",
+          addresses: [{ to: process.env.V2_ROUTER_ADDRESS || "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" }],
         },
-        (tx) => this.analyzeMinedTransaction(tx)
+        (tx: any) => this.analyzeMinedTransaction(tx)
       );
 
       this.isMonitoring = true;
@@ -77,9 +70,9 @@ export class AlchemyReentrancyMonitor {
 
   async stopMonitoring() {
     if (this.alchemyWs) {
-      this.alchemyWs.unsubscribe();
-      this.alchemyWs = null;
+      (this.alchemyWs as any).unsubscribe();
     }
+    this.alchemyWs = null;
     this.isMonitoring = false;
     console.log('🛑 Alchemy monitoring stopped');
   }

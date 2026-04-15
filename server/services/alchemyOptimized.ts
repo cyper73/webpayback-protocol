@@ -1,7 +1,7 @@
 import { Alchemy, Network } from 'alchemy-sdk';
 
 export class OptimizedAlchemyMonitor {
-  private alchemy: Alchemy;
+  private alchemy: any;
   private isMonitoring = false;
   private batchInterval: NodeJS.Timeout | null = null;
   private callCount = 0;
@@ -170,8 +170,8 @@ export class OptimizedAlchemyMonitor {
     return {
       isActive: this.isMonitoring,
       network: 'Polygon Mainnet',
-      mode: 'Batch Analysis (Free Tier)',
-      ...this.getUsageStats()
+      ...this.getUsageStats(),
+      mode: 'Batch Analysis (Free Tier)'
     };
   }
 }

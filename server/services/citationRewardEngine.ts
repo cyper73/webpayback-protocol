@@ -127,7 +127,7 @@ export class CitationRewardEngine {
             rewardCalculation: {
               baseReward: this.REWARD_MULTIPLIERS.baseReward,
               citationTypeMultiplier: this.REWARD_MULTIPLIERS.citationType[citation.citationType],
-              aiModelMultiplier: this.REWARD_MULTIPLIERS.aiModel[citation.aiModel] || 1.0,
+              aiModelMultiplier: (this.REWARD_MULTIPLIERS.aiModel as Record<string, number>)[citation.aiModel] || 1.0,
               originalReward: scaledRewardData.originalReward,
               poolHealthScaleFactor: scaledRewardData.scaleFactor,
               poolHealthStatus: scaledRewardData.healthStatus,
@@ -155,7 +155,7 @@ export class CitationRewardEngine {
 
     } catch (error) {
       console.error('Citation processing error:', error);
-      return { success: false, rewardAmount: 0, error: error.message };
+      return { success: false, rewardAmount: 0, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
@@ -165,7 +165,7 @@ export class CitationRewardEngine {
   private calculateCitationReward(citation: CitationEvent): number {
     const baseReward = this.REWARD_MULTIPLIERS.baseReward;
     const citationMultiplier = this.REWARD_MULTIPLIERS.citationType[citation.citationType] || 1.0;
-    const aiMultiplier = this.REWARD_MULTIPLIERS.aiModel[citation.aiModel] || 1.0;
+    const aiMultiplier = (this.REWARD_MULTIPLIERS.aiModel as Record<string, number>)[citation.aiModel] || 1.0;
     const confidenceMultiplier = citation.confidence || 0.95;
 
     return baseReward * citationMultiplier * aiMultiplier * confidenceMultiplier;
@@ -183,7 +183,7 @@ export class CitationRewardEngine {
       .from(aiKnowledgeIndex)
       .where(and(
         eq(aiKnowledgeIndex.creatorId, creatorId),
-        eq(aiKnowledgeIndex.contentFingerprint, contentFingerprint)
+        eq((aiKnowledgeIndex as any).contentFingerprint, contentFingerprint)
       ))
       .limit(1);
 
@@ -193,9 +193,9 @@ export class CitationRewardEngine {
         .update(aiKnowledgeIndex)
         .set({
           lastCitationDate: new Date(),
-          totalCitations: existing.totalCitations + 1,
-          cumulativeRewards: (parseFloat(existing.cumulativeRewards) + this.calculateCitationReward(citation)).toString(),
-        })
+          totalCitations: ((existing as any).totalCitations || 0) + 1,
+          cumulativeRewards: (parseFloat((existing as any).cumulativeRewards || '0') + this.calculateCitationReward(citation)).toString(),
+        } as any)
         .where(eq(aiKnowledgeIndex.id, existing.id));
     } else {
       // Create new knowledge index entry
@@ -203,6 +203,9 @@ export class CitationRewardEngine {
         .insert(aiKnowledgeIndex)
         .values({
           creatorId,
+          contentHash: contentFingerprint, // Fallback schema match
+          aiModel: citation.aiModel,
+          sourceUrl: citation.sourceUrl,
           contentFingerprint,
           contentSummary: this.generateContentSummary(citation.citationContext),
           keyTopics: this.extractKeyTopics(citation.citationContext),
@@ -210,7 +213,7 @@ export class CitationRewardEngine {
           lastCitationDate: new Date(),
           totalCitations: 1,
           cumulativeRewards: this.calculateCitationReward(citation).toString(),
-        });
+        } as any);
     }
   }
 

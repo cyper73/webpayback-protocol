@@ -42,9 +42,9 @@ const formSchema = insertCreatorSchema.extend({
   }),
   walletSignature: z.string().optional(),
   verificationMessage: z.string().optional()
-}).omit({ userId: true });
+}).omit({ userId: true }) as any;
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = any;
 
 export default function CreatorPortal() {
   const { toast } = useToast();

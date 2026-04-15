@@ -61,33 +61,36 @@ export function apiThrottling(req: Request, res: Response, next: NextFunction) {
   // Check daily limit
   if (usageData.dailyCalls >= DAILY_LIMIT) {
     console.log(`🚫 DAILY API LIMIT EXCEEDED: ${serviceId} - ${usageData.dailyCalls}/${DAILY_LIMIT} calls`);
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Daily API limit exceeded',
       limit: DAILY_LIMIT,
       used: usageData.dailyCalls,
       resetTime: new Date(usageData.lastReset + 24 * 60 * 60 * 1000).toISOString()
     });
+    return;
   }
   
   // Check hourly limit
   if (usageData.currentHourCalls >= HOURLY_LIMIT) {
     console.log(`⏰ HOURLY API LIMIT EXCEEDED: ${serviceId} - ${usageData.currentHourCalls}/${HOURLY_LIMIT} calls/hour`);
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Hourly API limit exceeded',
       hourlyLimit: HOURLY_LIMIT,
       used: usageData.currentHourCalls,
       retryAfter: 3600
     });
+    return;
   }
   
   // Check burst limit
   if (usageData.recentCalls.length >= BURST_LIMIT) {
     console.log(`💥 BURST LIMIT EXCEEDED: ${serviceId} - ${usageData.recentCalls.length} calls in 1 minute`);
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Too many requests in short time',
       burstLimit: BURST_LIMIT,
       retryAfter: 60
     });
+    return;
   }
   
   // Apply dynamic throttling when approaching daily limit

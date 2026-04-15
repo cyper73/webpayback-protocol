@@ -332,11 +332,11 @@ class PoolDrainProtectionService {
       } else {
         // Update existing record
         const limit = limits[0];
-        const newAmount = parseFloat(limit.currentPeriodAmount) + rewardAmount;
+        const newAmount = parseFloat((limit as any).currentPeriodAmount || '0') + rewardAmount;
         await storage.updateRewardPoolLimits(limit.id, {
           currentPeriodAmount: newAmount.toString(),
           updatedAt: now
-        });
+        } as any);
       }
     }
   }
@@ -366,7 +366,7 @@ class PoolDrainProtectionService {
     const allRewards = await storage.getRewardDistributions();
     
     return allRewards.filter(reward => {
-      const rewardTime = new Date(reward.createdAt);
+      const rewardTime = new Date((reward as any).createdAt || Date.now());
       return rewardTime >= windowStart && rewardTime <= now;
     });
   }
@@ -467,10 +467,11 @@ class PoolDrainProtectionService {
     if (founderEvents.length > 0) {
       // Mark founder events as resolved to hide them from active alerts
       for (const event of founderEvents) {
+        const currentEvidence = typeof event.evidence === 'object' && event.evidence !== null ? event.evidence : {};
         await storage.updateRewardPoolSecurity(event.id, {
           isResolved: true,
           evidence: {
-            ...event.evidence,
+            ...currentEvidence,
             founderWalletCleaned: true,
             cleanedAt: new Date().toISOString()
           }
@@ -499,7 +500,7 @@ class PoolDrainProtectionService {
     
     const totalBlocked = securityEvents.filter(e => e.actionTaken === 'blocked').length;
     const recentAlerts = securityEvents.filter(e => {
-      const eventTime = new Date(e.createdAt);
+      const eventTime = new Date((e as any).createdAt || Date.now());
       const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
       return eventTime >= hourAgo;
     }).length;

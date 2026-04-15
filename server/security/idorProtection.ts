@@ -89,20 +89,22 @@ export const authorizeCreatorAccess = (req: Request, res: Response, next: NextFu
     const creatorId = parseInt(req.params.id || req.params.creatorId || req.body.creatorId);
     
     if (isNaN(creatorId)) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Invalid creator ID',
         code: 'INVALID_CREATOR_ID'
       });
+    return;
     }
     
     const session = getUserSession(req);
     
     if (!session) {
       console.log('IDOR: No valid session found');
-      return res.status(401).json({ 
+      res.status(401).json({ 
         error: 'Authentication required',
         code: 'AUTHENTICATION_REQUIRED'
       });
+    return;
     }
     
     // Admin users can access everything
@@ -116,11 +118,12 @@ export const authorizeCreatorAccess = (req: Request, res: Response, next: NextFu
       console.log(`IDOR: Access denied - User ${session.userId} attempted to access creator ${creatorId}`);
       console.log(`IDOR: User owns creators: [${session.authenticatedCreatorIds.join(', ')}]`);
       
-      return res.status(403).json({ 
+      res.status(403).json({ 
         error: 'Access denied. You can only access your own creator data.',
         code: 'IDOR_ACCESS_DENIED',
         ownedCreatorIds: session.authenticatedCreatorIds
       });
+    return;
     }
     
     console.log(`IDOR: Access granted - User ${session.userId} accessing creator ${creatorId}`);
@@ -155,19 +158,21 @@ export const authorizeBulkCreatorAccess = (req: Request, res: Response, next: Ne
     }
     
     if (creatorIds.length === 0) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'No creator IDs provided',
         code: 'NO_CREATOR_IDS'
       });
+    return;
     }
     
     const session = getUserSession(req);
     
     if (!session) {
-      return res.status(401).json({ 
+      res.status(401).json({ 
         error: 'Authentication required',
         code: 'AUTHENTICATION_REQUIRED'
       });
+    return;
     }
     
     // Admin users can access everything
@@ -182,12 +187,13 @@ export const authorizeBulkCreatorAccess = (req: Request, res: Response, next: Ne
     if (unauthorizedIds.length > 0) {
       console.log(`IDOR: Bulk access denied - User ${session.userId} attempted to access unauthorized creators [${unauthorizedIds.join(', ')}]`);
       
-      return res.status(403).json({ 
+      res.status(403).json({ 
         error: 'Access denied. You can only access your own creator data.',
         code: 'IDOR_BULK_ACCESS_DENIED',
         unauthorizedIds,
         ownedCreatorIds: session.authenticatedCreatorIds
       });
+    return;
     }
     
     console.log(`IDOR: Bulk access granted - User ${session.userId} accessing creators [${creatorIds.join(', ')}]`);
@@ -208,19 +214,21 @@ export const authorizeResourceAccess = (resourceType: string) => {
       const resourceId = parseInt(req.params.id || req.params.resourceId);
       
       if (isNaN(resourceId)) {
-        return res.status(400).json({ 
+        res.status(400).json({ 
           error: `Invalid ${resourceType} ID`,
           code: 'INVALID_RESOURCE_ID'
         });
+    return;
       }
       
       const session = getUserSession(req);
       
       if (!session) {
-        return res.status(401).json({ 
+        res.status(401).json({ 
           error: 'Authentication required',
           code: 'AUTHENTICATION_REQUIRED'
         });
+    return;
       }
       
       // Admin users can access everything

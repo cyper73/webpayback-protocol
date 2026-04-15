@@ -11,6 +11,8 @@ import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtect
 import SimpleInfrastructure from "@/components/unified/SimpleInfrastructure";
 import CategoryContentStatistics from "@/components/analytics/CategoryContentStatistics";
 import { useHumanity } from "@humanity-org/react-sdk";
+import { usePrivy } from "@privy-io/react-auth";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity, User, TrendingUp, AlertTriangle, CheckCircle, Zap, Users, Globe, ArrowUpRight, DollarSign, PieChart, BarChart3, Clock, RefreshCw, Eye, Rocket, Settings, ShieldAlert, ArrowRight, Cpu } from "lucide-react";
@@ -26,10 +28,39 @@ const isFounderDevice = () => {
 };
 
 export default function Dashboard() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const { login: humanityLogin } = useHumanity();
-  const { toast } = useToast();
+  const { logout: privyLogout, authenticated, user } = usePrivy();
   const [isConnecting, setIsConnecting] = useState(false);
+
+  // Add robust check: Also check localStorage for our custom session
+  const hasLocalSession = typeof window !== 'undefined' ? !!localStorage.getItem('webpayback_session') : false;
+
+  // Add robust check for authentication status
+  const isActuallyLoggedIn = authenticated || !!user || hasLocalSession;
+
+  const handleLogout = async () => {
+    try {
+      if (authenticated) {
+        await privyLogout();
+      }
+    } catch (error) {
+      console.error("Privy logout failed:", error);
+    } finally {
+      // Clear local storage and query cache regardless of Privy state
+      localStorage.clear();
+      sessionStorage.clear();
+      queryClient.clear();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been safely disconnected.",
+      });
+      // Force reload to clean up state
+      window.location.reload();
+    }
+  };
 
   const handleHumanityLoginClick = async () => {
     try {
@@ -67,7 +98,7 @@ export default function Dashboard() {
     };
   }, []);
 
-  const { data: dashboardData, isFetching } = useQuery({
+  const { data: dashboardData, isFetching } = useQuery<any>({
     queryKey: ["/api/analytics/dashboard"],
     refetchInterval: isUserInteracting ? false : 30000,
     staleTime: 0,
@@ -143,9 +174,15 @@ export default function Dashboard() {
                 <Coins className="text-amber-400 w-4 h-4 flex-shrink-0" />
                 <span className="font-mono text-xs">WPT Live</span>
               </div>
-              <Button size="sm" variant="outline" className="bg-electric-blue/10 border-electric-blue/30 text-electric-blue hover:bg-electric-blue hover:text-white" onClick={handleHumanityLoginClick} disabled={isConnecting}>
-                {isConnecting ? "Connecting..." : "Login"} <ArrowUpRight className="ml-1 w-3 h-3" />
-              </Button>
+              {isActuallyLoggedIn ? (
+                <Button size="sm" variant="outline" className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20" onClick={handleLogout}>
+                  Logout
+                </Button>
+              ) : (
+                <Button size="sm" variant="outline" className="bg-electric-blue/10 border-electric-blue/30 text-electric-blue hover:bg-electric-blue hover:text-white" onClick={handleHumanityLoginClick} disabled={isConnecting}>
+                  {isConnecting ? "Connecting..." : "Login"} <ArrowUpRight className="ml-1 w-3 h-3" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

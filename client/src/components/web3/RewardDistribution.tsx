@@ -72,7 +72,7 @@ export default function RewardDistribution() {
                   <div>
                     <div className="text-sm text-gray-400">Active Creators</div>
                     <div className="font-bold text-electric-blue">
-                      {rewards ? [...new Set(rewards.map(r => r.creatorId))].length : 0}
+                      {rewards ? Array.from(new Set(rewards.map((r: any) => r.creatorId))).length : 0}
                     </div>
                   </div>
                 </div>

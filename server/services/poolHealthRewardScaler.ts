@@ -152,9 +152,9 @@ export class PoolHealthRewardScaler {
       scaleFactor: healthStatus.rewardScaleFactor,
       healthStatus: {
         ...healthStatus,
-        activationThreshold: this.MINIMUM_ACTIVATION_THRESHOLD,
+        belowActivationThreshold: healthStatus.belowActivationThreshold,
         isEthicalEquilibriumActive: !healthStatus.belowActivationThreshold
-      }
+      } as any
     };
   }
 

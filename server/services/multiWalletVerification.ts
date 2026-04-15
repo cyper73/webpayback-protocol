@@ -350,11 +350,11 @@ This signature does not authorize any transactions.`;
       "Copy the signature and paste it below"
     ];
 
-    const walletSpecificInstructions: Record<WalletType, Partial<{
+    const walletSpecificInstructions: Partial<Record<WalletType, Partial<{
       steps: string[];
       notes: string[];
       troubleshooting: string[];
-    }>> = {
+    }>>> = {
       [WalletType.PHANTOM]: {
         steps: [
           ...baseSteps.slice(0, 2),

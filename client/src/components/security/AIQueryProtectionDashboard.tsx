@@ -38,13 +38,13 @@ interface VPNAnalysis {
 
 export function AIQueryProtectionDashboard() {
   // Fetch AI Query Stats
-  const { data: queryStats, isLoading: queryStatsLoading } = useQuery({
+  const { data: queryStats, isLoading: queryStatsLoading } = useQuery<any>({
     queryKey: ['/api/ai-query/stats'],
     refetchInterval: 10000 // Refresh every 10 seconds
   });
 
   // Fetch VPN Stats
-  const { data: vpnStats, isLoading: vpnStatsLoading } = useQuery({
+  const { data: vpnStats, isLoading: vpnStatsLoading } = useQuery<any>({
     queryKey: ['/api/vpn/stats'],
     refetchInterval: 10000
   });

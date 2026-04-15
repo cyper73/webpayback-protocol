@@ -70,17 +70,14 @@ export default function PoolLiquidityDebugger() {
 
   const generateLiquidityParams = async () => {
     try {
-      const response = await apiRequest('/api/web3/generate-liquidity-params', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wmaticAmount: parseFloat(wmaticAmount),
-          wptAmount: parseFloat(wptAmount),
-          walletAddress,
-          slippageTolerance: parseFloat(slippage)
-        })
+      const response = await apiRequest('POST', '/api/web3/generate-liquidity-params', {
+        wmaticAmount: parseFloat(wmaticAmount),
+        wptAmount: parseFloat(wptAmount),
+        walletAddress,
+        slippageTolerance: parseFloat(slippage)
       });
-      setLiquidityParams(response.params);
+      const data = await response.json();
+      setLiquidityParams(data.params);
     } catch (error) {
       console.error('Failed to generate liquidity params:', error);
     }

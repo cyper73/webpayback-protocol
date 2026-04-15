@@ -349,7 +349,7 @@ Steps:
         riskFactors,
         verificationToken: undefined,
         metaTagInstruction: '❌ YOUTUBE CHANNEL URL NOT SUPPORTED:\n\nYou have entered a YouTube channel URL, but verification requires a specific video URL.\n\nPlease:\n1. Go to one of your YouTube videos\n2. Copy the video URL (youtube.com/watch?v=xxx)\n3. Use that URL instead of your channel URL',
-        chainlinkData: undefined
+        chainlinkData: undefined as any
       };
     }
     
@@ -543,7 +543,7 @@ Steps:
         console.log('🔗 HTTP Error:', response.status, response.statusText);
       }
     } catch (error) {
-      console.log('🔗 Fetch failed:', error.message);
+      console.log('🔗 Fetch failed:', error instanceof Error ? error.message : String(error));
       console.log('🔗 URL may not be publicly accessible or CORS blocked');
     }
     
@@ -635,7 +635,7 @@ Steps:
           reviewNotes: `Automatically verified by Chainlink with score ${chainlinkResult.verificationScore}/100`
         };
 
-        const verification = await storage.createDomainVerification(verificationData);
+        const verification = await storage.createDomainVerification(verificationData as any);
         
         return {
           success: true,
@@ -659,7 +659,7 @@ Steps:
           reviewNotes: `Chainlink flagged for manual review: ${chainlinkResult.riskFactors.join(', ')}`
         };
 
-        const verification = await storage.createDomainVerification(verificationData);
+        const verification = await storage.createDomainVerification(verificationData as any);
         
         return {
           success: false,

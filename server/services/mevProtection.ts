@@ -182,7 +182,7 @@ export class MEVProtectionService {
       networkId: 1, // Polygon
       status: "completed",
       completedAt: new Date()
-    };
+    } as any;
     
     await storage.createRewardDistribution(rewardData);
     

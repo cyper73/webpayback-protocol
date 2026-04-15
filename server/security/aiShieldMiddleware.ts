@@ -87,7 +87,7 @@ export function aiShieldMiddleware(options: AiShieldOptions = {}) {
       res.setHeader("WWW-Authenticate", "WebPayback-Token realm=\"Data Licensing\"");
 
       // Return 402 Payment Required with the legal payload
-      return res.status(402).json({
+      res.status(402).json({
         error: "Payment Required",
         code: 402,
         message: "Access to this content for AI training or automated scraping requires a commercial license.",
@@ -100,6 +100,7 @@ export function aiShieldMiddleware(options: AiShieldOptions = {}) {
         protected_resource: protectedResource,
         client_agent: userAgent
       });
+    return;
     }
 
     // If not an AI bot, allow the request to proceed normally

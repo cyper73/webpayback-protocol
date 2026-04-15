@@ -148,7 +148,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
     if (callDepth > REENTRANCY_CONFIG.MAX_CALL_DEPTH) {
       console.log(`🚨 REENTRANCY ATTACK DETECTED: Call depth ${callDepth} exceeds limit for ${userAddress}`);
       
-      return res.status(403).json({
+      res.status(403).json({
         error: 'Reentrancy attack detected. Transaction blocked.',
         code: 'REENTRANCY_DETECTED',
         details: {
@@ -157,6 +157,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
           userAddress: userAddress.slice(0, 6) + '...' + userAddress.slice(-4)
         }
       });
+    return;
     }
 
     // Check concurrent operations limit
@@ -166,7 +167,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
     if (userActiveOps >= REENTRANCY_CONFIG.MAX_CONCURRENT_OPS) {
       console.log(`⚠️ REENTRANCY: Too many concurrent operations for ${userAddress}`);
       
-      return res.status(429).json({
+      res.status(429).json({
         error: 'Too many concurrent operations. Please wait.',
         code: 'TOO_MANY_OPERATIONS',
         details: {
@@ -174,6 +175,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
           maxAllowed: REENTRANCY_CONFIG.MAX_CONCURRENT_OPS
         }
       });
+    return;
     }
 
     // Analyze transaction for suspicious patterns
@@ -184,7 +186,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
       console.log(`🚨 HIGH RISK TRANSACTION BLOCKED: Score ${riskScore}% for ${userAddress}`);
       suspiciousAddresses.add(userAddress);
       
-      return res.status(403).json({
+      res.status(403).json({
         error: 'High-risk transaction pattern detected.',
         code: 'HIGH_RISK_TRANSACTION',
         details: {
@@ -193,6 +195,7 @@ export const reentrancyProtection = (req: Request, res: Response, next: NextFunc
           recommendation: 'Transaction blocked for security reasons'
         }
       });
+    return;
     }
 
     // Flag suspicious activity but allow with warning

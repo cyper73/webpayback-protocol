@@ -32,13 +32,13 @@ interface CrossChainData {
  * Handles API calls, cross-chain data sync, and external integrations
  */
 export class ChainlinkFunctionsService {
-  private provider: ethers.JsonRpcProvider;
+  private provider: any;
   private pendingRequests: Map<string, FunctionRequest> = new Map();
   private requestHistory: FunctionRequest[] = [];
   private crossChainData: CrossChainData[] = [];
 
   constructor() {
-    this.provider = new ethers.JsonRpcProvider(
+    this.provider = new (ethers as any).providers.JsonRpcProvider(
       process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com'
     );
   }

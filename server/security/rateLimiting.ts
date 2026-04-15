@@ -144,12 +144,13 @@ const applyRateLimit = (
     
     console.log(`🚫 RATE LIMIT: Blocked request from ${key} - ${remainingBlockTime}s remaining`);
     
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Rate limit exceeded. You are temporarily blocked.',
       code: 'RATE_LIMIT_BLOCKED',
       retryAfter: remainingBlockTime,
       blockExpiresAt: new Date(entry.blockExpiry!).toISOString()
     });
+    return;
   }
   
   // Increment counter
@@ -165,7 +166,7 @@ const applyRateLimit = (
     // Log potential attack
     console.log(`🚨 POTENTIAL BRUTE FORCE: IP/Session exceeded rate limit on ${identifier}`);
     
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Rate limit exceeded. You have been temporarily blocked due to too many requests.',
       code: 'RATE_LIMIT_EXCEEDED',
       retryAfter: Math.ceil(config.blockDurationMs / 1000),
@@ -173,6 +174,7 @@ const applyRateLimit = (
       maxRequests: config.maxRequests,
       windowMs: config.windowMs
     });
+    return;
   }
   
   // Add rate limit headers
@@ -230,7 +232,7 @@ export const adaptiveRateLimit = (type: keyof typeof RATE_LIMIT_CONFIGS) => {
         shouldCount = false;
       }
       
-      if (config.skipFailedRequests && statusCode >= 400) {
+      if ((config as any).skipFailedRequests && statusCode >= 400) {
         shouldCount = false;
       }
       
@@ -266,10 +268,11 @@ export const ipAbuseProtection = (req: Request, res: Response, next: NextFunctio
   // Check if IP is permanently blocked
   if (blockedIPs.has(ip)) {
     console.log(`🚫 IP BLOCKED: Permanent block for ${ip}`);
-    return res.status(403).json({
+    res.status(403).json({
       error: 'Your IP address has been blocked due to abusive behavior.',
       code: 'IP_BLOCKED'
     });
+    return;
   }
   
   // Track abuse patterns
@@ -397,10 +400,11 @@ export const emergencyRateLimit = (req: Request, res: Response, next: NextFuncti
   // Very aggressive limiting - 50 requests per 10 seconds for external IPs only
   if (entry.count > 50) {
     console.log(`🚨 EMERGENCY RATE LIMIT: Potential DDoS from ${ip}`);
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Emergency rate limit exceeded',
       code: 'EMERGENCY_RATE_LIMIT'
     });
+    return;
   }
   
   next();

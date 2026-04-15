@@ -181,7 +181,7 @@ class ChannelMonitoringService {
         if (this.urlMatchesPattern(url, mapping.urlPattern)) {
           return {
             isChannelContent: true,
-            creatorId: mapping.creatorId,
+            creatorId: mapping.creatorId || undefined,
             channelMapping: mapping
           };
         }

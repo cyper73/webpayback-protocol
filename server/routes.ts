@@ -10,7 +10,7 @@ import { chainlinkDomainVerificationService } from "./services/chainlinkDomainVe
 import { channelMonitoringService } from "./services/channelMonitoring";
 import { aiKnowledgeTrackingService } from "./services/aiKnowledgeTracking";
 import { poolDrainProtectionService } from "./services/poolDrainProtection";
-import { fakeCreatorDetection } from "./services/fakeCreatorDetection";
+import { fakeCreatorDetectionService } from "./services/fakeCreatorDetection";
 import { citationRewardEngine } from "./services/citationRewardEngine";
 import { authenticityLayer } from "./services/authenticitylayer";
 import { aiQueryProtection } from "./services/aiQueryProtection";
@@ -3084,7 +3084,7 @@ app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
         });
       }
 
-      const detection = await fakeCreatorDetection.detectFakeCreator(creatorId, websiteUrl);
+      const detection = await fakeCreatorDetectionService.detectFakeCreator(creatorId, websiteUrl);
       
       res.json({
         success: true,
@@ -3102,7 +3102,7 @@ app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
   // Get fake creator detection statistics
   app.get('/api/fake-creator/stats', async (req, res) => {
     try {
-      const stats = await fakeCreatorDetection.getStats();
+      const stats = await fakeCreatorDetectionService.getStats();
       
       res.json({
         success: true,
@@ -3120,7 +3120,7 @@ app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
   // Get fake creator detection alerts
   app.get('/api/fake-creator/alerts', async (req, res) => {
     try {
-      const alerts = await fakeCreatorDetection.getAlerts();
+      const alerts = await fakeCreatorDetectionService.getAlerts();
       
       res.json({
         success: true,
@@ -3146,7 +3146,7 @@ app.use(aiShieldMiddleware({ walletAddress: "${walletAddress}" }));`;
         });
       }
 
-      const testResult = await fakeCreatorDetection.testDetection(testUrl || '', simulationType);
+      const testResult = await fakeCreatorDetectionService.testDetection(testUrl || '', simulationType);
       
       res.json(testResult);
     } catch (error) {

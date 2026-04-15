@@ -604,7 +604,9 @@ export const contentCategoryEnum = z.enum([
   "photography"
 ]);
 
-export const insertCreatorSchema = createInsertSchema(creators).pick({
+export const insertCreatorSchema = createInsertSchema(creators, {
+  contentCategory: contentCategoryEnum
+}).pick({
   userId: true,
   websiteUrl: true,
   walletAddress: true,
@@ -617,8 +619,6 @@ export const insertCreatorSchema = createInsertSchema(creators).pick({
   channelName: true,
   channelVerificationUrl: true,
   monitoringScope: true,
-}).extend({
-  contentCategory: contentCategoryEnum
 });
 
 export const insertChannelContentMappingSchema = createInsertSchema(channelContentMappings).pick({

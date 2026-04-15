@@ -29,17 +29,18 @@ export function ReferralSystem({ creatorId, creator }: ReferralSystemProps) {
   const [showShareCode, setShowShareCode] = useState(false);
   const { toast } = useToast();
 
-  const { data: referralStats, isLoading } = useQuery<ReferralStatsData>({
+  const { data: referralStats, isLoading } = useQuery<any>({
     queryKey: ['/api/referrals/rewards', creatorId],
     queryFn: async () => {
-      const rewards = await apiRequest(`/api/referrals/rewards${creatorId ? `?creatorId=${creatorId}` : ''}`);
+      const res = await fetch(`/api/referrals/rewards${creatorId ? `?creatorId=${creatorId}` : ''}`);
+      const rewards = await res.json();
       
       const pendingRewards = rewards.filter((r: ReferralReward) => r.status === 'pending').length;
       const completedRewards = rewards.filter((r: ReferralReward) => r.status === 'completed').length;
       const totalBonus = rewards.reduce((sum: number, r: ReferralReward) => sum + parseFloat(r.rewardAmount), 0);
       
       return {
-        totalReferrals: creator?.totalReferrals || 0,
+        totalReferrals: (creator as any)?.totalReferrals || 0,
         totalBonus: totalBonus.toFixed(8),
         pendingRewards,
         completedRewards,
@@ -50,8 +51,8 @@ export function ReferralSystem({ creatorId, creator }: ReferralSystemProps) {
   });
 
   useEffect(() => {
-    if (creator?.referralCode) {
-      setReferralCode(creator.referralCode);
+    if ((creator as any)?.referralCode) {
+      setReferralCode((creator as any).referralCode);
     }
   }, [creator]);
 
@@ -250,7 +251,7 @@ export function ReferralSystem({ creatorId, creator }: ReferralSystemProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {referralStats.rewards.slice(0, 5).map((reward) => (
+              {referralStats.rewards.slice(0, 5).map((reward: any) => (
                 <div key={reward.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                   <div className="flex items-center gap-3">
                     {getStatusIcon(reward.status)}

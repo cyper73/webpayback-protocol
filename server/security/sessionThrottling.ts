@@ -46,10 +46,11 @@ export function sessionThrottling(req: Request, res: Response, next: NextFunctio
   // Check if session is currently blocked
   if (sessionData.isBlocked && sessionData.blockUntil && now < sessionData.blockUntil) {
     console.log(`🚫 SESSION BLOCKED: ${clientId} - ${Math.ceil((sessionData.blockUntil - now) / 1000)}s remaining`);
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Session temporarily blocked due to excessive requests',
       retryAfter: Math.ceil((sessionData.blockUntil - now) / 1000)
     });
+    return;
   }
   
   // Reset window if enough time has passed
@@ -69,12 +70,13 @@ export function sessionThrottling(req: Request, res: Response, next: NextFunctio
     
     console.log(`⚠️  SESSION THROTTLED: ${clientId} - ${sessionData.requestCount} requests in ${Math.floor((now - sessionData.firstRequest) / 1000)}s`);
     
-    return res.status(429).json({
+    res.status(429).json({
       error: 'Too many requests from this session',
       limit: UNAUTHENTICATED_LIMIT,
       windowSize: WINDOW_SIZE / 1000,
       retryAfter: BLOCK_DURATION / 1000
     });
+    return;
   }
   
   // Add throttling headers

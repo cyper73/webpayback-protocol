@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, CheckCircle, TrendingUp, Coins } from "lucide-react";
 
 export default function StakeCraftIntegration() {
-  const { data: validators } = useQuery({
+  const { data: validators } = useQuery<any>({
     queryKey: ['/api/pol-staking/validators'],
     refetchInterval: 30000,
   });
 
-  const { data: poolInfo } = useQuery({
+  const { data: poolInfo } = useQuery<any>({
     queryKey: ['/api/web3/pool-info'],
     refetchInterval: 30000,
   });
 
-  const { data: stakeCraftStatus } = useQuery({
+  const { data: stakeCraftStatus } = useQuery<any>({
     queryKey: ['/api/pol-staking/stakecraft-status'],
     refetchInterval: 30000,
   });

@@ -43,17 +43,14 @@ const GDPRDataRequest: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await apiRequest('/api/gdpr/request', {
-        method: 'POST',
-        body: formData
-      });
+      const response = await apiRequest('POST', '/api/gdpr/request', formData);
+      const data = await response.json();
 
-      if (response.success) {
-        setRequestId(response.requestId);
-        setRequestSubmitted(true);
+      if (data.success) {
+        setRequestId(data.requestId);
         toast({
-          title: "GDPR Request Submitted",
-          description: `Request ID: ${response.requestId}. You will receive a response within 30 days.`,
+          title: "Request Submitted Successfully",
+          description: `Request ID: ${data.requestId}. You will receive a response within 30 days.`,
         });
       }
     } catch (error) {

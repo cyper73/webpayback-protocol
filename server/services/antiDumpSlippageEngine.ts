@@ -100,7 +100,7 @@ export class AntiDumpSlippageEngine {
       AND created_at >= ${thirtyDaysAgo.toISOString()}
     `);
 
-    return Number(result[0]?.total_rewards || 0);
+    return Number((result[0] as any)?.total_rewards || 0);
   }
 
   /**

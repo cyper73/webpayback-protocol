@@ -87,7 +87,7 @@ class ChainlinkAutomationService {
       return {
         upkeepNeeded: false,
         performData: "0x",
-        reason: `Error: ${error.message}`
+        reason: `Error: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }

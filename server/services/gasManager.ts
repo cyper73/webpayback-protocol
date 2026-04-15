@@ -225,7 +225,7 @@ export class GasManager {
         transactionHash: batchTransactionHash,
         status: "completed",
         completedAt: new Date()
-      });
+      } as any);
     }
 
     return {
@@ -256,7 +256,7 @@ export class GasManager {
         transactionHash: batchTransactionHash,
         status: "completed",
         completedAt: new Date()
-      });
+      } as any);
     }
 
     return {
@@ -314,13 +314,13 @@ export class GasManager {
     
     // Calculate additional metrics
     const recentRewards = rewards.filter(r => {
-      const completedAt = new Date(r.completedAt || r.createdAt);
+      const completedAt = new Date((r as any).completedAt || (r as any).createdAt);
       const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
       return completedAt > hourAgo;
     });
     
     const batchProcessedCount = rewards.filter(r => 
-      r.metadata && typeof r.metadata === 'object' && 'batchProcessed' in r.metadata
+      (r as any).metadata && typeof (r as any).metadata === 'object' && 'batchProcessed' in (r as any).metadata
     ).length;
     
     const totalValue = rewards.reduce((sum, r) => sum + parseFloat(r.amount), 0);

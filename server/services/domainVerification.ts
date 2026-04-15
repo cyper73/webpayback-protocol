@@ -140,10 +140,9 @@ class DomainVerificationService {
       // If it's a famous domain, flag for manual review
       if (this.isFamousDomain(domain)) {
         await storage.updateDomainVerification(verification.id, {
-          isManualReview: true,
           verificationStatus: 'pending',
           reviewNotes: `🚨 SECURITY ALERT: Attempt to register famous domain ${domain}. Manual review required.`
-        });
+        } as any);
       }
 
       const instructions = this.generateVerificationInstructions(
@@ -218,7 +217,7 @@ Then provide the URL of your social media post for manual verification.`;
         return { success: false, error: 'Domain already verified' };
       }
 
-      if (verification.isManualReview) {
+      if ((verification as any).isManualReview) {
         return { 
           success: false, 
           error: 'This domain requires manual review. Our team will verify it within 24-48 hours.' 
@@ -239,10 +238,10 @@ Then provide the URL of your social media post for manual verification.`;
       } else {
         await storage.updateDomainVerification(verificationId, {
           verificationStatus: 'failed',
-          attemptCount: (verification.attemptCount || 0) + 1,
+          attemptCount: ((verification as any).attemptCount || 0) + 1,
           lastAttempt: new Date(),
           failureReason: 'Verification token not found or incorrect'
-        });
+        } as any);
 
         return { success: false, error: 'Verification failed. Please check your verification setup.' };
       }
@@ -304,7 +303,7 @@ Then provide the URL of your social media post for manual verification.`;
             headers: {
               'User-Agent': 'WebPayback-Verification-Bot/1.0'
             },
-            timeout: 10000 // 10 second timeout
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           });
           
           if (response.ok) {
@@ -354,11 +353,10 @@ Then provide the URL of your social media post for manual verification.`;
           console.log(`🔍 Checking verification file at: ${url}`);
           
           const response = await fetch(url, {
-            method: 'GET',
             headers: {
               'User-Agent': 'WebPayback-Verification-Bot/1.0'
             },
-            timeout: 10000 // 10 second timeout
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           });
           
           if (response.ok) {

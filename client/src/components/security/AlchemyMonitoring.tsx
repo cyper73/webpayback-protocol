@@ -39,20 +39,16 @@ export function AlchemyMonitoring() {
   });
 
   // Mutation to start monitoring
-  const startMonitoring = useMutation({
-    mutationFn: () => apiRequest('/api/reentrancy/alchemy/start', {
-      method: 'POST',
-    }),
+  const startMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/reentrancy/alchemy/start'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/reentrancy/alchemy/status'] });
     },
   });
 
   // Mutation to stop monitoring
-  const stopMonitoring = useMutation({
-    mutationFn: () => apiRequest('/api/reentrancy/alchemy/stop', {
-      method: 'POST',
-    }),
+  const stopMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/reentrancy/alchemy/stop'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/reentrancy/alchemy/status'] });
     },
@@ -138,8 +134,8 @@ export function AlchemyMonitoring() {
           {/* Control Buttons */}
           <div className="flex gap-2 justify-center">
             <Button
-              onClick={() => startMonitoring.mutate()}
-              disabled={startMonitoring.isPending || status?.isActive}
+              onClick={() => startMutation.mutate()}
+              disabled={startMutation.isPending || status?.isActive}
               size="sm"
               className="flex items-center gap-2"
             >
@@ -147,8 +143,8 @@ export function AlchemyMonitoring() {
               Start Monitoring
             </Button>
             <Button
-              onClick={() => stopMonitoring.mutate()}
-              disabled={stopMonitoring.isPending || !status?.isActive}
+              onClick={() => stopMutation.mutate()}
+              disabled={stopMutation.isPending || !status?.isActive}
               variant="outline"
               size="sm"
               className="flex items-center gap-2"
@@ -158,9 +154,9 @@ export function AlchemyMonitoring() {
             </Button>
           </div>
 
-          {(startMonitoring.isPending || stopMonitoring.isPending) && (
+          {(startMutation.isPending || stopMutation.isPending) && (
             <div className="text-center text-sm text-muted-foreground">
-              {startMonitoring.isPending ? 'Starting monitoring...' : 'Stopping monitoring...'}
+              {startMutation.isPending ? 'Starting monitoring...' : 'Stopping monitoring...'}
             </div>
           )}
         </CardContent>

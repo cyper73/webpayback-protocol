@@ -40,7 +40,8 @@ export function ReferralInput({ value, onChange, disabled = false }: ReferralInp
   const validateReferralCode = async (code: string) => {
     setValidating(true);
     try {
-      const creator = await apiRequest(`/api/creators/referral/${code}`);
+      const response = await apiRequest('GET', `/api/creators/referral/${code}`);
+      const creator = await response.json();
       setIsValid(true);
       setReferrer(creator);
       onChange(code);

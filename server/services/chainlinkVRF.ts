@@ -30,12 +30,12 @@ interface RandomnessConfig {
  * Used for fair reward distribution, anti-fraud measures, and random selection
  */
 export class ChainlinkVRFService {
-  private provider: ethers.JsonRpcProvider;
+  private provider: any;
   private pendingRequests: Map<string, VRFRequest> = new Map();
   private requestHistory: VRFRequest[] = [];
 
   constructor() {
-    this.provider = new ethers.JsonRpcProvider(
+    this.provider = new (ethers as any).providers.JsonRpcProvider(
       process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com'
     );
   }

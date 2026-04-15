@@ -87,7 +87,7 @@ async function fetchGeolocationData(ip: string): Promise<any> {
     for (const serviceUrl of services) {
       try {
         const response = await fetch(serviceUrl, {
-          timeout: 5000,
+          signal: AbortSignal.timeout(5000),
           headers: { 'User-Agent': 'WebPayback-Protocol/1.0' }
         });
         

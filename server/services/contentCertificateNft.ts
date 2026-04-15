@@ -133,7 +133,7 @@ export class ContentCertificateNftService {
           // Calculate WPT reward based on confidence and royalty percentage
           const baseReward = 1.0; // Base 1 WPT per detection
           const confidenceMultiplier = matchingConfidence / 100;
-          const royaltyMultiplier = parseFloat(cert.royaltyPercentage) / 10;
+          const royaltyMultiplier = parseFloat(cert.royaltyPercentage || '10') / 10;
           const wptReward = baseReward * confidenceMultiplier * royaltyMultiplier;
 
           // Log detection

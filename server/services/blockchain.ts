@@ -72,13 +72,13 @@ class BlockchainService {
       
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
 
   async getDeploymentStatus(networkId: number): Promise<BlockchainNetwork | null> {
-    return await storage.getBlockchainNetwork(networkId);
+    return (await storage.getBlockchainNetwork(networkId)) as any;
   }
 
   private async simulateDeployment(networkData: InsertBlockchainNetwork): Promise<void> {
@@ -94,7 +94,7 @@ class BlockchainService {
       "Polygon": 10000,  // 10 seconds
       "Arbitrum": 20000  // 20 seconds
     };
-    return times[networkName] || 20000;
+    return (times as any)[networkName] || 20000;
   }
 
   private generateMockAddress(): string {
@@ -116,7 +116,7 @@ class BlockchainService {
       "Polygon": 1623847,
       "Arbitrum": 1945632
     };
-    return (baseGas[networkName] || 2000000).toString();
+    return ((baseGas as any)[networkName] || 2000000).toString();
   }
 
   async initializeNetworks(): Promise<void> {
@@ -133,7 +133,7 @@ class BlockchainService {
           contractAddress: isPolygon ? "0x9077051D318b614F915E8A0786C91e" : undefined,
           gasUsed: isPolygon ? "21000" : undefined,
           deployedAt: isPolygon ? new Date() : undefined
-        });
+        } as any);
       }
     }
   }

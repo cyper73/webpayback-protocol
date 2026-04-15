@@ -14,11 +14,7 @@ export default function NetworkSwitcher() {
 
   const switchNetworkMutation = useMutation({
     mutationFn: async (network: 'polygon' | 'ethereum') => {
-      return apiRequest('/api/web3/switch-network', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ network })
-      });
+      return apiRequest('POST', '/api/web3/switch-network', { network });
     },
     onSuccess: (data) => {
       toast({

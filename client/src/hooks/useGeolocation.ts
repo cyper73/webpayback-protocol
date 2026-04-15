@@ -40,7 +40,7 @@ export const useGeolocation = (): GeolocationHookResult => {
   const [privacyConfig, setPrivacyConfig] = useState<PrivacyConfig | null>(null);
 
   // Query jurisdiction detection API
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<any>({
     queryKey: ['/api/privacy/detect-jurisdiction'],
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
     retry: 2,

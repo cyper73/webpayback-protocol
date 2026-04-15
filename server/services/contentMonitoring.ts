@@ -6,7 +6,7 @@ import { gasManager } from "./gasManager";
 import { channelMonitoringService } from "./channelMonitoring";
 import { mevProtectionService } from "./mevProtection";
 import { poolDrainProtectionService } from "./poolDrainProtection";
-import { fakeCreatorDetection } from "./fakeCreatorDetection";
+import { fakeCreatorDetectionService } from "./fakeCreatorDetection";
 import { aiQueryProtection } from "./aiQueryProtection";
 import { vpnDetection } from "./vpnDetection";
 
@@ -303,7 +303,7 @@ class ContentMonitoringService {
       // 🔍 FAKE CREATOR DETECTION CHECK
       console.log(`🔍 Checking for fake creator: ${creator.websiteUrl}`);
       try {
-        const fakeCreatorCheck = await fakeCreatorDetection.detectFakeCreator(creator.id, creator.websiteUrl);
+        const fakeCreatorCheck = await fakeCreatorDetectionService.detectFakeCreator(creator.id, creator.websiteUrl);
         
         if (fakeCreatorCheck.shouldBlock) {
           console.log(`🚨 FAKE CREATOR DETECTED - Blocking reward:

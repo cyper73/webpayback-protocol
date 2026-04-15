@@ -48,19 +48,19 @@ export default function PoolHealthDashboard() {
   const [testReward, setTestReward] = useState(1000);
 
   // Fetch pool health status
-  const { data: healthStatus, isLoading: statusLoading } = useQuery({
+  const { data: healthStatus, isLoading: statusLoading } = useQuery<any>({
     queryKey: ['/api/pool-health/status'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch pool health alerts
-  const { data: alertsData, isLoading: alertsLoading } = useQuery({
+  const { data: alertsData, isLoading: alertsLoading } = useQuery<any>({
     queryKey: ['/api/pool-health/alerts'],
     refetchInterval: 30000,
   });
 
   // Fetch pool health thresholds
-  const { data: thresholds } = useQuery({
+  const { data: thresholds } = useQuery<any>({
     queryKey: ['/api/pool-health/thresholds'],
   });
 
