@@ -14,7 +14,7 @@ A cutting-edge blockchain protocol that automatically rewards content creators w
 - **Alchemy Infrastructure**: Real-time mempool monitoring and transaction processing to prevent MEV attacks and ensure secure reward distributions.
 
 ### 💰 Dual-Token Economy
-- **Humanity Token ($H)**: The core reward token distributed to verified creators (1 $H for every 1,000 AI accesses). Proof of Humanity multiplies earning potential.
+- **Humanity Token ($H)**: The core reward token distributed to verified creators. Proof of Humanity multiplies earning potential.
 - **WebPayback Utility Token (WPT)**: The internal ecosystem token used by AI companies to purchase data licenses and access the protocol's protected content.
 - **Cultural Staking (StakeCraft & Qloo)**: Advanced AI evaluation of a creator's cultural impact and audience affinity to equitably distribute rewards from the protocol's treasury.
 

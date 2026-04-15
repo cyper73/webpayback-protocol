@@ -235,7 +235,7 @@ export default function Dashboard() {
               </span>
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl leading-relaxed">
-              Receive <strong className="text-electric-blue">WPT-HUMAN</strong> tokens every time AI uses your data. Prove you are human, multiply your earnings, and withdraw without fees.
+              Receive <strong className="text-electric-blue">$H</strong> tokens every time AI accesses your data. Prove you are human to multiply your earnings and withdraw without fees.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">
