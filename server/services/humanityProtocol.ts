@@ -104,12 +104,13 @@ export class HumanityProtocolService {
           presets: ['is_human', 'humanity_score'],
         });
 
-        if (results?.errors && results.errors.length > 0) {
-            console.warn("Presets returned errors in login callback:", results.errors);
+        // Parse based on actual SDK response shape
+        if ((results as any)?.errors && (results as any).errors.length > 0) {
+            console.warn("Presets returned errors in login callback:", (results as any).errors);
             isVerified = true;
             score = 85;
-        } else if (results?.results && Array.isArray(results.results)) {
-            const isHumanResult = results.results.find((r: any) => r.preset === 'isHuman' || r.presetName === 'is_human');
+        } else if ((results as any)?.results && Array.isArray((results as any).results)) {
+            const isHumanResult = (results as any).results.find((r: any) => r.preset === 'isHuman' || r.presetName === 'is_human');
             if (isHumanResult && isHumanResult.credential?.credentialSubject?.is_human === false) {
                 isVerified = false;
             }
@@ -117,21 +118,21 @@ export class HumanityProtocolService {
                 credentialId = isHumanResult.credential?.id || "";
             }
 
-            const scoreResult = results.results.find((r: any) => r.preset === 'humanityScore' || r.presetName === 'humanity_score');
+            const scoreResult = (results as any).results.find((r: any) => r.preset === 'humanityScore' || r.presetName === 'humanity_score');
             if (scoreResult && scoreResult.credential?.credentialSubject?.score) {
                 score = Number(scoreResult.credential.credentialSubject.score);
             }
         } else {
-            if (results.is_human?.credential?.credentialSubject?.is_human === false) {
+            if ((results as any)?.is_human?.credential?.credentialSubject?.is_human === false) {
                 isVerified = false;
             }
 
-            if (results.humanity_score?.credential?.credentialSubject?.score) {
-                score = Number(results.humanity_score.credential.credentialSubject.score);
+            if ((results as any)?.humanity_score?.credential?.credentialSubject?.score) {
+                score = Number((results as any).humanity_score.credential.credentialSubject.score);
             }
 
             // We could extract the unique humanity ID here if available in the credential
-            credentialId = results.is_human?.credential?.id || "";
+            credentialId = (results as any)?.is_human?.credential?.id || "";
         }
 
       } catch (err) {
@@ -194,18 +195,18 @@ export class HumanityProtocolService {
           ],
         });
         
-        if (results?.errors && results.errors.length > 0) {
-            console.warn("Presets returned errors in callback:", results.errors);
+        if ((results as any)?.errors && (results as any).errors.length > 0) {
+            console.warn("Presets returned errors in callback:", (results as any).errors);
             // Sandbox fallback
             isVerified = true;
             score = 85;
-        } else if (results?.results && Array.isArray(results.results)) {
-            const isHumanResult = results.results.find((r: any) => r.preset === 'isHuman' || r.presetName === 'is_human');
+        } else if ((results as any)?.results && Array.isArray((results as any).results)) {
+            const isHumanResult = (results as any).results.find((r: any) => r.preset === 'isHuman' || r.presetName === 'is_human');
             if (isHumanResult && isHumanResult.credential?.credentialSubject?.is_human === false) {
                 isVerified = false;
             }
 
-            const scoreResult = results.results.find((r: any) => r.preset === 'humanityScore' || r.presetName === 'humanity_score');
+            const scoreResult = (results as any).results.find((r: any) => r.preset === 'humanityScore' || r.presetName === 'humanity_score');
             if (scoreResult && scoreResult.credential?.credentialSubject?.score) {
                 score = Number(scoreResult.credential.credentialSubject.score);
             }

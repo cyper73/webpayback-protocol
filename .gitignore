@@ -163,6 +163,7 @@ test-connectivity.tsx
 # Private project roadmap
 HUMANITY_GRANT_ROADMAP.md
 HUMANITY_INTERVIEW_PREP.md
+HUMANITY_PROTOCOL_INTEGRATION_PLAN.md
 PRESENTATION_SCRIPT.md
 PRESENTATION_SCRIPT.MD
 CLAUDE.md
@@ -175,6 +176,7 @@ CASE_STUDY_WEBPAYBACK.md
 # Interview Notes
 INTERVIEW_NOTES.md
 INTERVIEW_NOTES_EN.md
+CODE_REVIEW_NOTES.md
 
 # Contributing guidelines
 contributing.md
@@ -183,3 +185,6 @@ CONTRIBUTING.md
 # Security incident reports
 MALICIOUS_WALLET_BLOCK.md
 WALLET_SECURITY_SYSTEM.md
+
+# External API Docs
+sdk-h.txt
