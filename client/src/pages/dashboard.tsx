@@ -213,12 +213,14 @@ export default function Dashboard() {
               </Button>
             </RouterLink>
             
+            {/* Hidden until smart contract is implemented 
             <RouterLink to="/pool-health">
               <Button variant="outline" size="sm" className="bg-glass-dark border-blue-500/30 hover:bg-blue-500/20 text-white">
                 <Activity className="w-4 h-4 mr-2" />
                 Pool Health
               </Button>
             </RouterLink>
+            */}
           </div>
         </div>
       </div>
