@@ -67,7 +67,7 @@ export default function Dashboard() {
       setIsConnecting(true);
       await humanityLogin({
         mode: 'redirect',
-        scopes: ['openid', 'is_human', 'profile']
+        scopes: ['openid', 'identity:read']
       });
     } catch (error: any) {
       console.error("Login initialization failed:", error);
