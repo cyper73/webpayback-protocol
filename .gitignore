@@ -122,6 +122,11 @@ temp/
 *.tmp
 *.temp
 
+# Local QA artifacts
+tsc-output.txt
+eslint-output.txt
+smoke_auth_*.png
+
 # Archive files (except final release)
 *.tar.gz
 !webpayback-complete-final-*.tar.gz
