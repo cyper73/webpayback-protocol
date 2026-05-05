@@ -96,10 +96,11 @@ function App() {
         }
       }}
     >
-      <HumanityProvider 
-        clientId={import.meta.env.VITE_HUMANITY_CLIENT_ID || 'app_8ba7aeecf21f28ba51601f5073573f0e'} 
-        redirectUri={'http://localhost:5000/login'}
-        environment="sandbox"
+      <HumanityProvider
+        clientId={import.meta.env.VITE_HUMANITY_CLIENT_ID || 'app_8ba7aeecf21f28ba51601f5073573f0e'}
+        redirectUri={import.meta.env.VITE_HUMANITY_REDIRECT_URI ?? 'http://localhost:5000/login'}
+        environment={(import.meta.env.VITE_HUMANITY_ENVIRONMENT ?? 'testnet') as 'production' | 'staging' | 'testnet'}
+        storage="localStorage"
       >
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
