@@ -103,9 +103,14 @@ router.post('/sync', verifyPrivyToken, async (req, res) => {
     const scoreRaw = Number(req.body?.score ?? 0);
     const score = Number.isFinite(scoreRaw) ? Math.max(0, Math.min(100, scoreRaw)) : 0;
     const credentialId = typeof req.body?.credentialId === 'string' ? req.body.credentialId : null;
+    const privyUserId = typeof req.body?.privyUserId === 'string' ? req.body.privyUserId : null;
 
     if (!Number.isFinite(userId) || userId <= 0) {
       return res.status(400).json({ error: 'Invalid userId' });
+    }
+
+    if (!privyUserId || privyUserId !== req.privyUserId) {
+      return res.status(403).json({ error: 'Privy user mismatch' });
     }
 
     const existing = await db.select().from(creators).where(eq(creators.id, userId));

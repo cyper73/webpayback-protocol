@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { HumanityConnect, HumanityErrorBoundary, useAuth, useVerification } from "@humanity-org/react-sdk";
+import { HumanityConnect, useAuth, useVerification } from "@humanity-org/react-sdk";
+import { usePrivy } from "@privy-io/react-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Login() {
   const { toast } = useToast();
   const { isLoading, isAuthenticated, user, logout } = useAuth();
+  const { authenticated: privyAuthenticated, user: privyUser, getAccessToken, login } = usePrivy();
   const {
     verify,
     isLoading: isVerifying,
@@ -19,29 +21,75 @@ export default function Login() {
   } = useVerification();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !privyAuthenticated) {
       return;
     }
 
-    const walletAddress =
+    const humanityWalletAddress =
       (user as any)?.walletAddress ||
       (user as any)?.wallet?.address ||
       (user as any)?.evmAddress ||
       "";
+    const privyWalletAddress = (privyUser as any)?.wallet?.address || "";
+    const walletAddress = humanityWalletAddress || privyWalletAddress;
 
     if (!walletAddress) {
       return;
     }
 
+    let existingSession: any = {};
+    try {
+      existingSession = JSON.parse(localStorage.getItem("webpayback_session") || "{}");
+    } catch {
+      existingSession = {};
+    }
+
     const session = {
+      ...existingSession,
       walletAddress,
       loginTime: new Date().toISOString(),
       isAuthenticated: true,
+      privyUserId: (privyUser as any)?.id || existingSession?.privyUserId || null,
     };
 
-    localStorage.setItem("webpayback_session", JSON.stringify(session));
-    window.dispatchEvent(new CustomEvent("webpayback-login", { detail: session }));
-  }, [isAuthenticated, user]);
+    (async () => {
+      let enrichedSession: any = { ...session };
+
+      // Privy JWT is the backend auth layer for /api/humanity/sync.
+      if (privyAuthenticated) {
+        try {
+          const privyToken = await getAccessToken();
+          if (privyToken) {
+            enrichedSession = { ...enrichedSession, token: privyToken };
+          }
+        } catch {
+          // Keep session usable even if token retrieval fails; sync effect will surface a toast.
+        }
+      }
+
+      if (!Number.isFinite(Number(enrichedSession?.creatorId))) {
+        try {
+          const response = await fetch("/api/auth/wallet/check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ walletAddress }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const recoveredId = Number(data?.creators?.[0]?.id);
+            if (Number.isFinite(recoveredId) && recoveredId > 0) {
+              enrichedSession = { ...enrichedSession, creatorId: recoveredId };
+            }
+          }
+        } catch {
+          // Non-blocking: creatorId may be added later by other flows.
+        }
+      }
+
+      localStorage.setItem("webpayback_session", JSON.stringify(enrichedSession));
+      window.dispatchEvent(new CustomEvent("webpayback-login", { detail: enrichedSession }));
+    })();
+  }, [isAuthenticated, user, privyAuthenticated, privyUser, getAccessToken]);
 
   useEffect(() => {
     if (verificationError) {
@@ -72,7 +120,14 @@ export default function Login() {
 
     const creatorId = Number(session?.creatorId);
     const bearerToken = session?.token;
+    const privyUserId = typeof session?.privyUserId === "string" ? session.privyUserId : null;
+    const walletAddress = typeof session?.walletAddress === "string" ? session.walletAddress : null;
     if (!Number.isFinite(creatorId) || creatorId <= 0 || !bearerToken) {
+      toast({
+        title: "Sync skipped",
+        description: "Missing creator session data (creatorId/token).",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -101,10 +156,17 @@ export default function Login() {
             isVerified,
             score,
             credentialId,
+            privyUserId,
+            walletAddress,
           }),
         });
 
         if (!response.ok) {
+          toast({
+            title: "Sync failed",
+            description: "Could not persist Humanity status to backend.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -113,6 +175,11 @@ export default function Login() {
           description: "Your Humanity status was persisted to backend state.",
         });
       } catch {
+        toast({
+          title: "Sync failed",
+          description: "Network error while persisting Humanity status.",
+          variant: "destructive",
+        });
         return;
       }
     })();
@@ -122,6 +189,35 @@ export default function Login() {
     return (
       <div className="min-h-screen bg-black/90 flex items-center justify-center p-4">
         <Loader2 className="h-8 w-8 animate-spin text-electric-blue" />
+      </div>
+    );
+  }
+
+  if (!privyAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black/90 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-8 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-electric-blue/20 rounded-full blur-[100px] pointer-events-none" />
+          <div className="text-center space-y-4 relative z-10">
+            <div className="flex items-center justify-center gap-3">
+              <Shield className="h-10 w-10 text-electric-blue" />
+              <h1 className="text-3xl font-bold text-white tracking-tight">WebPayback Protocol</h1>
+            </div>
+            <p className="text-md text-gray-400 max-w-md mx-auto">
+              First sign in with Privy to create/attach your app wallet session.
+            </p>
+          </div>
+          <Card className="border-gray-800 bg-black/60 backdrop-blur-xl relative z-10">
+            <CardContent className="pt-8 pb-8 space-y-6">
+              <Button
+                onClick={login}
+                className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white"
+              >
+                Continue with Privy
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -148,62 +244,38 @@ export default function Login() {
                 </div>
                 <h3 className="text-xl font-medium text-white text-center">Prove Your Humanity</h3>
                 <div className="w-full flex justify-center">
-                  <HumanityErrorBoundary
-                    fallback={(error, reset) => (
-                      <div className="text-center space-y-3">
-                        <p className="text-sm text-red-400">
-                          Authentication unavailable: {error.message}
-                        </p>
-                        <Button
-                          onClick={reset}
-                          variant="outline"
-                          className="border-gray-700 hover:bg-gray-800 text-gray-300"
-                        >
-                          Retry
-                        </Button>
-                      </div>
-                    )}
+                  <HumanityConnect
+                    mode="redirect"
+                    scopes={["openid", "identity:read"]}
+                    variant="primary"
+                    size="md"
+                    label="Sign in with Humanity"
                     onError={(error) => {
+                      if (error.code === "access_denied") {
+                        toast({
+                          title: "Sign-in cancelled",
+                          description: "You denied the Humanity consent screen.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+
+                      if (error.code === "popup_blocked") {
+                        toast({
+                          title: "Popup blocked",
+                          description: "Enable popups or continue with redirect mode.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+
                       toast({
                         title: "Authentication error",
                         description: error.message || "Unable to initialize Humanity sign-in.",
                         variant: "destructive",
                       });
                     }}
-                  >
-                    <HumanityConnect
-                      mode="redirect"
-                      scopes={["openid", "identity:read"]}
-                      variant="primary"
-                      size="md"
-                      label="Sign in with Humanity"
-                      onError={(error) => {
-                        if (error.code === "access_denied") {
-                          toast({
-                            title: "Sign-in cancelled",
-                            description: "You denied the Humanity consent screen.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-
-                        if (error.code === "popup_blocked") {
-                          toast({
-                            title: "Popup blocked",
-                            description: "Enable popups or continue with redirect mode.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-
-                        toast({
-                          title: "Sign-in failed",
-                          description: error.message || "Humanity login failed. Please retry.",
-                          variant: "destructive",
-                        });
-                      }}
-                    />
-                  </HumanityErrorBoundary>
+                  />
                 </div>
               </div>
             </CardContent>
@@ -266,7 +338,15 @@ export default function Login() {
               </Button>
               <Button
                 onClick={async () => {
-                  await logout();
+                  try {
+                    await logout();
+                  } catch {
+                    toast({
+                      title: "Logout warning",
+                      description: "Provider logout failed, local session cleared.",
+                      variant: "destructive",
+                    });
+                  }
                   localStorage.removeItem("webpayback_session");
                   window.dispatchEvent(new CustomEvent("webpayback-logout"));
                 }}
