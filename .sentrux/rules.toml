@@ -1,0 +1,35 @@
+[constraints]
+max_cycles = 0
+no_god_files = false
+max_cc = 325
+max_coupling = "B"
+
+[[layers]]
+name = "client"
+paths = ["client/**"]
+order = 0
+
+[[layers]]
+name = "server"
+paths = ["server/**"]
+order = 1
+
+[[layers]]
+name = "shared"
+paths = ["shared/**"]
+order = 2
+
+[[boundaries]]
+from = "client/**"
+to = "server/**"
+reason = "Frontend must not depend on backend runtime code"
+
+[[boundaries]]
+from = "shared/**"
+to = "client/**"
+reason = "Shared must stay framework-agnostic"
+
+[[boundaries]]
+from = "shared/**"
+to = "server/**"
+reason = "Shared must stay framework-agnostic"
