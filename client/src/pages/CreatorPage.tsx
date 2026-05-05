@@ -1,7 +1,7 @@
 import CreatorPortal from "@/components/creators/CreatorPortal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Shield, Coins, TrendingUp, Wallet, ArrowUpRight } from "lucide-react";
-import { Link as RouterLink } from "wouter";
+import { Link as RouterLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function CreatorPage() {
@@ -45,7 +45,7 @@ export default function CreatorPage() {
                 <span className="font-mono text-xs">WPT Live</span>
               </div>
               <Button size="sm" variant="outline" className="bg-electric-blue/10 border-electric-blue/30 text-electric-blue hover:bg-electric-blue hover:text-white" asChild>
-                <RouterLink href="/">
+                <RouterLink to="/">
                   Back to Dashboard <ArrowUpRight className="ml-1 w-3 h-3" />
                 </RouterLink>
               </Button>

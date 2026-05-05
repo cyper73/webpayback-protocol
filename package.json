@@ -8,7 +8,10 @@
     "build": "tsc && vite build",
     "start": "NODE_ENV=production node dist/index.js",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "sentrux:check": "sentrux.exe check .",
+    "sentrux:gate": "sentrux.exe gate .",
+    "quality:arch": "npm run sentrux:check && npm run sentrux:gate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -89,6 +92,7 @@
     "react-hook-form": "^7.55.0",
     "react-icons": "^5.4.0",
     "react-resizable-panels": "^2.1.7",
+    "react-router-dom": "^6.30.3",
     "recharts": "^2.15.2",
     "speakeasy": "^2.0.0",
     "tailwind-merge": "^2.6.0",

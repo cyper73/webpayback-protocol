@@ -16,13 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, CheckCircle, AlertTriangle, FileText, Globe, Copy, Code, Settings, Lock, Coins, Info, HelpCircle } from "lucide-react";
 import { sanitizeUrl, sanitizeWalletAddress, sanitizeToastContent, validateDomain, sanitizeContentCategory } from "@/lib/security";
 import { WalletVerification } from "@/components/wallet/WalletVerification";
-import TwoFactorAuthSetup from "@/components/security/TwoFactorAuthSetup";
 import { HumanityStatus } from "@/components/creators/HumanityStatus";
 import { GaslessWithdrawal } from "@/components/wallet/GaslessWithdrawal";
 import { CashOutGuide } from "@/components/wallet/CashOutGuide";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import { usePrivy } from '@privy-io/react-auth';
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +30,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { HumanityConnect, useHumanity } from "@humanity-org/react-sdk";
 
 import ChannelMonitoringDemo from "@/components/ChannelMonitoringDemo";
 
@@ -47,6 +45,7 @@ const formSchema = insertCreatorSchema.extend({
 type FormData = any;
 
 export default function CreatorPortal() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,107 +58,6 @@ export default function CreatorPortal() {
   const [activeTab, setActiveTab] = useState("registration");
   const [currentCreatorId, setCurrentCreatorId] = useState<number | null>(null);
   const [preGeneratedTwoFactorSetup, setPreGeneratedTwoFactorSetup] = useState<any>(null);
-  const [isLinkingSocials, setIsLinkingSocials] = useState(false);
-
-  const { login, logout, authenticated, user, ready, getAccessToken } = usePrivy();
-  const { login: humanityLogin, isAuthenticated: isHumanityAuthenticated } = useHumanity();
-
-  // Check URL parameters for Humanity Protocol OAuth callback results
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const humanitySuccess = params.get('humanity_success');
-    const humanityError = params.get('humanity_error');
-    const humanityCode = params.get('humanity_code');
-    const humanityState = params.get('humanity_state');
-
-    if (humanityCode && humanityState) {
-      setActiveTab("humanity");
-      
-      // Try to parse userId from state
-      let parsedUserId = currentCreatorId;
-      try {
-        const decodedState = JSON.parse(atob(humanityState));
-        if (decodedState.userId) {
-          parsedUserId = parseInt(decodedState.userId);
-          setCurrentCreatorId(parsedUserId);
-        }
-      } catch (e) {
-        console.error("Failed to parse humanity state", e);
-      }
-      
-      const codeVerifier = localStorage.getItem('humanity_verifier');
-      
-      if (parsedUserId) {
-        // Prepare the request asynchronously so we can await the access token
-        const verifyHumanity = async () => {
-          try {
-            const accessToken = await getAccessToken();
-            
-            const res = await apiRequest("POST", "/api/humanity/verify", {
-              userId: parsedUserId,
-              code: humanityCode,
-              codeVerifier: codeVerifier || 'mock_verifier'
-            }, {
-              // Add the Privy token for backend verification
-              Authorization: `Bearer ${accessToken}`
-            });
-
-            if (!res.ok) {
-              const errData = await res.json().catch(() => ({}));
-              throw new Error(errData.error || "Network response was not ok");
-            }
-
-            const data = await res.json();
-            
-            if (data.success) {
-              toast({
-                title: "Verifica Humanity Completata",
-                description: data.message || "Your account has been successfully verified by Humanity Protocol!",
-                variant: "default",
-              });
-              queryClient.invalidateQueries({ queryKey: ['humanity-status', parsedUserId] });
-            } else {
-              toast({
-                title: "Verification Error",
-                description: data.error || "Failed to verify humanity status.",
-                variant: "destructive",
-              });
-            }
-          } catch (err: any) {
-            console.error("Verification connection error:", err);
-            toast({
-              title: "Connection Error",
-              description: err.message || "Unable to contact the server for verification.",
-              variant: "destructive",
-            });
-          } finally {
-            localStorage.removeItem('humanity_verifier');
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        };
-
-        verifyHumanity();
-      }
-    } else if (humanitySuccess) {
-      setActiveTab("humanity");
-      toast({
-        title: "Humanity Verification Complete",
-        description: "Your account has been successfully verified by Humanity Protocol!",
-        variant: "default",
-      });
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (humanityError) {
-      setActiveTab("humanity");
-      toast({
-        title: "Verification Error",
-        description: `Failed to complete verification: ${humanityError}`,
-        variant: "destructive",
-      });
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [toast, currentCreatorId, queryClient]);
 
   const {
     register,
@@ -916,32 +814,12 @@ export default function CreatorPortal() {
                   type="button"
                   variant="outline"
                   className="w-full border-electric-blue text-electric-blue hover:bg-electric-blue/10"
-                  disabled={isLinkingSocials}
-                  onClick={async () => {
-                    setIsLinkingSocials(true);
-                    toast({
-                      title: "Social Link Initiated",
-                      description: "Opening Humanity Protocol to link your social accounts..."
-                    });
-                    
-                    try {
-                      await humanityLogin({
-                        mode: 'redirect',
-                        scopes: ['openid']
-                      });
-                    } catch (error: any) {
-                      console.error("Social link failed:", error);
-                      toast({
-                        title: "Connection Error",
-                        description: error.message || "Failed to connect to Humanity Protocol.",
-                        variant: "destructive"
-                      });
-                      setIsLinkingSocials(false);
-                    }
+                  onClick={() => {
+                    navigate("/login");
                   }}
                 >
                   <Globe className="w-4 h-4 mr-2" />
-                  {isLinkingSocials ? "Connecting..." : "Link Social Accounts via Humanity"}
+                  Link Social Accounts via Humanity
                 </Button>
               </CardContent>
             </Card>
@@ -1037,7 +915,7 @@ export default function CreatorPortal() {
                       Prove your humanity to unlock reward multipliers.
                     </p>
                     <Button 
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => navigate("/login")}
                       className="bg-electric-blue hover:bg-electric-blue/80"
                     >
                       Verify Humanity

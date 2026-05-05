@@ -10,13 +10,12 @@ import { AlchemyUsageMonitor } from "@/components/monitoring/AlchemyUsageMonitor
 import { AIQueryProtectionDashboard } from "@/components/security/AIQueryProtectionDashboard";
 import SimpleInfrastructure from "@/components/unified/SimpleInfrastructure";
 import CategoryContentStatistics from "@/components/analytics/CategoryContentStatistics";
-import { useHumanity } from "@humanity-org/react-sdk";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import { Box, Wallet, Coins, Link, Shield, FileText, BookOpen, Activity, User, TrendingUp, AlertTriangle, CheckCircle, Zap, Users, Globe, ArrowUpRight, DollarSign, PieChart, BarChart3, Clock, RefreshCw, Eye, Rocket, Settings, ShieldAlert, ArrowRight, Cpu } from "lucide-react";
-import { Link as RouterLink } from "wouter";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 // import wptLogo from "@assets/wpt-logo_1752556131899.png"; // Rimosso temporaneamente finché l'asset non è disponibile
 import { useState, useEffect } from "react";
@@ -28,10 +27,10 @@ const isFounderDevice = () => {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isUserInteracting, setIsUserInteracting] = useState(false);
-  const { login: humanityLogin } = useHumanity();
   const { logout: privyLogout, authenticated, user } = usePrivy();
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -65,17 +64,8 @@ export default function Dashboard() {
   const handleHumanityLoginClick = async () => {
     try {
       setIsConnecting(true);
-      await humanityLogin({
-        mode: 'redirect',
-        scopes: ['openid', 'identity:read']
-      });
-    } catch (error: any) {
-      console.error("Login initialization failed:", error);
-      toast({
-        title: "Connection Error",
-        description: error.message || "Failed to connect to Humanity Protocol.",
-        variant: "destructive"
-      });
+      navigate("/login");
+    } finally {
       setIsConnecting(false);
     }
   };
@@ -245,7 +235,7 @@ export default function Dashboard() {
                 {isConnecting ? "Connecting..." : "Verify Humanity & Register"} <ArrowUpRight className="ml-2 h-5 w-5" />
               </Button>
               <Button size="lg" variant="outline" className="border-gray-700 hover:bg-gray-800 text-gray-300 rounded-full px-8 text-lg" asChild>
-                <RouterLink href="/getting-started">
+                <RouterLink to="/getting-started">
                   Learn how it works
                 </RouterLink>
               </Button>
@@ -305,11 +295,11 @@ export default function Dashboard() {
               <span className="text-sm text-gray-400">WebPayback Protocol - Where AI meets fair compensation for creators</span>
             </div>
             <div className="flex items-center space-x-6">
-              <RouterLink href="/privacy" className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white transition-colors">
+              <RouterLink to="/privacy" className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white transition-colors">
                 <Shield className="h-4 w-4" />
                 <span>Privacy Policy</span>
               </RouterLink>
-              <RouterLink href="/terms" className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white transition-colors">
+              <RouterLink to="/terms" className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white transition-colors">
                 <FileText className="h-4 w-4" />
                 <span>Terms & Conditions</span>
               </RouterLink>

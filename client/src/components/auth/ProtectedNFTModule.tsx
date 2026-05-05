@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { usePrivy } from '@privy-io/react-auth';
 import { ContentCertificatePage } from '../../pages/ContentCertificatePage';
 import { Button } from '@/components/ui/button';
@@ -8,18 +8,18 @@ import { Shield, AlertTriangle, ArrowRight } from 'lucide-react';
 
 export default function ProtectedNFTModule() {
   const { ready, authenticated, login } = usePrivy();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // If Privy is ready and user is NOT authenticated, redirect to home
     if (ready && !authenticated) {
       const timer = setTimeout(() => {
-        setLocation('/');
+        navigate('/');
       }, 3000); // 3 seconds delay to show the message before redirecting
       
       return () => clearTimeout(timer);
     }
-  }, [ready, authenticated, setLocation]);
+  }, [ready, authenticated, navigate]);
 
   if (!ready) {
     return (
@@ -66,7 +66,7 @@ export default function ProtectedNFTModule() {
                 </Button>
                 
                 <Button 
-                  onClick={() => setLocation('/')}
+                  onClick={() => navigate('/')}
                   variant="outline"
                   className="w-full border-gray-700 text-gray-300 hover:text-white hover:bg-gray-800 h-12"
                 >

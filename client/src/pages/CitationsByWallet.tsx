@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +41,7 @@ export default function CitationsByWallet() {
             <p className="text-muted-foreground mb-4">
               Please provide a valid wallet address in the URL.
             </p>
-            <Link href="/citations">
+            <Link to="/citations">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to General Dashboard
@@ -82,7 +82,7 @@ export default function CitationsByWallet() {
                 <p className="text-muted-foreground">
                   Unable to load citation data for wallet: {walletAddress}
                 </p>
-                <Link href="/citations">
+                <Link to="/citations">
                   <Button variant="outline">
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Wallet Input
@@ -120,7 +120,7 @@ export default function CitationsByWallet() {
                 )}
               </div>
             </div>
-            <Link href="/citations">
+            <Link to="/citations">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back

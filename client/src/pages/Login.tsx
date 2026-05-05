@@ -1,185 +1,124 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Wallet, Shield, CheckCircle, Mail, LogOut, Loader2 } from 'lucide-react';
-import { usePrivy } from '@privy-io/react-auth';
-import { useToast } from '@/hooks/use-toast';
-import { HumanityConnect, useHumanity } from "@humanity-org/react-sdk";
-
-interface LoginSession {
-  walletAddress: string;
-  loginTime: string;
-}
+import { useEffect } from "react";
+import { HumanityConnect, HumanityErrorBoundary, useAuth, useVerification } from "@humanity-org/react-sdk";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Loader2, Shield, Sparkles, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
-  const { login, logout, authenticated, user, ready } = usePrivy();
   const { toast } = useToast();
-  const { isAuthenticated: isHumanityAuthenticated, getAccessToken, user: humanityUser, login: humanityLogin } = useHumanity();
-  const [loginSession, setLoginSession] = useState<LoginSession | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { isLoading, isAuthenticated, user, logout } = useAuth();
+  const {
+    verify,
+    isLoading: isVerifying,
+    status: verificationStatus,
+    result: verificationResult,
+    error: verificationError,
+    reset: resetVerification,
+  } = useVerification();
 
-  const handleHumanityLoginClick = async () => {
-    try {
-      setIsConnecting(true);
-      toast({ title: "Connecting", description: "Initiating Humanity SDK..." });
-      
-      // Add a race condition to prevent humanityLogin from hanging indefinitely
-      await Promise.race([
-        humanityLogin({
-          mode: 'redirect',
-          scopes: ['openid']
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Humanity SDK login timeout")), 10000))
-      ]);
-      
-      toast({ title: "Redirecting", description: "You should be redirected shortly..." });
-    } catch (error: any) {
-      console.error("Login initialization failed:", error);
-      toast({
-        title: "Connection Error",
-        description: error.message || "Failed to connect to Humanity Protocol.",
-        variant: "destructive"
-      });
-      setIsConnecting(false);
-    }
-  };
-
-  // Monitor Humanity SDK authentication state to sync with backend and complete login
   useEffect(() => {
-    const syncHumanityLogin = async () => {
-      // If Humanity SDK says we are authenticated, but we haven't synced yet
-      if (isHumanityAuthenticated && !loginSession && !isConnecting) {
-        setIsConnecting(true);
-        toast({ title: "Sync Started", description: "Authenticating with backend..." });
-        
-        try {
-          // Promise.race to prevent getting stuck on getAccessToken
-          const accessToken = await Promise.race([
-            getAccessToken(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting access token from Humanity SDK")), 15000))
-          ]) as string;
-          
-          if (!accessToken) throw new Error("No access token found from Humanity SDK");
+    if (!isAuthenticated) {
+      return;
+    }
 
-          toast({ title: "Token Obtained", description: "Finalizing session..." });
+    const walletAddress =
+      (user as any)?.walletAddress ||
+      (user as any)?.wallet?.address ||
+      (user as any)?.evmAddress ||
+      "";
 
-          // Call backend to complete the login/registration process
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
-          
-          const response = await fetch('/api/humanity/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              accessToken,
-              humanityId: humanityUser?.id 
-            }),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
+    if (!walletAddress) {
+      return;
+    }
 
-          const data = await response.json();
-          
-          if (!response.ok || !data.success) {
-            throw new Error(data.message || data.error || 'Login failed on backend');
-          }
-
-          // We got a successful login with a wallet created by backend
-          const session = {
-            creatorId: data.creator.id,
-            walletAddress: data.creator.walletAddress,
-            loginTime: new Date().toISOString()
-          };
-          
-          setLoginSession(session);
-          localStorage.setItem('webpayback_session', JSON.stringify({
-            ...session,
-            isAuthenticated: true,
-            token: data.sessionToken
-          }));
-
-          window.dispatchEvent(new CustomEvent('webpayback-login', {
-            detail: session
-          }));
-
-          toast({
-            title: "Humanity Verified",
-            description: "Wallet automatically generated and assigned.",
-          });
-
-          // Redirect to Creator Portal
-          setTimeout(() => {
-            window.location.href = '/creators';
-          }, 1000);
-
-        } catch (err: any) {
-          console.error("Error during Humanity sync:", err);
-          toast({
-            title: "Login Sync Error",
-            description: err.message || "Failed to complete login with backend.",
-            variant: "destructive"
-          });
-        } finally {
-          setIsConnecting(false);
-        }
-      }
+    const session = {
+      walletAddress,
+      loginTime: new Date().toISOString(),
+      isAuthenticated: true,
     };
 
-    syncHumanityLogin();
-  }, [isHumanityAuthenticated, loginSession, isConnecting, getAccessToken, humanityUser, toast]);
+    localStorage.setItem("webpayback_session", JSON.stringify(session));
+    window.dispatchEvent(new CustomEvent("webpayback-login", { detail: session }));
+  }, [isAuthenticated, user]);
 
-  // Sync Privy state with local session state
   useEffect(() => {
-    if (ready && authenticated && user?.wallet?.address) {
-      const session = {
-        walletAddress: user.wallet.address,
-        loginTime: new Date().toISOString()
-      };
-      
-      setLoginSession(session);
-      
-      // Store minimal session info
-      localStorage.setItem('webpayback_session', JSON.stringify({
-        ...session,
-        isAuthenticated: true
-      }));
-
-      // Trigger global event
-      window.dispatchEvent(new CustomEvent('webpayback-login', {
-        detail: session
-      }));
-      
-    } 
-    // We removed the 'else if (ready && !authenticated)' block here
-    // because it was aggressively deleting the Humanity session we just created!
-  }, [ready, authenticated, user]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (e) {
-      console.log('Privy logout skipped or failed', e);
+    if (verificationError) {
+      toast({
+        title: "Verification error",
+        description: verificationError.message || "Humanity verification failed.",
+        variant: "destructive",
+      });
     }
-    
-    // Manual cleanup since we removed the aggressive auto-cleanup
-    setLoginSession(null);
-    localStorage.removeItem('webpayback_session');
-    window.dispatchEvent(new CustomEvent('webpayback-logout'));
-    
-    toast({
-      title: "Logout successful",
-      description: "You have been securely logged out."
-    });
-    
-    // Redirect to home
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 1000);
-  };
+  }, [verificationError, toast]);
 
-  if (!ready) {
+  useEffect(() => {
+    if (verificationStatus !== "success" || !verificationResult) {
+      return;
+    }
+
+    const sessionRaw = localStorage.getItem("webpayback_session");
+    if (!sessionRaw) {
+      return;
+    }
+
+    let session: any = null;
+    try {
+      session = JSON.parse(sessionRaw);
+    } catch {
+      return;
+    }
+
+    const creatorId = Number(session?.creatorId);
+    const bearerToken = session?.token;
+    if (!Number.isFinite(creatorId) || creatorId <= 0 || !bearerToken) {
+      return;
+    }
+
+    const isVerified = Boolean((verificationResult as any)?.verified);
+    const scoreCandidate =
+      Number((verificationResult as any)?.score) ||
+      Number((verificationResult as any)?.humanityScore) ||
+      Number((verificationResult as any)?.result?.score) ||
+      0;
+    const score = Number.isFinite(scoreCandidate) ? scoreCandidate : 0;
+    const credentialId =
+      (verificationResult as any)?.credentialId ||
+      (verificationResult as any)?.result?.credentialId ||
+      null;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/humanity/sync", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${bearerToken}`,
+          },
+          body: JSON.stringify({
+            userId: creatorId,
+            isVerified,
+            score,
+            credentialId,
+          }),
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        toast({
+          title: "Verification synced",
+          description: "Your Humanity status was persisted to backend state.",
+        });
+      } catch {
+        return;
+      }
+    })();
+  }, [verificationStatus, verificationResult, toast]);
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black/90 flex items-center justify-center p-4">
         <Loader2 className="h-8 w-8 animate-spin text-electric-blue" />
@@ -187,71 +126,85 @@ export default function Login() {
     );
   }
 
-  if (authenticated && loginSession) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black/90 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl space-y-6">
-          <Card className="border-gray-800 bg-black/60 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-500">
-                <CheckCircle className="h-6 w-6" />
-                WebPayback Login Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center space-y-4">
-                <p className="text-lg font-medium text-white">
-                  You are securely authenticated.
-                </p>
-                <p className="text-sm text-gray-400">
-                  Your Embedded Wallet is active and ready to interact with the blockchain.
-                </p>
-              </div>
-
-              <div className="bg-electric-blue/10 border border-electric-blue/30 p-4 rounded-lg space-y-3">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-electric-blue" />
-                  <span className="text-sm font-medium text-electric-blue">
-                    Assigned Wallet Address
-                  </span>
+        <div className="w-full max-w-md space-y-8 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-electric-blue/20 rounded-full blur-[100px] pointer-events-none" />
+          <div className="text-center space-y-4 relative z-10">
+            <div className="flex items-center justify-center gap-3">
+              <Shield className="h-10 w-10 text-electric-blue" />
+              <h1 className="text-3xl font-bold text-white tracking-tight">WebPayback Protocol</h1>
+            </div>
+            <p className="text-md text-gray-400 max-w-md mx-auto">
+              Sign in using the official Humanity SDK redirect flow.
+            </p>
+          </div>
+          <Card className="border-gray-800 bg-black/60 backdrop-blur-xl relative z-10">
+            <CardContent className="pt-8 pb-8 space-y-6">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="bg-electric-blue/10 p-4 rounded-full mb-2">
+                  <Shield className="h-10 w-10 text-electric-blue" />
                 </div>
-                <p className="text-xs font-mono text-gray-300 bg-black/50 border border-gray-800 p-3 rounded break-all">
-                  {loginSession.walletAddress}
-                </p>
-              </div>
+                <h3 className="text-xl font-medium text-white text-center">Prove Your Humanity</h3>
+                <div className="w-full flex justify-center">
+                  <HumanityErrorBoundary
+                    fallback={(error, reset) => (
+                      <div className="text-center space-y-3">
+                        <p className="text-sm text-red-400">
+                          Authentication unavailable: {error.message}
+                        </p>
+                        <Button
+                          onClick={reset}
+                          variant="outline"
+                          className="border-gray-700 hover:bg-gray-800 text-gray-300"
+                        >
+                          Retry
+                        </Button>
+                      </div>
+                    )}
+                    onError={(error) => {
+                      toast({
+                        title: "Authentication error",
+                        description: error.message || "Unable to initialize Humanity sign-in.",
+                        variant: "destructive",
+                      });
+                    }}
+                  >
+                    <HumanityConnect
+                      mode="redirect"
+                      scopes={["openid", "identity:read"]}
+                      variant="primary"
+                      size="md"
+                      label="Sign in with Humanity"
+                      onError={(error) => {
+                        if (error.code === "access_denied") {
+                          toast({
+                            title: "Sign-in cancelled",
+                            description: "You denied the Humanity consent screen.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
 
-              <div className="pt-4 border-t border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-white">
-                      Unlocked Modules
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-green-500/20 text-green-400 border-none">
-                      Creator Dashboard ✓
-                    </Badge>
-                    <Badge className="bg-electric-blue/20 text-electric-blue border-none">
-                      Humanity Protocol ✓
-                    </Badge>
-                  </div>
+                        if (error.code === "popup_blocked") {
+                          toast({
+                            title: "Popup blocked",
+                            description: "Enable popups or continue with redirect mode.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        toast({
+                          title: "Sign-in failed",
+                          description: error.message || "Humanity login failed. Please retry.",
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </HumanityErrorBoundary>
                 </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  onClick={() => window.location.href = '/creators'}
-                  className="flex-1 bg-electric-blue hover:bg-electric-blue/80 text-white"
-                >
-                  Go to Dashboard
-                </Button>
-                <Button 
-                  onClick={handleLogout}
-                  variant="outline"
-                  className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
-                >
-                  <LogOut className="w-4 h-4 mr-2" /> Log Out
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -262,63 +215,70 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-black/90 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8 relative">
-        {/* Glow effects */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-electric-blue/20 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="text-center space-y-4 relative z-10">
-          <div className="flex items-center justify-center gap-3">
-            <Shield className="h-10 w-10 text-electric-blue" />
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              WebPayback Protocol
-            </h1>
-          </div>
-          <p className="text-md text-gray-400 max-w-md mx-auto">
-            Sign in without a password. We'll automatically create a secure wallet for you.
-          </p>
-        </div>
-
-        <Card className="border-gray-800 bg-black/60 backdrop-blur-xl relative z-10">
-          <CardContent className="pt-8 pb-8 space-y-6">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="bg-electric-blue/10 p-4 rounded-full mb-2">
-                <Shield className="h-10 w-10 text-electric-blue" />
-              </div>
-              <h3 className="text-xl font-medium text-white text-center">Prove Your Humanity</h3>
-              <p className="text-sm text-gray-400 text-center max-w-sm mb-4">
-                We use Humanity Protocol to ensure you are a real person. 
-                A secure wallet will be created automatically for you.
+      <div className="w-full max-w-2xl space-y-6">
+        <Card className="border-gray-800 bg-black/60 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-500">
+              <CheckCircle className="h-6 w-6" />
+              Humanity SDK Session Active
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center space-y-4">
+              <p className="text-lg font-medium text-white">You are authenticated with Humanity SDK.</p>
+              <p className="text-sm text-gray-400">
+                Run a quick verification to sync your human-proof state for rewards.
               </p>
-              
-              <div className="w-full flex justify-center">
-                <Button 
-                  onClick={handleHumanityLoginClick}
-                  disabled={isConnecting}
-                  className="w-full bg-electric-blue hover:bg-electric-blue/80 text-white px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] flex items-center justify-center gap-2"
-                >
-                  {isConnecting ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Shield className="mr-2 h-5 w-5" />
-                  )}
-                  {isConnecting ? "Connecting..." : "Verify & Sign In"}
-                </Button>
+            </div>
+            <div className="pt-4 border-t border-gray-800">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-white">Verification Result</p>
+                <Badge className="bg-electric-blue/20 text-electric-blue border-none">
+                  {verificationResult?.verified ? "Verified" : "Pending"}
+                </Badge>
               </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={() => verify("is_human")}
+                disabled={isVerifying}
+                className="flex-1 bg-electric-blue hover:bg-electric-blue/80 text-white"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isVerifying ? "Verifying..." : "Verify is_human"}
+              </Button>
+              <Button
+                onClick={() => resetVerification()}
+                variant="outline"
+                className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
+              >
+                Re-check
+              </Button>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  window.location.href = "/creators";
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-500 text-white"
+              >
+                Go to Creator Portal
+              </Button>
+              <Button
+                onClick={async () => {
+                  await logout();
+                  localStorage.removeItem("webpayback_session");
+                  window.dispatchEvent(new CustomEvent("webpayback-logout"));
+                }}
+                variant="outline"
+                className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Log Out
+              </Button>
             </div>
           </CardContent>
         </Card>
-
-        <div className="text-center space-y-2 relative z-10">
-          <div className="flex items-center justify-center gap-4">
-            <Button 
-              variant="link" 
-              onClick={() => window.location.href = '/'}
-              className="text-gray-400 hover:text-electric-blue"
-            >
-              Back to Home
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

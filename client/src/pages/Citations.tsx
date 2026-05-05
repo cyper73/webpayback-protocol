@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +7,11 @@ import { Wallet, ArrowRight, Shield, Eye, Zap } from "lucide-react";
 
 export default function Citations() {
   const [walletAddress, setWalletAddress] = useState("");
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const handleWalletAccess = () => {
     if (walletAddress.trim()) {
-      setLocation(`/citations/${walletAddress.trim()}`);
+      navigate(`/citations/${walletAddress.trim()}`);
     }
   };
 

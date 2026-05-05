@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Shield, AlertCircle, Wallet, ArrowLeft, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 export function ContentCertificatePage() {
   return (
@@ -14,7 +14,7 @@ export function ContentCertificatePage() {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0 justify-start">
-              <Link href="/">
+              <Link to="/">
                 <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-white/10">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>

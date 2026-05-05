@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Cookie, Settings, X } from "lucide-react";
-import { Link as RouterLink } from "wouter";
+import { Link as RouterLink } from "react-router-dom";
 import { useGeolocation } from '@/hooks/useGeolocation';
 
 const COOKIE_CONSENT_KEY = 'webpayback_cookie_consent';
@@ -154,11 +154,11 @@ const CookieConsentBanner: React.FC = () => {
 
               <p className="text-xs text-gray-400">
                 By continuing, you agree to our{' '}
-                <RouterLink href="/privacy" className="text-electric-blue hover:underline">
+                <RouterLink to="/privacy" className="text-electric-blue hover:underline">
                   Privacy Policy
                 </RouterLink>{' '}
                 and{' '}
-                <RouterLink href="/terms" className="text-electric-blue hover:underline">
+                <RouterLink to="/terms" className="text-electric-blue hover:underline">
                   Terms & Conditions
                 </RouterLink>
               </p>

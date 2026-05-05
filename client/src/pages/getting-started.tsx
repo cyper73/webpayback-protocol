@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { 
   Coins, 
   Shield, 
@@ -27,7 +27,7 @@ export default function GettingStarted() {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0 justify-start">
-              <Link href="/">
+              <Link to="/">
                 <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-white/10">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -392,13 +392,13 @@ export default function GettingStarted() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                <Link href="/">
+                <Link to="/">
                   <Button className="w-full sm:w-auto h-12 px-8 flex items-center gap-2 bg-electric-blue hover:bg-electric-blue/80 text-white font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all hover:scale-105">
                     <Shield className="h-5 w-5" />
                     Enter Dashboard
                   </Button>
                 </Link>
-                <Link href="/content-certificate">
+                <Link to="/content-certificate">
                   <Button className="w-full sm:w-auto h-12 px-8 flex items-center gap-2 border-gray-600 text-gray-300 hover:text-white hover:bg-gray-800" variant="outline">
                     <FileText className="h-5 w-5" />
                     Mint NFT
