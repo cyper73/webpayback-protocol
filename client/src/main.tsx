@@ -6,9 +6,11 @@ import App from "./App";
 import "./index.css";
 
 const humanityEnvironment =
-  (import.meta.env.VITE_HUMANITY_ENVIRONMENT as "sandbox" | "production" | undefined) || "sandbox";
+  (import.meta.env.VITE_HUMANITY_ENVIRONMENT as "production" | "staging" | "testnet" | undefined) || "testnet";
 const humanityRedirectUri =
-  import.meta.env.VITE_REDIRECT_URI || `${window.location.origin}/callback`;
+  import.meta.env.VITE_HUMANITY_REDIRECT_URI ||
+  import.meta.env.VITE_REDIRECT_URI ||
+  `${window.location.origin}/callback`;
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
