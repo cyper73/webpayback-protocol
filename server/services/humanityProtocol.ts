@@ -43,21 +43,22 @@ export class HumanityProtocolService {
     this.provider = new ethers.providers.JsonRpcProvider(HUMANITY_RPC_URL);
     this.contract = new ethers.Contract(WPT_HUMAN_ADDRESS, WPT_HUMAN_ABI, this.provider);
     
-    // Initialize the official SDK
+    // Initialize the official SDK.
+    // NOTE: do NOT wrap this in try/catch. A misconfigured identity SDK must
+    // crash on boot — silently leaving this.sdk = null is what causes every
+    // route to fall through to the "isVerified = true; score = 85" fallback
+    // and grant verification to users who never completed it.
     if (HUMANITY_CLIENT_ID && HUMANITY_CLIENT_SECRET) {
-      try {
-        this.sdk = new HumanitySDK({
-          clientId: HUMANITY_CLIENT_ID,
-          clientSecret: HUMANITY_CLIENT_SECRET, // We are a confidential backend client
-          redirectUri: HUMANITY_REDIRECT_URI,
-          environment: 'sandbox', // Use sandbox to match frontend configuration
-        });
-        console.log("🟢 Humanity SDK initialized successfully in Sandbox mode");
-      } catch (err) {
-        console.error("🔴 Failed to initialize Humanity SDK:", err);
-      }
+      const env = (process.env.HUMANITY_ENVIRONMENT ?? 'testnet') as 'production' | 'staging' | 'testnet';
+      this.sdk = new HumanitySDK({
+        clientId: HUMANITY_CLIENT_ID,
+        clientSecret: HUMANITY_CLIENT_SECRET, // confidential backend client
+        redirectUri: HUMANITY_REDIRECT_URI,
+        environment: env,
+      });
+      console.log(`🟢 Humanity SDK initialized in ${env} mode`);
     } else {
-        console.warn("🟡 Humanity SDK not initialized: Missing CLIENT_ID or CLIENT_SECRET");
+      console.warn("🟡 Humanity SDK not initialized: Missing CLIENT_ID or CLIENT_SECRET");
     }
   }
 
