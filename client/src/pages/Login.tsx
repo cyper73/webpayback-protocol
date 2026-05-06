@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HumanityConnect, useAuth, useVerification } from "@humanity-org/react-sdk";
 import { usePrivy } from "@privy-io/react-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,11 @@ export default function Login() {
     error: verificationError,
     reset: resetVerification,
   } = useVerification();
+  const [socialAccountsCheck, setSocialAccountsCheck] = useState<{
+    checked: boolean;
+    verified: boolean;
+    count: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !privyAuthenticated) {
@@ -103,6 +108,13 @@ export default function Login() {
 
   useEffect(() => {
     if (verificationStatus !== "success" || !verificationResult) {
+      return;
+    }
+
+    const preset = typeof (verificationResult as any)?.preset === "string"
+      ? (verificationResult as any).preset
+      : null;
+    if (preset && preset !== "is_human") {
       return;
     }
 
@@ -309,6 +321,16 @@ export default function Login() {
                   {verificationResult?.verified ? "Verified" : "Pending"}
                 </Badge>
               </div>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm font-medium text-white">Social Accounts Check</p>
+                <Badge className="bg-electric-blue/20 text-electric-blue border-none">
+                  {!socialAccountsCheck?.checked
+                    ? "Not Checked"
+                    : socialAccountsCheck.verified
+                      ? `Verified (${socialAccountsCheck.count})`
+                      : "No Accounts"}
+                </Badge>
+              </div>
             </div>
             <div className="flex gap-3 pt-2">
               <Button
@@ -325,6 +347,49 @@ export default function Login() {
                 className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
               >
                 Re-check
+              </Button>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={async () => {
+                  try {
+                    const result = await verify("social_accounts");
+                    const rawValue =
+                      (result as any)?.value ??
+                      (result as any)?.result?.value ??
+                      (result as any)?.social_accounts ??
+                      [];
+                    const socialCount = Array.isArray(rawValue) ? rawValue.length : 0;
+                    const socialVerified = Boolean((result as any)?.verified) || socialCount > 0;
+                    setSocialAccountsCheck({
+                      checked: true,
+                      verified: socialVerified,
+                      count: socialCount,
+                    });
+                    toast({
+                      title: "Social check completed",
+                      description: socialVerified
+                        ? `Detected ${socialCount} linked social account(s).`
+                        : "No linked social accounts found in current identity scope.",
+                    });
+                  } catch (error: any) {
+                    setSocialAccountsCheck({
+                      checked: true,
+                      verified: false,
+                      count: 0,
+                    });
+                    toast({
+                      title: "Social check failed",
+                      description: error?.message || "Unable to verify social_accounts.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                disabled={isVerifying}
+                variant="outline"
+                className="flex-1 border-gray-700 hover:bg-gray-800 text-gray-300"
+              >
+                Verify social_accounts
               </Button>
             </div>
             <div className="flex gap-3">
