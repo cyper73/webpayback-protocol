@@ -49,7 +49,17 @@ export class HumanityProtocolService {
     // route to fall through to the "isVerified = true; score = 85" fallback
     // and grant verification to users who never completed it.
     if (HUMANITY_CLIENT_ID && HUMANITY_CLIENT_SECRET) {
-      const env = (process.env.HUMANITY_ENVIRONMENT ?? 'testnet') as 'production' | 'staging' | 'testnet';
+      const rawEnv = (process.env.HUMANITY_ENVIRONMENT ?? 'sandbox') as
+        | 'production'
+        | 'sandbox'
+        | 'staging'
+        | 'testnet';
+      const env: 'production' | 'sandbox' = rawEnv === 'production' ? 'production' : 'sandbox';
+      if (rawEnv !== env) {
+        console.warn(
+          `🟡 Humanity SDK environment "${rawEnv}" is not supported by current package; using "${env}"`,
+        );
+      }
       this.sdk = new HumanitySDK({
         clientId: HUMANITY_CLIENT_ID,
         clientSecret: HUMANITY_CLIENT_SECRET, // confidential backend client

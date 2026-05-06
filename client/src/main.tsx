@@ -5,8 +5,15 @@ import "@humanity-org/react-sdk/styles.css";
 import App from "./App";
 import "./index.css";
 
-const humanityEnvironment =
-  (import.meta.env.VITE_HUMANITY_ENVIRONMENT as "production" | "staging" | "testnet" | undefined) || "testnet";
+const rawHumanityEnvironment =
+  (import.meta.env.VITE_HUMANITY_ENVIRONMENT as "production" | "sandbox" | "staging" | "testnet" | undefined) || "sandbox";
+const humanityEnvironment: "production" | "sandbox" =
+  rawHumanityEnvironment === "production" ? "production" : "sandbox";
+if (rawHumanityEnvironment !== humanityEnvironment) {
+  console.warn(
+    `[Humanity SDK] Mapped unsupported environment "${rawHumanityEnvironment}" to "${humanityEnvironment}" for current SDK version.`,
+  );
+}
 const humanityRedirectUri =
   import.meta.env.VITE_HUMANITY_REDIRECT_URI ||
   import.meta.env.VITE_REDIRECT_URI ||
