@@ -7,8 +7,12 @@ import { eq } from "drizzle-orm";
 
 const router = Router();
 
-// Privy App ID from environment or fallback
-const PRIVY_APP_ID = process.env.VITE_PRIVY_APP_ID || 'cmn0xgyny01ra0ciijd8kc2kk';
+// Privy App ID from environment or fallback.
+// Prefer server-side PRIVY_APP_ID, keep VITE fallback for backward compatibility.
+const PRIVY_APP_ID =
+  process.env.PRIVY_APP_ID ||
+  process.env.VITE_PRIVY_APP_ID ||
+  'cmn0xgyny01ra0ciijd8kc2kk';
 // JWKS Endpoint for verifying Privy access tokens
 const JWKS_URL = `https://auth.privy.io/api/v1/apps/${PRIVY_APP_ID}/jwks.json`;
 
@@ -104,6 +108,7 @@ router.post('/sync', verifyPrivyToken, async (req, res) => {
     const score = Number.isFinite(scoreRaw) ? Math.max(0, Math.min(100, scoreRaw)) : 0;
     const credentialId = typeof req.body?.credentialId === 'string' ? req.body.credentialId : null;
     const privyUserId = typeof req.body?.privyUserId === 'string' ? req.body.privyUserId : null;
+    const walletAddress = typeof req.body?.walletAddress === 'string' ? req.body.walletAddress : null;
 
     if (!Number.isFinite(userId) || userId <= 0) {
       return res.status(400).json({ error: 'Invalid userId' });
@@ -113,9 +118,20 @@ router.post('/sync', verifyPrivyToken, async (req, res) => {
       return res.status(403).json({ error: 'Privy user mismatch' });
     }
 
+    if (!walletAddress || !walletAddress.startsWith('0x') || walletAddress.length !== 42) {
+      return res.status(400).json({ error: 'Invalid walletAddress' });
+    }
+
     const existing = await db.select().from(creators).where(eq(creators.id, userId));
     if (!existing.length) {
       return res.status(404).json({ error: 'Creator not found' });
+    }
+
+    if (
+      !existing[0].walletAddress ||
+      existing[0].walletAddress.toLowerCase() !== walletAddress.toLowerCase()
+    ) {
+      return res.status(403).json({ error: 'Creator ownership mismatch' });
     }
 
     await db
