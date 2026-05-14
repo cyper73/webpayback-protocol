@@ -49,8 +49,9 @@ export default function Login() {
       existingSession = {};
     }
 
+    const { token: _legacyToken, ...existingSessionWithoutToken } = existingSession;
     const session = {
-      ...existingSession,
+      ...existingSessionWithoutToken,
       walletAddress,
       loginTime: new Date().toISOString(),
       isAuthenticated: true,
@@ -59,18 +60,6 @@ export default function Login() {
 
     (async () => {
       let enrichedSession: any = { ...session };
-
-      // Privy JWT is the backend auth layer for /api/humanity/sync.
-      if (privyAuthenticated) {
-        try {
-          const privyToken = await getAccessToken();
-          if (privyToken) {
-            enrichedSession = { ...enrichedSession, token: privyToken };
-          }
-        } catch {
-          // Keep session usable even if token retrieval fails; sync effect will surface a toast.
-        }
-      }
 
       if (!Number.isFinite(Number(enrichedSession?.creatorId))) {
         try {
@@ -131,13 +120,12 @@ export default function Login() {
     }
 
     const creatorId = Number(session?.creatorId);
-    const bearerToken = session?.token;
     const privyUserId = typeof session?.privyUserId === "string" ? session.privyUserId : null;
     const walletAddress = typeof session?.walletAddress === "string" ? session.walletAddress : null;
-    if (!Number.isFinite(creatorId) || creatorId <= 0 || !bearerToken) {
+    if (!Number.isFinite(creatorId) || creatorId <= 0) {
       toast({
         title: "Sync skipped",
-        description: "Missing creator session data (creatorId/token).",
+        description: "Missing creator session data (creatorId).",
         variant: "destructive",
       });
       return;
@@ -157,6 +145,32 @@ export default function Login() {
 
     (async () => {
       try {
+        if (!privyAuthenticated) {
+          toast({
+            title: "Sync skipped",
+            description: "Privy session missing. Please sign in again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        let bearerToken: string | undefined;
+        try {
+          const tokenCandidate = await getAccessToken();
+          bearerToken = tokenCandidate || undefined;
+        } catch {
+          bearerToken = undefined;
+        }
+
+        if (!bearerToken) {
+          toast({
+            title: "Sync skipped",
+            description: "Missing Privy access token for backend sync.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const response = await fetch("/api/humanity/sync", {
           method: "POST",
           headers: {
@@ -195,7 +209,7 @@ export default function Login() {
         return;
       }
     })();
-  }, [verificationStatus, verificationResult, toast]);
+  }, [verificationStatus, verificationResult, toast, privyAuthenticated, getAccessToken]);
 
   if (isLoading) {
     return (
